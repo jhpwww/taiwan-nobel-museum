@@ -10,6 +10,7 @@
  * values on one element and the compositor does the rest.
  */
 import Sculpture3D from './Sculpture3D.astro';
+import AmbientVideo from './AmbientVideo.astro';
 import StyleSwitch from './StyleSwitch.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
@@ -46,6 +47,7 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
 
 <section class="hall3d" aria-labelledby="hall-title">
   <StyleSwitch lang={lang} current="room" />
+  <AmbientVideo opacity={0.28} />
   <div class="stage" aria-hidden="true">
     <div class="camera" data-camera>
       <div class="room">
@@ -84,6 +86,8 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
     </div>
   </div>
 
+  <div class="veil" data-veil aria-hidden="true"></div>
+
   <div class="dust" aria-hidden="true">
     {Array.from({ length: 22 }, (_, i) => (
       <span style={`--x:${(i * 47) % 100}%; --y:${(i * 31) % 80 + 10}%; --d:${11 + (i % 6) * 2.6}s; --s:${0.6 + (i % 4) * 0.3}`}></span>
@@ -100,7 +104,12 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
   <nav class="plinths" aria-label={t('hall.enter')}>
     {cats.map((c) => (
       <a class="plinth" href={c.href} data-cat={c.key} style={`--deg:${c.deg}deg`}>
-        <span class="plinth__art"><Sculpture3D cat={c.key} size={172} /></span>
+        <span class="plinth__art">
+          <Sculpture3D cat={c.key} size={172} />
+          <span class="plinth__mirror" aria-hidden="true">
+            <Sculpture3D cat={c.key} size={172} spin={false} />
+          </span>
+        </span>
         <span class="plinth__name">{c.name}</span>
         <span class="plinth__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
       </a>
@@ -139,7 +148,17 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
     overflow: hidden;
   }
   .camera, .room { position: absolute; inset: 0; transform-style: preserve-3d; }
-  .camera { will-change: transform; transition: transform 0.9s cubic-bezier(.22,.61,.36,1); }
+  .camera {
+    will-change: transform;
+    transition: transform 0.9s cubic-bezier(.22,.61,.36,1);
+    /* the entrance: the room settles from far back into place */
+    animation: dolly 3.1s cubic-bezier(.16,.84,.3,1) both;
+  }
+  @keyframes dolly {
+    from { transform: translateZ(-620px) translateY(5%) rotateX(5deg); opacity: 0; }
+    60%  { opacity: 1; }
+    to   { transform: none; opacity: 1; }
+  }
   .room > * { position: absolute; }
 
   .floor {
@@ -210,7 +229,7 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
   .vpanel img {
     position: absolute; inset: 0;
     inline-size: 100%; block-size: 100%; object-fit: cover;
-    filter: saturate(.5) brightness(.42) contrast(1.08);
+    filter: saturate(.45) brightness(.3) contrast(1.12);
   }
   .vpanel .b { opacity: 0; animation: vswap 18s var(--delay) ease-in-out infinite; }
   @keyframes vswap { 0%,42% { opacity: 0 } 50%,92% { opacity: 1 } 100% { opacity: 0 } }
@@ -256,6 +275,42 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
     18% { opacity: .8 } 82% { opacity: .55 }
     100% { transform: translate3d(22px,-130px,0); opacity: 0 }
   }
+
+  /* the polished floor: each piece reflected, fading as it falls away */
+  .plinth__art { position: relative; }
+  .plinth__mirror {
+    position: absolute;
+    inset-block-start: 96%;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    scale: 1 -1;
+    opacity: .2;
+    filter: blur(1.1px) brightness(.62);
+    mask-image: linear-gradient(to top, transparent 6%, #000 72%);
+    pointer-events: none;
+  }
+  .plinth__mirror :global(.x3d__plinth) { display: none; }
+
+  /* the walk-in wash */
+  .veil {
+    position: absolute; inset: 0; z-index: 40; pointer-events: none; opacity: 0;
+    background: radial-gradient(62% 62% at 50% 52%,
+      color-mix(in srgb, var(--veil, #e0aa53) 92%, #fff) 0%,
+      color-mix(in srgb, var(--veil, #e0aa53) 55%, #0d0803) 52%,
+      #0d0803 100%);
+    transition: opacity .55s ease-in;
+  }
+  .veil[data-on] { opacity: 1; }
+
+  /* the room pushes toward whichever plinth was chosen */
+  .stage { transition: transform .78s cubic-bezier(.5,0,.75,0); }
+  .hall3d[data-walking] .stage,
+  .stage[data-walking] {
+    transform: translate3d(var(--wx,0), var(--wy,0), 0) scale(2.35);
+  }
+  .plinths, .masthead, .intro { transition: opacity .5s ease, transform .78s cubic-bezier(.5,0,.75,0); }
+  .hall3d[data-walking] .plinths { transform: translate3d(var(--wx,0), var(--wy,0), 0) scale(2.1); opacity: .25; }
+  .hall3d[data-walking] .masthead, .hall3d[data-walking] .intro { opacity: 0; }
 
   /* ---------- masthead ---------- */
   .masthead { text-align: center; display: grid; justify-items: center; gap: .3rem; padding-inline: 1rem; }
@@ -351,6 +406,15 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
 </style>
 
 <script>
+  import { wireWalkIn } from '../scripts/walkin';
+
+  const hall = document.querySelector<HTMLElement>('.hall3d');
+  const veilEl = document.querySelector<HTMLElement>('[data-veil]');
+  const plinthLinks = document.querySelectorAll<HTMLAnchorElement>('.plinth[data-cat]');
+  if (hall && veilEl && plinthLinks.length) {
+    wireWalkIn({ scene: hall, veil: veilEl, links: plinthLinks });
+  }
+
   // One rAF, two rotations, one element. Everything else is compositor work.
   const cam = document.querySelector<HTMLElement>('[data-camera]');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');

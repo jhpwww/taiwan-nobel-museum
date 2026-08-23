@@ -71,6 +71,15 @@ src/
   Keep it that way. DPR is capped at 1.5, there are no shadow maps, and the loop must stop on
   IntersectionObserver and visibilitychange.
 - Anything drawn on the canvas is decoration. Every link must exist in the markup underneath.
+- Camera moves are WALL-CLOCK driven (`performance.now()` against a stored `t0`), never by
+  accumulating a clamped per-frame delta. With a clamp, a slow renderer stretches a 1.15 s move
+  into tens of seconds and any navigation waiting on its callback never happens.
+- Any action that waits on the render loop needs a timeout backstop that runs regardless.
+- The adaptive quality ladder in `degrade()` must always draw a frame before it stops; resizing
+  clears the buffer, so stopping straight after a resize leaves a black canvas.
+- `scripts/make-ambient.py` regenerates the background loop. Every motion period must divide the
+  clip length exactly — that is what makes it seamless without a crossfade. Keep it dark; it sits
+  behind text.
 
 **Media and rights**
 - YouTube only, via `youtube-nocookie.com`, behind the click-to-load facade. Never download,

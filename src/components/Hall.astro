@@ -1,5 +1,6 @@
 ---
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
+import AmbientVideo from './AmbientVideo.astro';
 import StyleSwitch from './StyleSwitch.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
@@ -32,6 +33,7 @@ const cats = ORDER.map((key, i) => ({
 
 <section class="hall" aria-labelledby="hall-title">
   <StyleSwitch lang={lang} current="flat" />
+  <AmbientVideo opacity={0.62} />
   <div class="hall__scene" data-parallax aria-hidden="true">
     <div class="layer layer--vault" data-depth="6">
       <svg viewBox="0 0 1600 500" preserveAspectRatio="xMidYMin slice">
@@ -66,6 +68,8 @@ const cats = ORDER.map((key, i) => ({
     </div>
     <div class="layer layer--vignette"></div>
   </div>
+
+  <div class="veil" data-veil aria-hidden="true"></div>
 
   <div class="hall__masthead">
     <img class="hall__crest" src={asset('ntu-logo.png')} alt="" width="96" height="96" />
@@ -175,6 +179,24 @@ const cats = ORDER.map((key, i) => ({
 
   .layer--vignette {
     background: radial-gradient(78% 68% at 50% 42%, transparent 42%, rgba(9, 6, 3, 0.82) 100%);
+  }
+
+  .veil {
+    position: absolute; inset: 0; z-index: 40; pointer-events: none; opacity: 0;
+    background: radial-gradient(62% 62% at 50% 52%,
+      color-mix(in srgb, var(--veil, #e0aa53) 92%, #fff) 0%,
+      color-mix(in srgb, var(--veil, #e0aa53) 55%, #120c06) 52%,
+      #120c06 100%);
+    transition: opacity .55s ease-in;
+  }
+  .veil[data-on] { opacity: 1; }
+  .hall[data-walking] .hall__plinths {
+    transform: translate3d(var(--wx,0), var(--wy,0), 0) scale(2.2);
+    opacity: .3;
+  }
+  .hall[data-walking] .hall__masthead, .hall[data-walking] .intro { opacity: 0; }
+  .hall__plinths, .hall__masthead, .intro {
+    transition: opacity .5s ease, transform .78s cubic-bezier(.5,0,.75,0);
   }
 
   /* ---------- masthead ---------- */
@@ -321,6 +343,12 @@ const cats = ORDER.map((key, i) => ({
 </style>
 
 <script>
+  import { wireWalkIn } from '../scripts/walkin';
+  const hallEl = document.querySelector<HTMLElement>('.hall');
+  const veilEl = document.querySelector<HTMLElement>('[data-veil]');
+  const plinthLinks = document.querySelectorAll<HTMLAnchorElement>('.plinth[data-cat]');
+  if (hallEl && veilEl && plinthLinks.length) wireWalkIn({ scene: hallEl, veil: veilEl, links: plinthLinks });
+
   // Pointer parallax. Cheap: one rAF, transform only, disabled for reduced motion.
   const scene = document.querySelector<HTMLElement>('[data-parallax]');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');

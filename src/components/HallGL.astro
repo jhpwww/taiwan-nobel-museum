@@ -41,6 +41,7 @@ const stills = lectures
     aria-hidden="true"
   ></canvas>
   <div class="hallgl__scrim" aria-hidden="true"></div>
+  <div class="hallgl__veil" data-veil aria-hidden="true"></div>
 
   <div class="masthead">
     <img class="crest" src={asset('ntu-logo.png')} alt="" width="96" height="96" />
@@ -90,6 +91,20 @@ const stills = lectures
     transition: opacity 1.1s ease;
   }
   .hallgl__canvas[data-ready] { opacity: 1; }
+  /* the scene gave up on a slow machine; the last frame stands as artwork */
+  .hallgl__canvas[data-static] { opacity: 1; }
+  /* the walk-in wash: the room brightens into the gallery's own colour */
+  .hallgl__veil {
+    position: absolute; inset: 0; z-index: 40; pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(60% 60% at 50% 52%,
+      color-mix(in srgb, var(--veil, #e0aa53) 92%, #fff) 0%,
+      color-mix(in srgb, var(--veil, #e0aa53) 60%, #0b0703) 55%,
+      #0b0703 100%);
+    transition: opacity .42s ease-in;
+  }
+  .hallgl__veil[data-on] { opacity: 1; }
+
   .hallgl__scrim {
     position: absolute; inset: 0; z-index: -1; pointer-events: none;
     background:
@@ -115,10 +130,10 @@ const stills = lectures
   .tile {
     display: grid; justify-items: center; gap: .1rem;
     text-decoration: none; color: var(--text);
-    padding: .55rem .4rem .7rem;
+    padding: .45rem .4rem .55rem;
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    background: color-mix(in srgb, #140d06 62%, transparent);
+    background: color-mix(in srgb, #100a04 52%, transparent);
     backdrop-filter: blur(7px);
     transition: transform .4s var(--ease), border-color .4s, background .4s;
   }
@@ -127,7 +142,7 @@ const stills = lectures
     border-color: color-mix(in srgb, var(--accent) 62%, transparent);
     background: color-mix(in srgb, #1d1309 78%, transparent);
   }
-  .tile__art { inline-size: clamp(34px, 4vw, 48px); opacity: .85; }
+  .tile__art { inline-size: clamp(28px, 3.2vw, 38px); opacity: .8; }
   .tile__art :global(svg) { inline-size: 100%; block-size: auto; }
   .tile__name { font-family: var(--font-han-serif); font-size: var(--step-0); color: var(--cream); margin-block-start: .3rem; text-align: center; }
   .tile:hover .tile__name { color: var(--accent); }
@@ -191,8 +206,29 @@ const stills = lectures
       }));
       const scene = createRotunda({ canvas, cats: colored, stills });
       canvas.setAttribute('data-ready', '');
-      // handle for tooling: lets the screenshot harness settle the render loop
-      (window as any).__rotunda = scene;
+      (window as any).__rotunda = scene;   // handle for the screenshot harness
+
+      // clicking a gallery flies the camera into it before the page changes
+      const veil = document.querySelector<HTMLElement>('[data-veil]');
+      document.querySelectorAll<HTMLAnchorElement>('.tile[data-cat]').forEach((a) => {
+        a.addEventListener('click', (e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+          const key = a.dataset.cat;
+          if (!key) return;
+          e.preventDefault();
+          veil?.style.setProperty('--veil', getComputedStyle(a).getPropertyValue('--accent'));
+          let gone = false;
+          const go = () => { if (!gone) { gone = true; location.href = a.href; } };
+          if (canvas.hasAttribute('data-static')) { go(); return; }   // scene gave up; just navigate
+          scene.walkInto(key, () => {
+            veil?.setAttribute('data-on', '');
+            setTimeout(go, 420);
+          });
+          // if the GPU is struggling, the flight must never hold the visitor here
+          setTimeout(() => veil?.setAttribute('data-on', ''), 700);
+          setTimeout(go, 1800);
+        });
+      });
     }
   }
 </script>

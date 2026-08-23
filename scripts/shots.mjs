@@ -37,8 +37,11 @@ for (const s of shots) {
   page.on('pageerror', (e) => errors.push(`${s.name}: ${e.message}`));
   await page.goto(`http://localhost:4321${BASE}${s.path}`, { waitUntil: 'networkidle', timeout: 30000 });
   await page.waitForTimeout(s.wait ?? 900);
-  // a continuous rAF loop never lets the page go idle; settle it before capture
-  await page.evaluate(() => (window).__rotunda?.stop?.()).catch(() => {});
+  // a continuous rAF loop or a playing video never lets the page go idle
+  await page.evaluate(() => {
+    (window).__rotunda?.stop?.();
+    document.querySelectorAll('video').forEach((v) => v.pause());
+  }).catch(() => {});
   await page.waitForTimeout(150);
   if (s.hover) { try { await page.hover(s.hover); await page.waitForTimeout(1200); } catch {} }
   await page.screenshot({ path: join(outDir, `${s.name}.png`), fullPage: !!s.full, timeout: 60000 });
