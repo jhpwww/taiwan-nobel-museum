@@ -34,6 +34,23 @@ inline on touch devices, where hover never fires. The statistics come from the o
 Nobel API via `scripts/fetch-prize-facts.py` and are stamped with the date they were fetched —
 re-run it once a year after the October announcements.
 
+## Three hall styles
+
+The entrance is being evaluated in three variants. Everything below the hall — galleries,
+lecture pages, browse, about — is shared, so all three are complete, working sites.
+
+| Route | Style | Technique | Extra JS |
+|---|---|---|---|
+| `/` | 平面 Flat | SVG sculptures, pointer parallax | none |
+| `/room/` | 展廳 Room | **CSS 3D**: real perspective, receding colonnade, curved wall of lecture stills, SVG sculptures extruded into solid depth | none |
+| `/rotunda/` | 圓廳 Rotunda | **WebGL**: procedurally generated room and six volumetric models, warm point lights, framed stills | ~129 KB gz (three.js) |
+
+`/rotunda/` never loads three.js on small screens, with Save-Data on, or without WebGL2 — the
+markup underneath the canvas is the complete hall, so it degrades to a working page rather than
+a blank one. Its render loop stops when the canvas scrolls out of view or the tab is hidden.
+
+Pick one and delete `StyleSwitch.astro` plus the two spare routes.
+
 ## Stack
 
 Astro 5 + TypeScript, no UI framework, no runtime database, no CMS, no login.

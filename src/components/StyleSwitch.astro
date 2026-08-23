@@ -1,0 +1,72 @@
+---
+/**
+ * StyleSwitch.astro — lets the same museum be viewed in three hall styles.
+ *
+ * A build-time comparison aid: all three share every page below the hall, so
+ * only the entrance differs. Delete this component and the two extra routes
+ * once a style is chosen.
+ */
+import { type Lang } from '../i18n/ui';
+import { path } from '../i18n/routing';
+
+interface Props { lang: Lang; current: 'flat' | 'room' | 'gl' }
+const { lang, current } = Astro.props;
+const OPTIONS = [
+  { key: 'flat', href: path(lang), zh: '平面', en: 'Flat', dzh: '最輕量', den: 'Lightest' },
+  { key: 'room', href: path(lang, 'room'), zh: '展廳', en: 'Room', dzh: 'CSS 3D 景深', den: 'CSS 3D depth' },
+  { key: 'gl', href: path(lang, 'rotunda'), zh: '圓廳', en: 'Rotunda', dzh: 'WebGL 實體建模', den: 'WebGL models' },
+] as const;
+---
+
+<div class="sw" role="group" aria-label={lang === 'zh' ? '大廳風格' : 'Hall style'}>
+  {OPTIONS.map((o) => (
+    <a
+      class:list={['sw__opt', o.key === current && 'is-on']}
+      href={o.href}
+      aria-current={o.key === current ? 'true' : undefined}
+    >
+      <span class="sw__t">{lang === 'zh' ? o.zh : o.en}</span>
+      <span class="sw__d">{lang === 'zh' ? o.dzh : o.den}</span>
+    </a>
+  ))}
+</div>
+
+<style>
+  .sw {
+    /* opposite the language nav, clear of the centred crest */
+    position: absolute;
+    inset-block-start: 0.85rem;
+    inset-inline-start: clamp(1rem, 3vw, 2.5rem);
+    z-index: 60;
+    display: flex;
+    gap: 1px;
+    padding: 2px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: color-mix(in srgb, #120c06 76%, transparent);
+    backdrop-filter: blur(8px);
+  }
+  .sw__opt {
+    display: grid; justify-items: center; gap: 0;
+    padding: 0.34rem 0.95rem;
+    border-radius: 999px;
+    text-decoration: none;
+    color: var(--muted);
+    transition: background 0.3s var(--ease), color 0.3s var(--ease);
+  }
+  .sw__opt:hover { color: var(--cream); background: var(--surface-hi); }
+  .sw__opt.is-on { color: var(--bg-0); background: var(--gold); }
+  .sw__t { font-size: var(--step--1); letter-spacing: 0.08em; line-height: 1.25; }
+  .sw__d { font-size: 0.6rem; opacity: 0.72; letter-spacing: 0.04em; }
+
+  @media (max-width: 62rem) {
+    .sw__d { display: none; }
+    .sw__opt { padding: 0.3rem 0.7rem; }
+  }
+  /* stays left-aligned on small screens too: the crest is centred */
+  @media (max-width: 34rem) {
+    .sw { inset-block-start: 3.3rem; inset-inline-start: 0.75rem; }
+    .sw__t { font-size: 0.72rem; }
+    .sw__opt { padding: 0.26rem 0.6rem; }
+  }
+</style>

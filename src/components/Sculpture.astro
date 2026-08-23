@@ -8,8 +8,8 @@
  */
 import type { CategoryKey, GalleryKey } from '../data/catalog';
 export type { CategoryKey, GalleryKey };
-interface Props { cat: GalleryKey; size?: number; id?: string; }
-const { cat, size = 200, id = `s-${cat}` } = Astro.props;
+interface Props { cat: GalleryKey; size?: number; id?: string; plinth?: boolean; }
+const { cat, size = 200, id = `s-${cat}`, plinth = true } = Astro.props;
 const gid = `${id}-grad`;
 const glow = `${id}-glow`;
 /** one laurel branch: [cx, cy, rotation]; the right branch is this one mirrored */
@@ -167,7 +167,7 @@ const LAUREL: [number, number, number][] = [[92.0, 165.3, 10], [78.4, 160.6, 28]
 
   </g>
 
-  {/* plinth */}
+  {plinth && (
   <g class="sculpt__plinth">
     <ellipse cx="100" cy="252" rx="62" ry="12" fill="var(--bg-3)" opacity="0.95" />
     <ellipse cx="100" cy="250" rx="62" ry="12" fill="none" stroke="var(--line-hi)" stroke-width="1.2" />
@@ -175,6 +175,7 @@ const LAUREL: [number, number, number][] = [[92.0, 165.3, 10], [78.4, 160.6, 28]
           fill="var(--bg-2)" stroke="var(--line)" stroke-width="1.2" />
     <ellipse cx="100" cy="250" rx="44" ry="8" fill="var(--accent)" opacity="0.10" />
   </g>
+  )}
 </svg>
 
 <style>

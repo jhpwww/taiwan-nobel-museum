@@ -61,6 +61,17 @@ src/
   upcoming at the next rebuild, not at midnight. An upcoming lecture may have no video yet —
   that branch must keep working.
 
+**The hall**
+- Three variants share one `HomePage.astro` via a `style` prop: `flat` (SVG), `room` (CSS 3D),
+  `gl` (WebGL). Only the hall differs; never fork the pages below it.
+- `Sculpture3D.astro` EXTRUDES `Sculpture.astro` — it stacks the same SVG along Z and darkens
+  the back slices. Do not rebuild the forms from CSS primitives; that was tried and the
+  silhouettes came out worse than the artwork.
+- The WebGL scene is procedural on purpose: no model files, so the only payload is three.js.
+  Keep it that way. DPR is capped at 1.5, there are no shadow maps, and the loop must stop on
+  IntersectionObserver and visibilitychange.
+- Anything drawn on the canvas is decoration. Every link must exist in the markup underneath.
+
 **Media and rights**
 - YouTube only, via `youtube-nocookie.com`, behind the click-to-load facade. Never download,
   re-host, re-cut or proxy a video.

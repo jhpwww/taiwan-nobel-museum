@@ -1,14 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hall from './Hall.astro';
+import Hall3D from './Hall3D.astro';
+import HallGL from './HallGL.astro';
 import LectureCard from './LectureCard.astro';
 import VideoFacade from './VideoFacade.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { browse, lecture as lectureUrl } from '../i18n/routing';
 import { lectures, byDateDesc, catName, totalVideos, nextUpcoming, recommended, localDate } from '../data/catalog';
 
-interface Props { lang: Lang }
-const { lang } = Astro.props;
+interface Props { lang: Lang; style?: 'flat' | 'room' | 'gl' }
+const { lang, style = 'flat' } = Astro.props;
 const t = useT(lang);
 
 const byDate = byDateDesc();
@@ -28,7 +30,9 @@ const nVideos = totalVideos();
 ---
 
 <Base lang={lang} bare>
-  <Hall lang={lang} />
+  {style === 'gl' ? <HallGL lang={lang} />
+   : style === 'room' ? <Hall3D lang={lang} />
+   : <Hall lang={lang} />}
 
   <section class="strip">
     <div class="wrap">

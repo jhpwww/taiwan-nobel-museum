@@ -1,0 +1,373 @@
+---
+/**
+ * Hall3D.astro — the great hall as an actual room in CSS 3D space.
+ *
+ * A single `perspective` on the stage and `preserve-3d` throughout, so the
+ * floor, colonnades, arches, video wall and plinths all sit at real Z depths.
+ * Moving the pointer turns the camera; nothing is faked with parallax offsets.
+ *
+ * Cost: no library, no canvas, no per-frame layout. One rAF drives two rotate
+ * values on one element and the compositor does the rest.
+ */
+import Sculpture3D from './Sculpture3D.astro';
+import StyleSwitch from './StyleSwitch.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { gallery, asset } from '../i18n/routing';
+import { lectures, catName, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const ORDER: CategoryKey[] = categoryList().map((c) => c.key);
+const counts = lectures.reduce<Record<string, number>>((a, l) => {
+  a[l.prize.category] = (a[l.prize.category] ?? 0) + 1; return a;
+}, {});
+/** six plinths on an arc: the middle pair nearest the viewer */
+const ARC = [-38, -22, -7.5, 7.5, 22, 38];
+const cats = ORDER.map((key, i) => ({
+  key, name: catName(key, lang), n: counts[key] ?? 0,
+  href: gallery(lang, key), deg: ARC[i],
+}));
+const [introA, introConj, introB] = introParts(lang);
+
+/** the video wall: real lecture stills, so the hall reads as a film archive */
+const WALL = 13;
+const stills = lectures
+  .filter((l) => l.video.guide || l.video.lecture)
+  .map((l) => `https://i.ytimg.com/vi/${l.video.guide ?? l.video.lecture}/mqdefault.jpg`);
+const panels = Array.from({ length: WALL }, (_, i) => ({
+  deg: -60 + i * 10,
+  a: stills[i % stills.length],
+  b: stills[(i + WALL) % stills.length],
+  delay: (i * 1.7) % 9,
+}));
+---
+
+<section class="hall3d" aria-labelledby="hall-title">
+  <StyleSwitch lang={lang} current="room" />
+  <div class="stage" aria-hidden="true">
+    <div class="camera" data-camera>
+      <div class="room">
+        <div class="floor"></div>
+        <div class="ceiling"></div>
+
+        <!-- curved wall of lecture stills -->
+        <div class="vwall">
+          {panels.map((p) => (
+            <span class="vpanel" style={`--deg:${p.deg}deg; --delay:${p.delay}s`}>
+              <img src={p.a} alt="" loading="lazy" decoding="async" width="320" height="180" />
+              <img class="b" src={p.b} alt="" loading="lazy" decoding="async" width="320" height="180" />
+            </span>
+          ))}
+          <span class="vwall__glass"></span>
+        </div>
+
+        <!-- receding colonnades, real Z depth -->
+        {[0, 1, 2, 3, 4].map((i) => (
+          <>
+            <span class="col col--l" style={`--z:${-300 - i * 340}px`}>
+              <b class="cap"></b><b class="foot"></b>
+            </span>
+            <span class="col col--r" style={`--z:${-300 - i * 340}px`}>
+              <b class="cap"></b><b class="foot"></b>
+            </span>
+            <span class="arch arch--l" style={`--z:${-300 - i * 340}px`}></span>
+            <span class="arch arch--r" style={`--z:${-300 - i * 340}px`}></span>
+          </>
+        ))}
+
+        <span class="haze haze--far"></span>
+        <span class="haze haze--mid"></span>
+        <span class="shaft"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="dust" aria-hidden="true">
+    {Array.from({ length: 22 }, (_, i) => (
+      <span style={`--x:${(i * 47) % 100}%; --y:${(i * 31) % 80 + 10}%; --d:${11 + (i % 6) * 2.6}s; --s:${0.6 + (i % 4) * 0.3}`}></span>
+    ))}
+  </div>
+
+  <div class="masthead">
+    <img class="crest" src={asset('ntu-logo.png')} alt="" width="96" height="96" />
+    <p class="uni">{t('site.university')}</p>
+    <h1 id="hall-title" class="title">{t('site.tagline')}</h1>
+    <p class="hint">{t('hall.hint')}</p>
+  </div>
+
+  <nav class="plinths" aria-label={t('hall.enter')}>
+    {cats.map((c) => (
+      <a class="plinth" href={c.href} data-cat={c.key} style={`--deg:${c.deg}deg`}>
+        <span class="plinth__art"><Sculpture3D cat={c.key} size={172} /></span>
+        <span class="plinth__name">{c.name}</span>
+        <span class="plinth__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
+      </a>
+    ))}
+  </nav>
+
+  <a class="intro" href={gallery(lang, INTRO)} data-cat={INTRO}>
+    <span class="intro__medal" aria-hidden="true"><Sculpture3D cat={INTRO} size={120} layers={8} spin={false} /></span>
+    <span class="intro__text">
+      <span class="intro__eyebrow">{t('hall.nobelRoom')}</span>
+      <span class="intro__title">{introA}<span class="conj">{introConj}</span>{introB}</span>
+      <span class="intro__desc">{t('hall.introDesc')}</span>
+    </span>
+    <span class="intro__cta" aria-hidden="true">{t('hall.introCta')} →</span>
+  </a>
+</section>
+
+<style>
+  .hall3d {
+    position: relative;
+    min-block-size: min(100svh, 62rem);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-content: start;
+    padding-block: max(clamp(1.5rem, 4vh, 3.5rem), 4.6rem) clamp(2.5rem, 6vh, 4.5rem);
+    overflow: hidden;
+    isolation: isolate;
+    background: #0d0803;
+  }
+
+  /* ---------- the room ---------- */
+  .stage {
+    position: absolute; inset: 0; z-index: -1;
+    perspective: 1250px;
+    perspective-origin: 50% 44%;
+    overflow: hidden;
+  }
+  .camera, .room { position: absolute; inset: 0; transform-style: preserve-3d; }
+  .camera { will-change: transform; transition: transform 0.9s cubic-bezier(.22,.61,.36,1); }
+  .room > * { position: absolute; }
+
+  .floor {
+    inset-block-start: 58%; inset-inline: -60%;
+    block-size: 260%;
+    transform: rotateX(84deg);
+    transform-origin: 50% 0;
+    background:
+      linear-gradient(to bottom, rgba(70,44,18,.55), rgba(12,8,3,.98) 46%),
+      repeating-linear-gradient(90deg, transparent 0 7%, rgba(232,198,142,.05) 7% 7.25%, transparent 7.25% 14%),
+      repeating-linear-gradient(0deg, transparent 0 5%, rgba(232,198,142,.045) 5% 5.2%, transparent 5.2% 10%);
+    box-shadow: inset 0 2px 0 rgba(232,198,142,.16);
+    mask-image: linear-gradient(to bottom, transparent, #000 9%, #000 100%);
+  }
+  .ceiling {
+    inset-block-end: 62%; inset-inline: -60%;
+    block-size: 200%;
+    transform: rotateX(-84deg);
+    transform-origin: 50% 100%;
+    background:
+      linear-gradient(to top, rgba(74,49,21,.5), transparent 58%),
+      repeating-linear-gradient(90deg, transparent 0 9%, rgba(232,198,142,.05) 9% 9.3%, transparent 9.3% 18%);
+  }
+
+  /* colonnade — each column is a plane standing at its own depth */
+  .col {
+    inline-size: 62px; block-size: 58%;
+    inset-block-start: 18%;
+    background:
+      linear-gradient(90deg, #150d05 0%, #3d250e 22%, #5a3813 42%, #33200c 68%, #100a03 100%),
+      repeating-linear-gradient(90deg, transparent 0 7px, rgba(0,0,0,.22) 7px 9px);
+    box-shadow: inset 0 0 0 1px rgba(232,198,142,.08);
+  }
+  .col .cap, .col .foot {
+    position: absolute; inset-inline: -9px; block-size: 16px;
+    background: linear-gradient(90deg, #1a1006, #6a4318 45%, #241608);
+    box-shadow: 0 1px 0 rgba(232,198,142,.12);
+  }
+  .col .cap { inset-block-start: -16px; }
+  .col .foot { inset-block-end: -14px; block-size: 14px; }
+  .col--l { inset-inline-start: 8%; transform: translateZ(var(--z)) rotateY(24deg); }
+  .col--r { inset-inline-end: 8%; transform: translateZ(var(--z)) rotateY(-24deg); }
+  .arch {
+    inline-size: 190px; block-size: 190px;
+    inset-block-start: 6%;
+    border-block-start: 2px solid rgba(232,198,142,.10);
+    border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  }
+  .arch--l { inset-inline-start: 2%; transform: translateZ(var(--z)); }
+  .arch--r { inset-inline-end: 2%; transform: translateZ(var(--z)); }
+
+  /* ---------- the video wall ---------- */
+  .vwall {
+    inset-block-start: 46%; inset-inline-start: 50%;
+    inline-size: 0; block-size: 0;
+    transform-style: preserve-3d;
+  }
+  .vpanel {
+    position: absolute;
+    inline-size: 196px; block-size: 110px;
+    margin: -55px -98px;
+    transform: rotateY(var(--deg)) translateZ(-880px);
+    border: 1px solid rgba(232,198,142,.14);
+    overflow: hidden;
+    background: #140d06;
+    box-shadow: 0 0 40px -8px rgba(0,0,0,.9);
+  }
+  .vpanel img {
+    position: absolute; inset: 0;
+    inline-size: 100%; block-size: 100%; object-fit: cover;
+    filter: saturate(.5) brightness(.42) contrast(1.08);
+  }
+  .vpanel .b { opacity: 0; animation: vswap 18s var(--delay) ease-in-out infinite; }
+  @keyframes vswap { 0%,42% { opacity: 0 } 50%,92% { opacity: 1 } 100% { opacity: 0 } }
+
+  .vwall__glass {
+    position: absolute; inline-size: 2200px; block-size: 460px; margin: -230px -1100px;
+    transform: translateZ(-700px);
+    background: linear-gradient(to bottom, rgba(255,196,106,.08), transparent 70%);
+    pointer-events: none;
+  }
+
+  /* ---------- light and depth ---------- */
+  .haze {
+    inset-inline: -50%; inset-block: -20%;
+    pointer-events: none;
+  }
+  .haze--far {
+    transform: translateZ(-620px);
+    background: radial-gradient(60% 50% at 50% 34%, rgba(255,190,104,.16), transparent 72%);
+  }
+  .haze--mid {
+    transform: translateZ(-240px);
+    background: radial-gradient(70% 60% at 50% 40%, rgba(120,72,26,.16), transparent 76%);
+  }
+  .shaft {
+    inset-inline: 0; inset-block: 0;
+    transform: translateZ(-120px);
+    background: conic-gradient(from 168deg at 50% -12%,
+      transparent 0deg, rgba(255,206,128,.09) 9deg, transparent 18deg,
+      transparent 342deg, rgba(255,206,128,.07) 351deg, transparent 360deg);
+    mask-image: linear-gradient(to bottom, #000 0 58%, transparent 84%);
+  }
+
+  .dust { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+  .dust span {
+    position: absolute; inset-inline-start: var(--x); inset-block-start: var(--y);
+    inline-size: 3px; block-size: 3px; border-radius: 50%;
+    background: rgba(255,216,150,.5); scale: var(--s);
+    animation: drift var(--d) linear infinite; filter: blur(.4px);
+  }
+  @keyframes drift {
+    0% { transform: translate3d(0,16px,0); opacity: 0 }
+    18% { opacity: .8 } 82% { opacity: .55 }
+    100% { transform: translate3d(22px,-130px,0); opacity: 0 }
+  }
+
+  /* ---------- masthead ---------- */
+  .masthead { text-align: center; display: grid; justify-items: center; gap: .3rem; padding-inline: 1rem; }
+  .crest { inline-size: clamp(54px, 7.5vw, 88px); block-size: auto; filter: drop-shadow(0 4px 26px rgba(255,190,100,.36)); }
+  .uni { font-size: var(--step--1); letter-spacing: .3em; color: var(--gold); text-transform: uppercase; margin-block-start: .45rem; }
+  :global(:lang(zh)) .uni { letter-spacing: .42em; text-indent: .42em; }
+  .title {
+    font-size: var(--step-4); color: var(--cream); max-inline-size: 22ch;
+    text-shadow: 0 2px 46px rgba(255,190,100,.3);
+  }
+  .hint { font-size: var(--step--1); color: var(--muted); letter-spacing: .18em; margin-block-start: .5rem; }
+
+  /* ---------- plinths, standing on the arc ---------- */
+  .plinths {
+    display: grid; grid-template-columns: repeat(6, 1fr);
+    align-items: end; gap: clamp(.2rem, 1vw, 1.1rem);
+    inline-size: min(100% - 2rem, 86rem);
+    margin: clamp(.5rem, 2vh, 1.75rem) auto 0;
+    perspective: 900px;
+  }
+  .plinth {
+    display: grid; justify-items: center; gap: .1rem;
+    text-decoration: none; color: var(--text);
+    padding: .4rem .2rem .8rem;
+    transform: rotateY(calc(var(--deg) * .28)) translateZ(calc(cos(var(--deg)) * 26px - 18px));
+    transform-style: preserve-3d;
+    transition: transform .55s cubic-bezier(.22,.61,.36,1), filter .45s;
+  }
+  .plinth:hover, .plinth:focus-visible {
+    transform: rotateY(0deg) translateZ(58px);
+    filter: brightness(1.14);
+  }
+  .plinths:hover .plinth:not(:hover) { filter: brightness(.55) saturate(.6); }
+  .plinth__art { display: block; transform-style: preserve-3d; }
+  .plinth__name {
+    font-family: var(--font-han-serif); font-size: var(--step-0); color: var(--cream);
+    letter-spacing: .06em; margin-block-start: .3rem; text-align: center;
+  }
+  .plinth:hover .plinth__name, .plinth:focus-visible .plinth__name { color: var(--accent); }
+  .plinth__n { font-size: var(--step--1); color: var(--muted-dim); letter-spacing: .08em; }
+
+  /* ---------- the introduction room ---------- */
+  .intro {
+    display: flex; align-items: center; gap: clamp(.75rem, 2.5vw, 2rem);
+    inline-size: min(100% - 2rem, 54rem);
+    margin: clamp(1.25rem, 3vh, 2.25rem) auto 0;
+    padding: .5rem clamp(1rem, 3vw, 1.9rem) .5rem .5rem;
+    text-decoration: none; color: var(--text);
+    border: 1px solid var(--line); border-radius: 999px;
+    background:
+      radial-gradient(60% 180% at 8% 50%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 70%),
+      color-mix(in srgb, var(--bg-1) 82%, transparent);
+    backdrop-filter: blur(6px);
+    transition: border-color .4s, transform .4s, box-shadow .4s;
+  }
+  .intro:hover, .intro:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+    transform: translateY(-2px); box-shadow: var(--shadow-lift);
+  }
+  .intro__medal {
+    flex: none;
+    inline-size: clamp(3.6rem, 8vw, 5.4rem);
+    block-size: clamp(3.6rem, 8vw, 5.4rem);
+    display: grid; place-items: center;
+  }
+  .intro__medal :global(.x3d__plinth) { display: none; }
+  .intro__medal :global(.x3d) {
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 1 / 1.42;
+    translate: 0 -14%;
+  }
+  .intro__text { display: grid; gap: .1rem; flex: 1 1 auto; min-inline-size: 0; }
+  .intro__eyebrow { font-size: .66rem; letter-spacing: .2em; text-transform: uppercase; color: var(--accent); }
+  .intro__title { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); line-height: 1.3; }
+  .intro__title .conj { font-size: .62em; opacity: .7; margin-inline: .18em; vertical-align: .08em; }
+  .intro__desc { font-size: var(--step--1); color: var(--muted); line-height: 1.6; }
+  .intro__cta { flex: none; font-size: var(--step--1); letter-spacing: .1em; color: var(--gold); transition: translate .35s; }
+  .intro:hover .intro__cta { translate: .25rem 0; }
+
+  @media (max-width: 62rem) {
+    .plinths { grid-template-columns: repeat(3, 1fr); row-gap: 1.25rem; }
+    .plinth { transform: none; }
+    .plinth:hover, .plinth:focus-visible { transform: translateZ(0) scale(1.05); }
+    .vpanel { inline-size: 132px; block-size: 74px; margin: -37px -66px; }
+  }
+  @media (max-width: 34rem) {
+    .plinths { grid-template-columns: repeat(2, 1fr); }
+    .hall3d { min-block-size: 0; }
+    .intro { border-radius: var(--radius); padding: 1rem; flex-wrap: wrap; }
+  }
+  @media (max-width: 40rem) { .intro__cta { inline-size: 100%; } }
+</style>
+
+<script>
+  // One rAF, two rotations, one element. Everything else is compositor work.
+  const cam = document.querySelector<HTMLElement>('[data-camera]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  if (cam && !reduce.matches && matchMedia('(pointer: fine)').matches) {
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+    const tick = () => {
+      cx += (tx - cx) * 0.05;
+      cy += (ty - cy) * 0.05;
+      cam.style.transform = `rotateX(${cy.toFixed(3)}deg) rotateY(${cx.toFixed(3)}deg)`;
+      raf = Math.abs(tx - cx) > 0.01 || Math.abs(ty - cy) > 0.01 ? requestAnimationFrame(tick) : 0;
+    };
+    addEventListener('pointermove', (e) => {
+      tx = (e.clientX / innerWidth - 0.5) * 7;
+      ty = (0.5 - e.clientY / innerHeight) * 3.4;
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, { passive: true });
+    // settle back to centre when the pointer leaves
+    addEventListener('pointerleave', () => { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick); });
+  }
+</script>

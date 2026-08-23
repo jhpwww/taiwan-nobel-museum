@@ -1,5 +1,6 @@
 ---
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
+import StyleSwitch from './StyleSwitch.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
@@ -30,6 +31,7 @@ const cats = ORDER.map((key, i) => ({
 ---
 
 <section class="hall" aria-labelledby="hall-title">
+  <StyleSwitch lang={lang} current="flat" />
   <div class="hall__scene" data-parallax aria-hidden="true">
     <div class="layer layer--vault" data-depth="6">
       <svg viewBox="0 0 1600 500" preserveAspectRatio="xMidYMin slice">

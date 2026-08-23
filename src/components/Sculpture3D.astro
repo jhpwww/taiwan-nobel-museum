@@ -1,0 +1,123 @@
+---
+/**
+ * Sculpture3D.astro — the gallery sculptures given real physical depth.
+ *
+ * Rather than rebuild the forms from CSS primitives (which loses the refined
+ * silhouettes), each SVG is EXTRUDED: the same artwork is stacked N times along
+ * Z inside a `preserve-3d` group, the front face lit and the layers behind it
+ * progressively darker. Turning the group genuinely turns a solid object — you
+ * see the extruded side wall, not a rotating picture.
+ *
+ * The turn is a limited oscillation rather than a full spin: an extruded plane
+ * is only convincing while you can still read its face.
+ *
+ * Cost: N clones of an inline SVG, one CSS animation, zero JavaScript.
+ */
+import Sculpture from './Sculpture.astro';
+import type { GalleryKey } from '../data/catalog';
+
+interface Props {
+  cat: GalleryKey;
+  size?: number;
+  layers?: number;   // extrusion depth in slices
+  spin?: boolean;
+  id?: string;
+}
+const { cat, size = 190, layers = 12, spin = true, id = `x-${cat}` } = Astro.props;
+const slices = Array.from({ length: layers }, (_, i) => i);
+const gap = 1.5;   // px between slices
+---
+
+<div class="x3d" data-cat={cat} style={`--sz:${size}px; --depth:${(layers - 1) * gap}px`}>
+  <div class:list={['x3d__turn', spin && 'is-turning']}>
+    {slices.map((i) => (
+      <span
+        class:list={['x3d__slice', i === 0 && 'is-face']}
+        style={`--z:${-i * gap}px; --k:${(1 - i / (layers - 1)).toFixed(3)}`}
+      >
+        <Sculpture cat={cat} size={size} id={`${id}-${i}`} plinth={false} />
+      </span>
+    ))}
+  </div>
+
+  <div class="x3d__plinth" aria-hidden="true">
+    <span class="ptop"></span>
+    <span class="pside"></span>
+    <span class="pglow"></span>
+  </div>
+</div>
+
+<style>
+  .x3d {
+    position: relative;
+    inline-size: var(--sz);
+    block-size: calc(var(--sz) * 1.42);
+    transform-style: preserve-3d;
+  }
+
+  .x3d__turn {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    transform-style: preserve-3d;
+    transform: translateZ(calc(var(--depth) / 2));
+  }
+  .is-turning { animation: x3d-turn 19s ease-in-out infinite; }
+  @keyframes x3d-turn {
+    0%, 100% { transform: translateZ(calc(var(--depth) / 2)) rotateY(-24deg); }
+    50%      { transform: translateZ(calc(var(--depth) / 2)) rotateY(24deg); }
+  }
+
+  .x3d__slice {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 100%;
+    transform: translateZ(var(--z));
+    /* back slices become the darkened side wall of the extrusion */
+    filter: brightness(calc(0.24 + 0.76 * var(--k) * var(--k)));
+  }
+  .x3d__slice.is-face { filter: none; }
+  .x3d__slice :global(svg) { display: block; inline-size: 100%; block-size: auto; }
+  /* only the lit face carries the bloom, or the stack turns to mush */
+  .x3d__slice:not(.is-face) :global(.sculpt__body) { filter: none; }
+  .x3d__slice:not(.is-face) :global(.sculpt__glow) { display: none; }
+
+  /* ---------- plinth, a real disc in 3D ---------- */
+  .x3d__plinth {
+    position: absolute;
+    inset-block-end: 6%;
+    inset-inline-start: 50%;
+    transform-style: preserve-3d;
+  }
+  .ptop {
+    position: absolute;
+    inline-size: 124px; block-size: 124px; margin: -62px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at 50% 30%, #4b2f11, #21140a 74%);
+    transform: rotateX(77deg);
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+      0 0 34px -6px color-mix(in srgb, var(--accent) 38%, transparent);
+  }
+  .pside {
+    position: absolute;
+    inline-size: 124px; block-size: 32px;
+    margin-inline-start: -62px; inset-block-start: -3px;
+    background: linear-gradient(#31200e, #130b04);
+    border-radius: 0 0 50% 50% / 0 0 19px 19px;
+    box-shadow: inset 0 1px 0 color-mix(in srgb, var(--accent) 28%, transparent);
+  }
+  .pglow {
+    position: absolute;
+    inline-size: 190px; block-size: 46px; margin-inline-start: -95px; inset-block-start: 6px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, color-mix(in srgb, var(--accent) 26%, transparent), transparent 70%);
+    filter: blur(8px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .is-turning { animation: none; transform: translateZ(calc(var(--depth) / 2)) rotateY(-12deg); }
+  }
+</style>
