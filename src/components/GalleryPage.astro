@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import LectureCard from './LectureCard.astro';
+import Sculpture, { type CategoryKey } from './Sculpture.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { home } from '../i18n/routing';
+import { byCategory, categories } from '../data/catalog';
+
+interface Props { lang: Lang; cat: CategoryKey }
+const { lang, cat } = Astro.props;
+const t = useT(lang);
+const meta = categories[cat];
+const recs = byCategory(cat);
+
+/** the Nobel gallery holds no lectures — it holds the story of the prize */
+const isNobelRoom = cat === 'nobel';
+const NOBEL_LINKS = [
+  { href: 'https://www.nobelprize.org/alfred-nobel/', zh: '諾貝爾其人', en: 'Alfred Nobel, the man',
+    dzh: '一位炸藥發明家，為什麼留下了這座獎？', den: 'The inventor of dynamite — and why he left this prize behind.' },
+  { href: 'https://www.nobelprize.org/prizes/facts/nobel-prize-facts/', zh: '諾貝爾獎小知識', en: 'Nobel Prize facts',
+    dzh: '最年輕、最年長、得過兩次的人：官方統計。', den: 'Youngest, oldest, twice-awarded: the official numbers.' },
+  { href: 'https://www.nobelprize.org/the-nobel-prize-organisation/', zh: '獎項如何評選', en: 'How the prizes are decided',
+    dzh: '提名、審議、保密五十年的評選過程。', den: 'Nomination, deliberation, and fifty years of secrecy.' },
+  { href: 'https://educational.nobelprize.org/', zh: '諾貝爾教育資源', en: 'Nobel Prize educational resources',
+    dzh: '官方為學生設計的互動教材與遊戲（英文）。', den: 'Games and teaching material made for students.' },
+];
+---
+
+<Base lang={lang} title={meta[lang]} segments={['gallery', cat]}>
+  <header class="gh" data-cat={cat}>
+    <div class="wrap gh__in">
+      <div class="gh__art" aria-hidden="true"><Sculpture cat={cat} size={150} id={`gal-${cat}`} /></div>
+      <div>
+        <p class="eyebrow"><a class="gh__back" href={home(lang)}>← {t('cat.back')}</a></p>
+        <h1 class="gh__title">{meta[lang]}</h1>
+        {!isNobelRoom && <p class="gh__n">{t('hall.count', { n: recs.length })}</p>}
+      </div>
+    </div>
+  </header>
+
+  <div class="wrap gh__body">
+    {isNobelRoom ? (
+      <ul class="nobel" role="list">
+        {NOBEL_LINKS.map((l) => (
+          <li>
+            <a href={l.href} rel="noopener">
+              <span class="nobel__t">{lang === 'zh' ? l.zh : l.en}</span>
+              <span class="nobel__d">{lang === 'zh' ? l.dzh : l.den}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <>
+        <h2 class="visually-hidden">{t('cat.lectures')}</h2>
+        <ul class="grid" role="list">
+          {recs.map((rec) => <li><LectureCard lang={lang} rec={rec} /></li>)}
+        </ul>
+      </>
+    )}
+  </div>
+</Base>
+
+<style>
+  .gh {
+    border-block-end: 1px solid var(--line);
+    background:
+      radial-gradient(60% 120% at 8% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 68%),
+      var(--bg-1);
+    padding-block: clamp(1.8rem, 5vw, 3rem);
+  }
+  .gh__in { display: flex; align-items: center; gap: clamp(1rem, 3vw, 2.5rem); }
+  .gh__art { --sculpt-hi: #ffe9c2; --sculpt-lo: #6d451a; flex: none; }
+  @media (max-width: 40rem) { .gh__art { display: none; } }
+  .gh__back { text-decoration: none; color: var(--muted); }
+  .gh__back:hover { color: var(--gold); }
+  .gh__title { font-size: var(--step-3); color: var(--cream); margin-block-start: 0.3rem; }
+  .gh__n { font-size: var(--step--1); color: var(--accent); letter-spacing: 0.14em; margin-block-start: 0.3rem; }
+
+  .gh__body { padding-block: clamp(2rem, 5vw, 3rem); }
+  .grid {
+    display: grid; gap: clamp(0.9rem, 2vw, 1.5rem);
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+  .nobel { display: grid; gap: 1rem; padding: 0; margin: 0;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
+  .nobel a {
+    display: grid; gap: 0.3rem; text-decoration: none; block-size: 100%;
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 1.2rem 1.35rem;
+    transition: border-color 0.3s var(--ease), background 0.3s var(--ease), transform 0.3s var(--ease);
+  }
+  .nobel a:hover { border-color: var(--line-hi); background: var(--surface-hi); transform: translateY(-2px); }
+  .nobel__t { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); }
+  .nobel__d { font-size: var(--step--1); color: var(--muted); line-height: 1.6; }
+</style>

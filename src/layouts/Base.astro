@@ -1,0 +1,151 @@
+---
+import '../styles/global.css';
+import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
+import { home, browse, about, asset, otherLang } from '../i18n/routing';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  /** path segments of the current page, so the language switch lands on its twin */
+  segments?: (string | number)[];
+  bare?: boolean;              // the great hall supplies its own header
+}
+const { lang, title, description, segments = [], bare = false } = Astro.props;
+const t = useT(lang);
+const other = otherLang(lang, ...segments);
+const pageTitle = title ? `${title} — ${t('site.title')}` : t('site.title');
+const desc = description ?? t('site.description');
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang={HTML_LANG[lang]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={desc} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href={asset('favicon.svg')} type="image/svg+xml" />
+    <meta name="theme-color" content="#120c06" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={desc} />
+    <meta property="og:locale" content={lang === 'zh' ? 'zh_TW' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="alternate" hreflang="zh-Hant" href={new URL(otherLang('en', ...segments).href, Astro.site)} />
+    <link rel="alternate" hreflang="en" href={new URL(otherLang('zh', ...segments).href, Astro.site)} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://i.ytimg.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@400;500;600&display=swap"
+    />
+  </head>
+
+  <body>
+    <a class="skip-link" href="#main">{t('nav.skip')}</a>
+
+    {!bare && (
+      <header class="topbar">
+        <div class="wrap topbar__in">
+          <a class="topbar__brand" href={home(lang)}>
+            <img src={asset('ntu-logo.png')} alt="" width="34" height="34" />
+            <span class="topbar__brand-txt">
+              <span class="topbar__uni">{t('site.university')}</span>
+              <span class="topbar__series">{t('site.tagline')}</span>
+            </span>
+          </a>
+          <nav class="topbar__nav" aria-label={t('nav.hall')}>
+            <a href={home(lang)}>{t('nav.hall')}</a>
+            <a href={browse(lang)}>{t('nav.all')}</a>
+            <a href={about(lang)}>{t('nav.about')}</a>
+            <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}>
+              {LANG_LABEL[other.lang]}
+            </a>
+          </nav>
+        </div>
+      </header>
+    )}
+
+    <main id="main">
+      <slot />
+    </main>
+
+    <footer class="foot">
+      <div class="wrap foot__in">
+        <p class="foot__rights">{t('foot.rights')}</p>
+        <p class="foot__src">
+          {t('foot.source')}:
+          <a href="https://www.youtube.com/@PeaceFoundationNET" rel="noopener">International Peace Foundation</a>,
+          <a href="https://www.youtube.com/@ntuspeech" rel="noopener">臺大演講網</a>
+        </p>
+      </div>
+    </footer>
+
+    <style>
+      .topbar {
+        position: sticky;
+        inset-block-start: 0;
+        z-index: 50;
+        background: color-mix(in srgb, var(--bg-0) 88%, transparent);
+        backdrop-filter: blur(10px);
+        border-block-end: 1px solid var(--line);
+      }
+      .topbar__in {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        min-block-size: 4rem;
+        flex-wrap: wrap;
+      }
+      .topbar__brand {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        text-decoration: none;
+        color: var(--cream);
+      }
+      .topbar__brand img { border-radius: 50%; }
+      .topbar__brand-txt { display: grid; line-height: 1.25; }
+      .topbar__uni { font-size: var(--step--1); color: var(--muted); letter-spacing: 0.1em; }
+      .topbar__series { font-family: var(--font-han-serif); font-size: var(--step-0); color: var(--cream); }
+
+      .topbar__nav { display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.9rem); }
+      .topbar__nav a {
+        font-size: var(--step--1);
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        text-decoration: none;
+        padding-block: 0.4rem;
+        border-block-end: 1px solid transparent;
+        transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
+      }
+      .topbar__nav a:hover { color: var(--gold-bright); border-block-end-color: var(--gold); }
+      .topbar__lang {
+        border: 1px solid var(--line) !important;
+        border-radius: 999px;
+        padding: 0.22rem 0.85rem !important;
+        color: var(--gold) !important;
+      }
+      .topbar__lang:hover { background: var(--surface-hi); }
+
+      .foot {
+        margin-block-start: clamp(4rem, 10vw, 8rem);
+        border-block-start: 1px solid var(--line);
+        background: var(--bg-1);
+        padding-block: 2.5rem 3rem;
+      }
+      .foot__in { display: grid; gap: 0.75rem; }
+      .foot__rights { font-size: var(--step--1); color: var(--muted-dim); max-width: 68ch; line-height: 1.7; }
+      .foot__src { font-size: var(--step--1); color: var(--muted-dim); }
+      .foot__src a { color: var(--muted); }
+    </style>
+  </body>
+</html>

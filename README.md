@@ -1,0 +1,99 @@
+# 諾貝爾獎得主講座虛擬博物館 · Nobel Laureate Lectures — A Virtual Museum
+
+A web-based virtual museum for the Nobel laureate lectures delivered in Taiwan under the
+**臺灣橋樑計畫 (Taiwan Bridges Program)** — the lectures themselves, their 導讀影片, and the
+interviews recorded alongside them.
+
+Audience: high-school students, undergraduates, and the general public. Not specialists.
+
+**Live site:** https://jhpwww.github.io/taiwan-nobel-museum/
+
+---
+
+## What is here
+
+| | |
+|---|---|
+| 31 lectures | Nov 2025 – May 2026, 31 Nobel laureates, 12 host institutions |
+| 導讀影片 | 6 published so far; the schema carries all 31 as they are released |
+| Interviews | 24, from 天下雜誌 CommonWealth Magazine and 風傳媒 The Storm Media |
+| Special events | Launch ceremony, two 北一女中 outreach lectures, a laureate panel, the 對話諾貝爾特展 |
+
+Prize categories: Physics 9 · Chemistry 8 · Medicine 7 · Economics 5 · Peace 2.
+There were no Literature lectures, so that gallery is a room about Alfred Nobel and the prize itself.
+
+## Stack
+
+Astro 5 + TypeScript, no UI framework, no runtime database, no CMS, no login.
+Plain CSS with custom properties. Deployed to GitHub Pages by GitHub Actions.
+
+The site ships **zero external JavaScript files** — the two small scripts (pointer parallax,
+video facade) are inlined. Videos are embedded from `youtube-nocookie.com` and load nothing
+until clicked.
+
+## Running it
+
+```bash
+npm install
+npm run dev        # http://localhost:4321/taiwan-nobel-museum/
+npm run build      # -> dist/
+npm run check      # astro check + tsc
+```
+
+Node 20+ required. **On WSL, keep this repo in the Linux filesystem** (`~/…`), not under
+`/mnt/c/…` — npm on the Windows mount is roughly 50× slower and will appear to hang.
+
+## Content backend
+
+The published Google Sheet is the source of truth for lecture data.
+
+```
+Google Sheet ──(publish tab as CSV)──> SHEET_CSV_URL ──> scripts/sync-sheet.mjs ──> src/data/lectures.json ──> build
+```
+
+**To add or edit a lecture:** edit the Sheet, then press **Run workflow** on the repository's
+Actions tab. There is no schedule — nothing publishes until someone decides to publish it.
+
+- `data/sheet-seed.csv` is the CSV to import when first creating the Sheet.
+- `scripts/sync-sheet.mjs` validates every row and **fails the build** on a malformed field
+  rather than shipping partial content.
+- A row with `status` set to anything other than `published` is skipped.
+- Never hand-edit `src/data/lectures.json`. Fix the Sheet and re-run.
+
+Set `SHEET_CSV_URL` under **Settings → Secrets and variables → Actions → Variables**. Until
+it is set, the build uses the committed catalogue, so a fresh clone always works.
+
+> Publish only a dedicated tab holding publishable columns. The internal production sheet
+> carries staff names, phone numbers and email addresses; those must never reach the site.
+
+## Where the data came from
+
+Everything in `data/catalog.json` is traceable. See the header of `scripts/seed-catalog.py`.
+
+- Schedule — the IPF 導讀拍攝進度 programme sheet, cross-checked against YouTube video titles
+- Lecture videos — the International Peace Foundation channel, matched by title, not by list order
+- 導讀影片 and the NTU uploads — 臺大演講網
+- Per-lecture NTU material — https://cge.ntu.edu.tw/cl_n_203079.html
+- Nobel citations — nobelprize.org, all 31 URLs verified
+
+Two dates that the programme book left ambiguous were settled from the video titles:
+**Wüthrich 2026-04-07** and **Semenza 2026-04-14**.
+
+## Editorial copy
+
+`scripts/copy-zh-en.py` holds the hook and summary for every lecture in both languages.
+It is plain reviewable text — rewrite it freely, then:
+
+```bash
+npm run content    # merge copy + facts -> src/data/lectures.json
+npm run sheet      # regenerate data/sheet-seed.csv
+```
+
+The 導讀 narration scripts were used as background reference only. They are not site content.
+
+## Rights
+
+Nothing is downloaded, re-hosted, re-cut or proxied. Every video is embedded from YouTube and
+remains the copyright of its original publisher. Nobel Foundation text and images are linked,
+never copied. "Nobel Prize" and the medal are trademarks of the Nobel Foundation; this is an
+independent educational project, not affiliated with or endorsed by it.

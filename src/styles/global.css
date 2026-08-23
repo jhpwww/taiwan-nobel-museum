@@ -1,0 +1,143 @@
+/* ============================================================
+   Nobel Laureate Lectures — a virtual museum
+   Warm, dim, and quiet. Colour carries prize category; nothing else.
+   ============================================================ */
+
+/* ---------- reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { min-height: 100dvh; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; }
+img, svg, video { display: block; max-width: 100%; }
+button, input, select { font: inherit; color: inherit; }
+a { color: inherit; }
+:where(ul, ol)[role='list'] { list-style: none; padding: 0; }
+
+/* ---------- tokens ---------- */
+:root {
+  /* warm neutrals — the gallery itself */
+  --bg-0:  #120c06;
+  --bg-1:  #1b1209;
+  --bg-2:  #27190e;
+  --bg-3:  #35230f;
+
+  --surface:      rgba(255, 238, 214, 0.045);
+  --surface-hi:   rgba(255, 238, 214, 0.085);
+  --line:         rgba(232, 198, 142, 0.16);
+  --line-hi:      rgba(232, 198, 142, 0.34);
+
+  --gold:        #e0aa53;
+  --gold-bright: #f7d698;
+  --gold-deep:   #a8762f;
+  --cream:       #f6ebd9;
+  --text:        #ece0cd;
+  --muted:       #b39a7d;
+  --muted-dim:   #8a7358;
+
+  /* prize categories — warm hues, each paired with its own sculpture form
+     so colour is never the only thing telling them apart */
+  --c-physics:   #f0c063;
+  --c-chemistry: #e08a45;
+  --c-medicine:  #d4675f;
+  --c-economics: #c9a96e;
+  --c-peace:     #ecd8b0;
+  --c-nobel:     #bf8f52;
+
+  --accent: var(--gold);
+
+  /* type */
+  --font-display: 'Cormorant Garamond', 'Noto Serif TC', 'Source Han Serif TC',
+                  'PingFang TC', 'Songti TC', 'Microsoft JhengHei', serif;
+  --font-body: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei',
+               -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-han-serif: 'Noto Serif TC', 'Source Han Serif TC', 'PingFang TC', 'Songti TC', serif;
+
+  --step--1: clamp(0.80rem, 0.77rem + 0.15vw, 0.88rem);
+  --step-0:  clamp(0.95rem, 0.90rem + 0.24vw, 1.08rem);
+  --step-1:  clamp(1.15rem, 1.05rem + 0.48vw, 1.45rem);
+  --step-2:  clamp(1.45rem, 1.25rem + 0.95vw, 2.05rem);
+  --step-3:  clamp(1.85rem, 1.45rem + 1.90vw, 3.00rem);
+  --step-4:  clamp(2.30rem, 1.60rem + 3.30vw, 4.40rem);
+
+  --measure: 62ch;
+  --radius: 3px;
+  --shadow-lift: 0 18px 48px -18px rgba(0, 0, 0, 0.85);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ---------- base ---------- */
+body {
+  background: var(--bg-0);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--step-0);
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 500; line-height: 1.2; letter-spacing: 0.01em; }
+h1 { font-size: var(--step-4); }
+h2 { font-size: var(--step-3); }
+h3 { font-size: var(--step-2); }
+:lang(zh) h1, :lang(zh) h2, :lang(zh) h3 { font-family: var(--font-han-serif); letter-spacing: 0.03em; }
+
+p { max-width: var(--measure); }
+
+a { color: var(--gold); text-decoration-color: rgba(224, 170, 83, 0.35); text-underline-offset: 0.25em; }
+a:hover { color: var(--gold-bright); text-decoration-color: currentColor; }
+
+:focus-visible {
+  outline: 2px solid var(--gold-bright);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+::selection { background: rgba(224, 170, 83, 0.28); color: var(--cream); }
+
+/* ---------- utilities ---------- */
+.wrap { width: min(100% - 2.5rem, 76rem); margin-inline: auto; }
+.wrap-narrow { width: min(100% - 2.5rem, 52rem); margin-inline: auto; }
+.stack > * + * { margin-block-start: var(--gap, 1rem); }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+.skip-link {
+  position: absolute; inset-inline-start: 1rem; inset-block-start: -4rem;
+  z-index: 999; background: var(--bg-2); color: var(--cream);
+  padding: 0.6rem 1.1rem; border: 1px solid var(--line-hi); border-radius: var(--radius);
+  transition: inset-block-start 0.2s var(--ease);
+}
+.skip-link:focus { inset-block-start: 1rem; }
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--step--1);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+:lang(zh) .eyebrow { letter-spacing: 0.16em; }
+
+/* a Chinese gloss set smaller under an English original */
+.gloss { font-size: 0.78em; color: var(--muted); font-family: var(--font-body); letter-spacing: 0.02em; line-height: 1.6; }
+
+.rule { border: 0; border-block-start: 1px solid var(--line); }
+
+/* ---------- category accent ---------- */
+[data-cat='physics']   { --accent: var(--c-physics); }
+[data-cat='chemistry'] { --accent: var(--c-chemistry); }
+[data-cat='medicine']  { --accent: var(--c-medicine); }
+[data-cat='economics'] { --accent: var(--c-economics); }
+[data-cat='peace']     { --accent: var(--c-peace); }
+[data-cat='nobel']     { --accent: var(--c-nobel); }
+
+/* ---------- motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

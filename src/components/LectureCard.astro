@@ -1,0 +1,101 @@
+---
+import { useT, type Lang } from '../i18n/ui';
+import { lecture as lectureUrl } from '../i18n/routing';
+import { catName, videoCount, localDate, type Lecture } from '../data/catalog';
+
+interface Props { lang: Lang; rec: Lecture; featured?: boolean }
+const { lang, rec, featured = false } = Astro.props;
+const t = useT(lang);
+
+const cat = rec.prize.category;
+const catLabel = catName(cat, lang);
+const poster = `https://i.ytimg.com/vi/${rec.video.guide ?? rec.video.lecture}/hqdefault.jpg`;
+const date = localDate(rec.event.date, lang);
+const nVideos = videoCount(rec);
+---
+
+<a class:list={['card', featured && 'card--featured']} href={lectureUrl(lang, rec.id)} data-cat={cat}>
+  <span class="card__media">
+    <img src={poster} alt="" width="480" height="360" loading="lazy" decoding="async" />
+    <span class="card__scrim"></span>
+    {rec.video.guide && <span class="card__badge">{t('lec.guide')}</span>}
+    <span class="card__count">{nVideos} <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>
+  </span>
+
+  <span class="card__body">
+    <span class="card__prize">{t('lec.prize', { year: rec.prize.year, category: catLabel })}</span>
+    <span class="card__who">{lang === 'zh' ? rec.laureate.zh : rec.laureate.en}</span>
+    {lang === 'zh' && <span class="card__who-en gloss">{rec.laureate.en}</span>}
+    <span class="card__hook">{rec.hook[lang]}</span>
+    <span class="card__meta">{date} · {lang === 'zh' ? rec.event.host_zh : rec.event.host_en}</span>
+  </span>
+</a>
+
+<style>
+  .card {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    transition: border-color 0.35s var(--ease), transform 0.35s var(--ease),
+                box-shadow 0.35s var(--ease), background 0.35s var(--ease);
+  }
+  .card:hover, .card:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+    background: var(--surface-hi);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .card__media { position: relative; display: block; aspect-ratio: 16 / 9; overflow: hidden; background: var(--bg-2); }
+  .card__media img {
+    inline-size: 100%; block-size: 100%; object-fit: cover;
+    transition: transform 0.7s var(--ease), filter 0.5s var(--ease);
+    filter: saturate(0.85) contrast(1.02) brightness(0.82);
+  }
+  .card:hover .card__media img { transform: scale(1.055); filter: saturate(1) brightness(0.95); }
+  .card__scrim {
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(18, 12, 6, 0.88), transparent 62%);
+  }
+  .card__badge {
+    position: absolute; inset-block-start: 0.6rem; inset-inline-start: 0.6rem;
+    font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--bg-0); background: var(--accent);
+    padding: 0.16rem 0.5rem; border-radius: 2px; font-weight: 500;
+  }
+  .card__count {
+    position: absolute; inset-block-end: 0.55rem; inset-inline-end: 0.6rem;
+    display: inline-flex; align-items: center; gap: 0.25rem;
+    font-size: 0.7rem; color: var(--cream);
+    background: rgba(18, 12, 6, 0.66); border: 1px solid var(--line);
+    padding: 0.1rem 0.45rem; border-radius: 999px;
+  }
+
+  .card__body { display: grid; gap: 0.18rem; padding: 0.95rem 1.05rem 1.15rem; align-content: start; }
+  .card__prize {
+    font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: var(--accent);
+  }
+  .card__who { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); line-height: 1.3; }
+  .card__who-en { display: block; margin-block-start: -0.1rem; }
+  .card__hook {
+    margin-block-start: 0.45rem;
+    color: var(--text); line-height: 1.65; font-size: var(--step-0);
+    display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card__meta { margin-block-start: 0.6rem; font-size: var(--step--1); color: var(--muted-dim); }
+
+  .card--featured { grid-template-rows: auto auto; }
+  .card--featured .card__who { font-size: var(--step-2); }
+  @media (min-width: 52rem) {
+    .card--featured { grid-template-columns: 1.35fr 1fr; grid-template-rows: 1fr; }
+    .card--featured .card__media { block-size: 100%; aspect-ratio: auto; }
+    .card--featured .card__body { align-content: center; padding: 1.6rem 1.8rem; }
+    .card--featured .card__hook { -webkit-line-clamp: 4; }
+  }
+</style>

@@ -1,0 +1,215 @@
+---
+import Base from '../layouts/Base.astro';
+import VideoFacade from './VideoFacade.astro';
+import LectureCard from './LectureCard.astro';
+import Sculpture, { type CategoryKey } from './Sculpture.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { gallery } from '../i18n/routing';
+import { catName, tagName, relatedTo, localDate, type Lecture } from '../data/catalog';
+
+interface Props { lang: Lang; rec: Lecture }
+const { lang, rec } = Astro.props;
+const t = useT(lang);
+
+const cat: CategoryKey = rec.prize.category;
+const catLabel = catName(cat, lang);
+const date = localDate(rec.event.date, lang, true);
+const host = lang === 'zh' ? rec.event.host_zh : rec.event.host_en;
+const who = lang === 'zh' ? rec.laureate.zh : rec.laureate.en;
+
+const next = relatedTo(rec, 3);
+
+---
+
+<Base
+  lang={lang}
+  title={`${who} — ${rec.title.en}`}
+  description={rec.description[lang]}
+  segments={['lecture', rec.id]}
+>
+  <article class="lec" data-cat={cat}>
+    <header class="lec__head">
+      <div class="wrap lec__head-in">
+        <div class="lec__crest" aria-hidden="true"><Sculpture cat={cat} size={110} id={`lec-${rec.id}`} /></div>
+        <div class="lec__id">
+          <p class="eyebrow lec__prize">
+            <a href={gallery(lang, cat)}>{t('lec.prize', { year: rec.prize.year, category: catLabel })}</a>
+          </p>
+          <h1 class="lec__who">{who}</h1>
+          {lang === 'zh' && <p class="gloss lec__who-en">{rec.laureate.en}</p>}
+          <p class="lec__hook">{rec.hook[lang]}</p>
+          <h2 class="lec__title">{rec.title.en}</h2>
+          {lang === 'zh' && <p class="gloss lec__title-zh">{rec.title.zh}</p>}
+          <dl class="lec__facts">
+            <div><dt>{t('lec.date')}</dt><dd>{date}</dd></div>
+            <div><dt>{t('lec.at')}</dt><dd>{host}</dd></div>
+            <div><dt>{t('lec.affiliation')}</dt><dd>{rec.affiliation.institution}, {rec.affiliation.country}</dd></div>
+          </dl>
+          <ul class="tags" role="list">
+            {rec.topic_tags.map((tg) => <li>{tagName(tg, lang)}</li>)}
+          </ul>
+        </div>
+      </div>
+    </header>
+
+    <div class="wrap lec__body">
+      <div class="lec__main stack" style="--gap:2.5rem">
+        {/* 1. the on-ramp: guide video if it exists */}
+        {rec.video.guide ? (
+          <section aria-labelledby="h-guide">
+            <h3 id="h-guide" class="lec__h">{t('lec.guide')}</h3>
+            <VideoFacade id={rec.video.guide} title={`${t('lec.guide')} — ${who}`} kind="guide"
+                         note={t('lec.guideNote')} playHint={t('lec.playHint')} eager />
+          </section>
+        ) : (
+          <p class="lec__soon">{t('lec.guideSoon')}</p>
+        )}
+
+        {/* 2. why this matters */}
+        <section class="lec__about">
+          <p class="lec__lede">{rec.description[lang]}</p>
+        </section>
+
+        {/* 3. the lecture itself */}
+        <section aria-labelledby="h-lec">
+          <h3 id="h-lec" class="lec__h">{t('lec.lecture')}</h3>
+          {rec.video.lecture ? (
+            <VideoFacade id={rec.video.lecture} title={`${rec.title.en} — ${who}`} kind="lecture"
+                         note={t('lec.lectureNote')} playHint={t('lec.playHint')} />
+          ) : (
+            <p class="lec__soon">{t('lec.noVideo')}</p>
+          )}
+          {rec.video.extra_sessions.length > 0 && (
+            <div class="lec__sessions">
+              <h4 class="lec__h4">{t('lec.session')}</h4>
+              <div class="lec__row">
+                {rec.video.extra_sessions.map((s) => (
+                  <VideoFacade id={s.id} title={`${rec.title.en} — ${s.label}`} label={s.label}
+                               playHint={t('lec.playHint')} />
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+
+        {/* 4. interviews */}
+        {rec.interviews.length > 0 && (
+          <section aria-labelledby="h-itv">
+            <h3 id="h-itv" class="lec__h">{t('lec.interview')}</h3>
+            <div class="lec__row">
+              {rec.interviews.map((iv) => (
+                <VideoFacade
+                  id={iv.id}
+                  title={`${who} — ${lang === 'zh' ? iv.source_zh : iv.source_en}`}
+                  kind="interview"
+                  label={lang === 'zh' ? iv.source_zh : iv.source_en}
+                  playHint={t('lec.playHint')}
+                />
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
+
+      {/* 5. go deeper */}
+      <aside class="lec__aside" aria-labelledby="h-deep">
+        <h3 id="h-deep" class="lec__h">{t('lec.deeper')}</h3>
+        <ul class="links" role="list">
+          <li>
+            <a href={rec.links.nobel_facts} rel="noopener">{t('lec.nobelFacts')}</a>
+            <span>{t('lec.nobelFactsNote')}</span>
+          </li>
+          {rec.links.ntu_spotlight && (
+            <li><a href={rec.links.ntu_spotlight} rel="noopener">{t('lec.ntuSpotlight')}</a></li>
+          )}
+          {rec.links.ntu_epaper && (
+            <li><a href={rec.links.ntu_epaper} rel="noopener">{t('lec.ntuNews')}</a></li>
+          )}
+          {rec.links.instagram && (
+            <li><a href={rec.links.instagram} rel="noopener">{t('lec.instagram')}</a></li>
+          )}
+          <li>
+            <a href={rec.links.cw_hub} rel="noopener">{t('lec.cwHub')}</a>
+            <span>{t('lec.cwHubNote')}</span>
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <section class="wrap lec__next" aria-labelledby="h-next">
+      <h3 id="h-next" class="lec__h">{t('lec.next')}</h3>
+      <ul class="grid" role="list">
+        {next.map((r) => <li><LectureCard lang={lang} rec={r} /></li>)}
+      </ul>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .lec__head {
+    border-block-end: 1px solid var(--line);
+    background:
+      radial-gradient(70% 100% at 12% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
+      var(--bg-1);
+    padding-block: clamp(2rem, 6vw, 3.5rem);
+  }
+  .lec__head-in { display: grid; gap: 1.5rem; }
+  @media (min-width: 52rem) { .lec__head-in { grid-template-columns: auto 1fr; gap: 2.5rem; align-items: start; } }
+  .lec__crest { --sculpt-hi: #ffe9c2; --sculpt-lo: #6d451a; opacity: 0.9; }
+  @media (max-width: 52rem) { .lec__crest { display: none; } }
+
+  .lec__prize a { color: var(--accent); text-decoration: none; letter-spacing: 0.16em; }
+  .lec__prize a:hover { text-decoration: underline; }
+  .lec__who { font-size: var(--step-3); color: var(--cream); margin-block-start: 0.35rem; }
+  .lec__who-en { margin-block-start: 0.1rem; }
+  .lec__hook {
+    font-family: var(--font-han-serif); font-size: var(--step-1);
+    color: var(--accent); line-height: 1.55; margin-block-start: 0.9rem; max-inline-size: 34ch;
+  }
+  .lec__title { font-size: var(--step-1); color: var(--text); margin-block-start: 1.1rem; max-inline-size: 46ch; font-weight: 400; }
+  .lec__title-zh { margin-block-start: 0.2rem; max-inline-size: 46ch; }
+
+  .lec__facts { display: flex; flex-wrap: wrap; gap: 0 2.5rem; margin-block-start: 1.4rem; }
+  .lec__facts dt { font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted-dim); }
+  .lec__facts dd { margin: 0.1rem 0 0.7rem; font-size: var(--step--1); color: var(--text); }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.4rem 0 0; padding: 0; }
+  .tags li {
+    font-size: 0.7rem; letter-spacing: 0.06em; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 0.14rem 0.7rem;
+  }
+
+  .lec__body { display: grid; gap: clamp(2rem, 5vw, 3.5rem); padding-block-start: clamp(2rem, 6vw, 3.5rem); }
+  @media (min-width: 62rem) { .lec__body { grid-template-columns: minmax(0, 1fr) 17rem; align-items: start; } }
+
+  .lec__h { font-size: var(--step-1); color: var(--cream); margin-block-end: 0.9rem; }
+  .lec__h::before {
+    content: ''; display: inline-block; inline-size: 0.5rem; block-size: 0.5rem;
+    background: var(--accent); margin-inline-end: 0.6rem; vertical-align: 0.12em; border-radius: 1px;
+  }
+  .lec__h4 { font-size: var(--step-0); color: var(--muted); margin-block: 1.5rem 0.7rem; font-weight: 400; }
+
+  .lec__lede { font-size: var(--step-1); line-height: 1.85; color: var(--text); max-inline-size: 54ch; }
+  .lec__soon {
+    font-size: var(--step--1); color: var(--muted-dim); border: 1px dashed var(--line);
+    border-radius: var(--radius); padding: 1rem 1.2rem; max-inline-size: none;
+  }
+
+  .lec__row { display: grid; gap: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr)); }
+
+  .lec__aside {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: 1.3rem 1.4rem;
+  }
+  .links { display: grid; gap: 1rem; padding: 0; margin: 0; }
+  .links li { display: grid; gap: 0.15rem; }
+  .links a { font-size: var(--step-0); text-decoration: none; border-block-end: 1px solid var(--line-hi); justify-self: start; }
+  .links a:hover { border-block-end-color: currentColor; }
+  .links span { font-size: var(--step--1); color: var(--muted-dim); line-height: 1.55; }
+
+  .lec__next { margin-block-start: clamp(3rem, 8vw, 5rem); }
+  .grid {
+    display: grid; gap: clamp(0.9rem, 2vw, 1.5rem); margin-block-start: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+</style>

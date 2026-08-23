@@ -1,0 +1,10 @@
+---
+import LecturePage from '../../components/LecturePage.astro';
+import { lectures } from '../../data/catalog';
+
+export function getStaticPaths() {
+  return lectures.map((rec) => ({ params: { id: rec.id }, props: { rec } }));
+}
+const { rec } = Astro.props;
+---
+<LecturePage lang="zh" rec={rec} />

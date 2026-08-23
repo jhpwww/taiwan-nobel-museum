@@ -1,0 +1,1675 @@
+{
+  "lectures": [
+    {
+      "id": "geim",
+      "no": 1,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Sir Andre Geim",
+        "zh": "安德烈‧蓋姆"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2010
+      },
+      "affiliation": {
+        "institution": "University of Manchester",
+        "country": "UK"
+      },
+      "event": {
+        "date": "2025-11-10",
+        "host_key": "NTU",
+        "host_en": "National Taiwan University",
+        "host_zh": "國立臺灣大學",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Wonder materials",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "rcE23c82xUc",
+        "lecture_ntu": "1KdZldwfnT4",
+        "guide": "S2ohEFiR4u0",
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2010/geim/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html",
+        "instagram": "https://www.instagram.com/reel/DQ6SspNATCL/",
+        "ntu_epaper": "https://sec.ntu.edu.tw/epaper/article.asp?num=1666&sn=39600",
+        "ntu_spotlight": "https://www.ntu.edu.tw/spotlight/2025/2424_20251112.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "thooft",
+      "no": 2,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Gerardus 't Hooft",
+        "zh": "傑拉德‧特胡夫特"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 1999
+      },
+      "affiliation": {
+        "institution": "Utrecht University",
+        "country": "Netherlands"
+      },
+      "event": {
+        "date": "2025-11-14",
+        "host_key": "TKU",
+        "host_en": "Tamkang University",
+        "host_zh": "淡江大學",
+        "city": "New Taipei"
+      },
+      "title": {
+        "en": "Education and collaboration in fundamental science as bridges between nations",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "OHIoN7OcMTM",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/1999/thooft/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "karman",
+      "no": 3,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Mrs. Tawakkol Karman",
+        "zh": "塔瓦庫‧卡曼"
+      },
+      "prize": {
+        "category": "peace",
+        "year": 2011
+      },
+      "affiliation": {
+        "institution": "Human rights activist",
+        "country": "Yemen"
+      },
+      "event": {
+        "date": "2025-11-17",
+        "host_key": "NTHU",
+        "host_en": "National Tsing Hua University",
+        "host_zh": "國立清華大學",
+        "city": "Hsinchu"
+      },
+      "title": {
+        "en": "Sustainable development and shared future",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "q3V6sN0zE7c",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/peace/2011/karman/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "kornberg",
+      "no": 4,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Roger D. Kornberg",
+        "zh": "羅傑‧康柏格"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2006
+      },
+      "affiliation": {
+        "institution": "Stanford University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2025-11-20",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The end of disease? – The extraordinary developments in biomedicine and the implications for humanity",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "zBzFC9ODs1M",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "sWcdQVzpkQA"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2006/kornberg/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "queloz",
+      "no": 5,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Didier Queloz",
+        "zh": "迪迪埃‧奎洛茲"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2019
+      },
+      "affiliation": {
+        "institution": "ETH Zürich",
+        "country": "Switzerland"
+      },
+      "event": {
+        "date": "2025-11-24",
+        "host_key": "NTNU",
+        "host_en": "National Taiwan Normal University",
+        "host_zh": "國立臺灣師範大學",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The role of science in building a global agenda for peace",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "awXleH-HVEI",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "ishzcLcC-Bc"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2019/queloz/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "murad",
+      "no": 6,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Ms. Nadia Murad",
+        "zh": "娜迪雅‧穆拉德"
+      },
+      "prize": {
+        "category": "peace",
+        "year": 2018
+      },
+      "affiliation": {
+        "institution": "Human rights activist",
+        "country": "Iraq / USA"
+      },
+      "event": {
+        "date": "2025-12-01",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Who can influence the end of conflict-related sexual violence (CRSV) worldwide? – The power of personal stories and the role of activism",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "K86pQuvw144",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/peace/2018/murad/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "pissarides",
+      "no": 7,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Sir Christopher A. Pissarides",
+        "zh": "克里斯多福‧皮薩里德斯"
+      },
+      "prize": {
+        "category": "economics",
+        "year": 2010
+      },
+      "affiliation": {
+        "institution": "London School of Economics",
+        "country": "UK"
+      },
+      "event": {
+        "date": "2025-12-09",
+        "host_key": "NCKU",
+        "host_en": "National Cheng Kung University",
+        "host_zh": "國立成功大學",
+        "city": "Tainan"
+      },
+      "title": {
+        "en": "AI and the future of work and wellbeing",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "mDPup-8ozT4",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/economic-sciences/2010/pissarides/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "maskin",
+      "no": 8,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Eric S. Maskin",
+        "zh": "艾瑞克‧馬斯金"
+      },
+      "prize": {
+        "category": "economics",
+        "year": 2007
+      },
+      "affiliation": {
+        "institution": "Harvard University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2025-12-15",
+        "host_key": "NTU",
+        "host_en": "National Taiwan University",
+        "host_zh": "國立臺灣大學",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Why globalization has failed to reduce inequality",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "Vaftz_NrTww",
+        "lecture_ntu": "hv8g3oRq7Ms",
+        "guide": "ET-QoWIUjec",
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "KALrpOE4kfs"
+        },
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "-BB6eP51GeQ"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/economic-sciences/2007/maskin/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html",
+        "instagram": "https://www.instagram.com/reel/DSWODY1iK_K/",
+        "ntu_epaper": "https://sec.ntu.edu.tw/epaper/article.asp?num=1671&sn=39645",
+        "ntu_spotlight": "https://www.ntu.edu.tw/spotlight/2025/2439_20251217.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "sudhof",
+      "no": 9,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Thomas C. Südhof",
+        "zh": "湯瑪斯‧聚德霍夫"
+      },
+      "prize": {
+        "category": "medicine",
+        "year": 2013
+      },
+      "affiliation": {
+        "institution": "Stanford University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-01-05",
+        "host_key": "AU",
+        "host_en": "Asia University",
+        "host_zh": "亞洲大學",
+        "city": "Taichung"
+      },
+      "title": {
+        "en": "Drug development for neurodegenerative diseases: towards cheaper and more sustainable treatment",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "BaeZY-6cwDk",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": [
+          {
+            "id": "6sh75WDdREs",
+            "label": "Day 2 · 2026-01-06"
+          }
+        ]
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "85quwK-splA"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/medicine/2013/sudhof/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "ciechanover",
+      "no": 10,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Aaron Ciechanover",
+        "zh": "亞倫‧切哈諾沃"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2004
+      },
+      "affiliation": {
+        "institution": "Israel Institute of Technology",
+        "country": "Israel"
+      },
+      "event": {
+        "date": "2026-01-09",
+        "host_key": "CMU",
+        "host_en": "China Medical University",
+        "host_zh": "中國醫藥大學",
+        "city": "Taichung"
+      },
+      "title": {
+        "en": "Personalized medicine revolution: Are we going to cure all diseases and at what price?",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "m14M1uLkFFU",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "Spc1R-6Qhhs"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2004/ciechanover/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "strickland",
+      "no": 11,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Donna Strickland",
+        "zh": "唐娜‧史崔克蘭"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2018
+      },
+      "affiliation": {
+        "institution": "University of Waterloo",
+        "country": "Canada"
+      },
+      "event": {
+        "date": "2026-01-12",
+        "host_key": "NTU",
+        "host_en": "National Taiwan University",
+        "host_zh": "國立臺灣大學",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Why trust in science is important",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "C7PAOAEOczU",
+        "lecture_ntu": "51o9waNOWD8",
+        "guide": "5e6-gtnHV0M",
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "yzuzWHUBRF4"
+        },
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "mfKzYae44F0"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2018/strickland/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html",
+        "instagram": "https://www.instagram.com/reel/DTzWJUciXtk/",
+        "ntu_epaper": "https://sec.ntu.edu.tw/epaper/article.asp?num=1674&sn=39685",
+        "ntu_spotlight": "https://www.ntu.edu.tw/spotlight/2026/2448_20260116.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "stiglitz",
+      "no": 12,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Joseph E. Stiglitz",
+        "zh": "約瑟夫‧史迪格里茲"
+      },
+      "prize": {
+        "category": "economics",
+        "year": 2001
+      },
+      "affiliation": {
+        "institution": "Columbia University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-01-13",
+        "host_key": "YKH",
+        "host_en": "Yu Kuo-Hwa Foundation",
+        "host_zh": "俞國華文教基金會",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The road to freedom: economics and the good society",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "WlxbaXqWXAs",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/economic-sciences/2001/stiglitz/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "haroche",
+      "no": 13,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Serge Haroche",
+        "zh": "塞爾日‧阿羅什"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2012
+      },
+      "affiliation": {
+        "institution": "Collège de France",
+        "country": "France"
+      },
+      "event": {
+        "date": "2026-01-16",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "New developments and applications in laser science and quantum optics, electronics and computing",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "JrkyzmChFjI",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "pJoT3EBR1us"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2012/haroche/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "schmidt",
+      "no": 14,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Brian P. Schmidt",
+        "zh": "布萊恩‧施密特"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2011
+      },
+      "affiliation": {
+        "institution": "Australian National University",
+        "country": "Australia"
+      },
+      "event": {
+        "date": "2026-01-19",
+        "host_key": "NCHU",
+        "host_en": "National Chung Hsing University",
+        "host_zh": "國立中興大學",
+        "city": "Taichung"
+      },
+      "title": {
+        "en": "Science: Humanity's universal bridge",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "il_Wkv2Maaw",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2011/schmidt/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "mayor",
+      "no": 15,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Michel Mayor",
+        "zh": "米歇爾‧麥耶"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2019
+      },
+      "affiliation": {
+        "institution": "University of Geneva",
+        "country": "Switzerland"
+      },
+      "event": {
+        "date": "2026-01-22",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Is there a Planet B – Will humanity emigrate to an exoplanet?",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "tj8OSXJRV0A",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "TewD-AbmUQw"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2019/mayor/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "meldal",
+      "no": 16,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Morten P. Meldal",
+        "zh": "莫頓‧梅爾達爾"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2022
+      },
+      "affiliation": {
+        "institution": "University of Copenhagen",
+        "country": "Denmark"
+      },
+      "event": {
+        "date": "2026-01-26",
+        "host_key": "NTU",
+        "host_en": "National Taiwan University",
+        "host_zh": "國立臺灣大學",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Chemistry for a sustainable world – Everything is chemistry and how that influences our choices",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "lTZP1kxTwSM",
+        "lecture_ntu": "XhOCuaxqSHY",
+        "guide": "UNt_MdCz5T0",
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "T3nEqnPrXEM"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2022/meldal/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html",
+        "instagram": "https://www.instagram.com/reel/DUE8cF7gnG7/",
+        "ntu_epaper": "https://sec.ntu.edu.tw/epaper/article.asp?num=1674&sn=39684",
+        "ntu_spotlight": "https://www.ntu.edu.tw/spotlight/2026/2451_20260128.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "engle",
+      "no": 17,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Robert F. Engle III",
+        "zh": "羅伯特‧恩格爾"
+      },
+      "prize": {
+        "category": "economics",
+        "year": 2003
+      },
+      "affiliation": {
+        "institution": "New York University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-02-02",
+        "host_key": "THU",
+        "host_en": "Tunghai University",
+        "host_zh": "東海大學",
+        "city": "Taichung"
+      },
+      "title": {
+        "en": "A financial approach to climate risk",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "EJVC6_gZc5o",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": [
+          {
+            "id": "_sgZRKOUygM",
+            "label": "Alternate upload"
+          }
+        ]
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "UJDJJV67shY"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/economic-sciences/2003/engle/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "roberts",
+      "no": 18,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Dr. Sir Richard J. Roberts",
+        "zh": "理查‧羅伯茨"
+      },
+      "prize": {
+        "category": "medicine",
+        "year": 1993
+      },
+      "affiliation": {
+        "institution": "New England Biolabs",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-02-05",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Why you should love GMOs",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "VmpL2HPJ_g8",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "yAL6mkgehbg"
+        },
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "GoVWwoxZZ2A"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/medicine/1993/roberts/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "mbmoser",
+      "no": 19,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. May-Britt Moser",
+        "zh": "梅‧布麗特‧莫澤"
+      },
+      "prize": {
+        "category": "medicine",
+        "year": 2014
+      },
+      "affiliation": {
+        "institution": "Norwegian University of Science and Technology",
+        "country": "Norway"
+      },
+      "event": {
+        "date": "2026-02-09",
+        "host_key": "NTU",
+        "host_en": "National Taiwan University",
+        "host_zh": "國立臺灣大學",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The brain's systems for navigation and memory and their relevance for Alzheimer's disease",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "JnBkvRgjA9I",
+        "lecture_ntu": "cRu-6W0kQKs",
+        "guide": "vK_aNwIlqRs",
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/medicine/2014/may-britt-moser/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html",
+        "instagram": "https://www.instagram.com/reel/DVNnv4ogaXh/",
+        "ntu_epaper": "https://sec.ntu.edu.tw/epaper/article.asp?num=1675&sn=39698",
+        "ntu_spotlight": "https://www.ntu.edu.tw/spotlight/2026/2452_20260211.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "nurse",
+      "no": 20,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Dr. Sir Paul Nurse",
+        "zh": "保羅‧納斯"
+      },
+      "prize": {
+        "category": "medicine",
+        "year": 2001
+      },
+      "affiliation": {
+        "institution": "Francis Crick Institute",
+        "country": "UK"
+      },
+      "event": {
+        "date": "2026-02-11",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "What is life?",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "TN0GNDKL6mY",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "9IyVEq0LHBM"
+        },
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "2AQFCYlhqFY"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/medicine/2001/nurse/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "winter",
+      "no": 21,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Sir Gregory P. Winter",
+        "zh": "格雷戈里‧溫特"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2018
+      },
+      "affiliation": {
+        "institution": "MRC Laboratory of Molecular Biology",
+        "country": "UK"
+      },
+      "event": {
+        "date": "2026-03-02",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The antibody revolution",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "KTHc6qF3mo0",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "FpUEzPKrlBY"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2018/winter/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "mcdonald",
+      "no": 22,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Arthur B. McDonald",
+        "zh": "阿瑟‧麥克唐納"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2015
+      },
+      "affiliation": {
+        "institution": "Sudbury Neutrino Observatory",
+        "country": "Canada"
+      },
+      "event": {
+        "date": "2026-03-09",
+        "host_key": "TKU",
+        "host_en": "Tamkang University",
+        "host_zh": "淡江大學",
+        "city": "New Taipei"
+      },
+      "title": {
+        "en": "Answering existential questions about our universe and its evolution",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "io3z9LwxM34",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2015/mcdonald/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "noyori",
+      "no": 23,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Ryoji Noyori",
+        "zh": "野依良治"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2001
+      },
+      "affiliation": {
+        "institution": "Nagoya University",
+        "country": "Japan"
+      },
+      "event": {
+        "date": "2026-03-20",
+        "host_key": "TKU",
+        "host_en": "Tamkang University",
+        "host_zh": "淡江大學",
+        "city": "New Taipei"
+      },
+      "title": {
+        "en": "Chemistry is the science of value creation",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "zAM1_fhu6kY",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2001/noyori/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "emoser",
+      "no": 24,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Edvard I. Moser",
+        "zh": "愛德華‧莫澤"
+      },
+      "prize": {
+        "category": "medicine",
+        "year": 2014
+      },
+      "affiliation": {
+        "institution": "Norwegian University of Science and Technology",
+        "country": "Norway"
+      },
+      "event": {
+        "date": "2026-03-27",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The brain's GPS: How we know where we are",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "QOvGspShTQU",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "mD7Hz7KVIVM"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/medicine/2014/edvard-moser/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "rice",
+      "no": 25,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Charles M. Rice",
+        "zh": "查爾斯‧萊斯"
+      },
+      "prize": {
+        "category": "medicine",
+        "year": 2020
+      },
+      "affiliation": {
+        "institution": "Rockefeller University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-03-30",
+        "host_key": "TCU",
+        "host_en": "Tzu Chi University",
+        "host_zh": "慈濟大學",
+        "city": "Hualien"
+      },
+      "title": {
+        "en": "Global infectious disease: triumphs and challenges",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "NJXpq2nSyTY",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "QwE4TN8Hmlo"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/medicine/2020/rice/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "wuthrich",
+      "no": 26,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Kurt Wüthrich",
+        "zh": "庫爾特‧維特里希"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2002
+      },
+      "affiliation": {
+        "institution": "ETH Zürich",
+        "country": "Switzerland"
+      },
+      "event": {
+        "date": "2026-04-07",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The molecules of life, AI and human health",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "xVOW7dzgRyM",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "LpPpUHwFdaw"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2002/wuthrich/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "semenza",
+      "no": 27,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Gregg L. Semenza",
+        "zh": "格雷格‧塞門薩"
+      },
+      "prize": {
+        "category": "medicine",
+        "year": 2019
+      },
+      "affiliation": {
+        "institution": "Johns Hopkins University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-04-14",
+        "host_key": "NCKU",
+        "host_en": "National Cheng Kung University",
+        "host_zh": "國立成功大學",
+        "city": "Tainan"
+      },
+      "title": {
+        "en": "Oxygen, carbon dioxide and sustainable life on Earth",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "ZEFnMve_8ig",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/medicine/2019/semenza/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "roth",
+      "no": 28,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Alvin E. Roth",
+        "zh": "艾爾文‧羅斯"
+      },
+      "prize": {
+        "category": "economics",
+        "year": 2012
+      },
+      "affiliation": {
+        "institution": "Stanford University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-04-20",
+        "host_key": "NTHU",
+        "host_en": "National Tsing Hua University",
+        "host_zh": "國立清華大學",
+        "city": "Hsinchu"
+      },
+      "title": {
+        "en": "Markets, market design and medicine",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "f1ib7S3mJpE",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "cw",
+          "source_en": "CommonWealth Magazine",
+          "source_zh": "天下雜誌",
+          "id": "lhgrxypspsU"
+        },
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "6E5szZDmbI4"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/economic-sciences/2012/roth/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "kobilka",
+      "no": 29,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Brian K. Kobilka",
+        "zh": "布萊恩‧科比爾卡"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2012
+      },
+      "affiliation": {
+        "institution": "Stanford University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-04-21",
+        "host_key": "NTHU",
+        "host_en": "National Tsing Hua University",
+        "host_zh": "國立清華大學",
+        "city": "Hsinchu"
+      },
+      "title": {
+        "en": "The new era in drug development",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "DEURLJp2AUI",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2012/kobilka/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "kajita",
+      "no": 30,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Takaaki Kajita",
+        "zh": "梶田隆章"
+      },
+      "prize": {
+        "category": "physics",
+        "year": 2015
+      },
+      "affiliation": {
+        "institution": "University of Tokyo",
+        "country": "Japan"
+      },
+      "event": {
+        "date": "2026-04-23",
+        "host_key": "AS",
+        "host_en": "Academia Sinica",
+        "host_zh": "中央研究院",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "The importance of science for peacebuilding",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "uWHIUdjWnGc",
+        "lecture_ntu": null,
+        "guide": null,
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "0r0eBO35vEc"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/physics/2015/kajita/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html"
+      },
+      "topic_tags": []
+    },
+    {
+      "id": "frank",
+      "no": 31,
+      "series": "TAIWAN BRIDGES",
+      "laureate": {
+        "en": "Prof. Joachim Frank",
+        "zh": "約阿希姆‧法蘭克"
+      },
+      "prize": {
+        "category": "chemistry",
+        "year": 2017
+      },
+      "affiliation": {
+        "institution": "Columbia University",
+        "country": "USA"
+      },
+      "event": {
+        "date": "2026-05-06",
+        "host_key": "NTU",
+        "host_en": "National Taiwan University",
+        "host_zh": "國立臺灣大學",
+        "city": "Taipei"
+      },
+      "title": {
+        "en": "Cryo-electron microscopy, a new foundation for molecular medicine and drug design",
+        "zh": null
+      },
+      "description": {
+        "en": null,
+        "zh": null
+      },
+      "video": {
+        "lecture": "yhZhymmeaso",
+        "lecture_ntu": "pfNkuYxhgfM",
+        "guide": "FJnh2-IxXy0",
+        "extra_sessions": []
+      },
+      "interviews": [
+        {
+          "source": "storm",
+          "source_en": "The Storm Media",
+          "source_zh": "風傳媒",
+          "id": "7m_c74EtA1w"
+        }
+      ],
+      "links": {
+        "nobel_facts": "https://www.nobelprize.org/prizes/chemistry/2017/frank/facts/",
+        "cw_hub": "https://event.cw.com.tw/2026taiwanbridge/index.html",
+        "instagram": "https://www.instagram.com/reel/DYPb8dKgRW0/",
+        "ntu_epaper": "https://sec.ntu.edu.tw/epaper/article.asp?num=1687&sn=41788",
+        "ntu_spotlight": "https://www.ntu.edu.tw/spotlight/2026/2489_20260513.html"
+      },
+      "topic_tags": []
+    }
+  ],
+  "special_events": [
+    {
+      "id": "launch",
+      "kind": "ceremony",
+      "date": "2025-11-10",
+      "host": "NTU",
+      "title_en": "TAIWAN BRIDGES Launch with President Ching-te Lai",
+      "title_zh": "臺灣橋樑計畫啟動儀式（賴清德總統出席）",
+      "yt": "pcBGv6HRv0A"
+    },
+    {
+      "id": "geim-fg",
+      "kind": "outreach",
+      "date": "2025-11-11",
+      "host": null,
+      "host_en": "Taipei First Girls High School",
+      "host_zh": "臺北市立第一女子高級中學",
+      "title_en": "Prof. Sir Andre Geim at Taipei First Girls High School",
+      "title_zh": "安德烈‧蓋姆爵士於北一女中",
+      "yt": "3axu6HmxIJ4",
+      "laureate": "geim"
+    },
+    {
+      "id": "frank-fg",
+      "kind": "outreach",
+      "date": "2026-05-07",
+      "host": null,
+      "host_en": "Taipei First Girls High School",
+      "host_zh": "臺北市立第一女子高級中學",
+      "title_en": "Prof. Joachim Frank at Taipei First Girls High School",
+      "title_zh": "約阿希姆‧法蘭克於北一女中",
+      "yt": "G38hTcV7Vxw",
+      "laureate": "frank"
+    },
+    {
+      "id": "roth-kobilka-panel",
+      "kind": "panel",
+      "date": "2026-04-21",
+      "host": "NTHU",
+      "title_en": "Nobel Laureates Alvin Roth and Brian Kobilka in conversation",
+      "title_zh": "艾爾文‧羅斯與布萊恩‧科比爾卡對談",
+      "yt": "jZKHkoxxaoY"
+    },
+    {
+      "id": "exhibition",
+      "kind": "exhibition",
+      "date": "2026-05-04",
+      "host": "NTU",
+      "title_en": "In Dialogue with the Nobel Spirit — Special Exhibition",
+      "title_zh": "對話諾貝爾特展",
+      "yt": "5sqJElopVz0",
+      "note_zh": "展期 2026/5/4–5/28，臺大校總區綜合教學館2樓，獲瑞典駐臺辦事處特別授權"
+    }
+  ],
+  "hosts": {
+    "NTU": {
+      "en": "National Taiwan University",
+      "zh": "國立臺灣大學",
+      "city": "Taipei"
+    },
+    "AS": {
+      "en": "Academia Sinica",
+      "zh": "中央研究院",
+      "city": "Taipei"
+    },
+    "TKU": {
+      "en": "Tamkang University",
+      "zh": "淡江大學",
+      "city": "New Taipei"
+    },
+    "NTHU": {
+      "en": "National Tsing Hua University",
+      "zh": "國立清華大學",
+      "city": "Hsinchu"
+    },
+    "NCKU": {
+      "en": "National Cheng Kung University",
+      "zh": "國立成功大學",
+      "city": "Tainan"
+    },
+    "NTNU": {
+      "en": "National Taiwan Normal University",
+      "zh": "國立臺灣師範大學",
+      "city": "Taipei"
+    },
+    "AU": {
+      "en": "Asia University",
+      "zh": "亞洲大學",
+      "city": "Taichung"
+    },
+    "CMU": {
+      "en": "China Medical University",
+      "zh": "中國醫藥大學",
+      "city": "Taichung"
+    },
+    "NCHU": {
+      "en": "National Chung Hsing University",
+      "zh": "國立中興大學",
+      "city": "Taichung"
+    },
+    "THU": {
+      "en": "Tunghai University",
+      "zh": "東海大學",
+      "city": "Taichung"
+    },
+    "TCU": {
+      "en": "Tzu Chi University",
+      "zh": "慈濟大學",
+      "city": "Hualien"
+    },
+    "YKH": {
+      "en": "Yu Kuo-Hwa Foundation",
+      "zh": "俞國華文教基金會",
+      "city": "Taipei"
+    }
+  }
+}

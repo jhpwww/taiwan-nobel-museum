@@ -1,0 +1,274 @@
+---
+import Sculpture, { type CategoryKey } from './Sculpture.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { gallery, asset } from '../i18n/routing';
+import { lectures, catName } from '../data/catalog';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const ORDER: CategoryKey[] = ['peace', 'economics', 'physics', 'nobel', 'chemistry', 'medicine'];
+const counts = lectures.reduce<Record<string, number>>((a, l) => {
+  a[l.prize.category] = (a[l.prize.category] ?? 0) + 1;
+  return a;
+}, {});
+
+const cats = ORDER.map((key) => ({
+  key,
+  name: catName(key, lang),
+  n: counts[key] ?? 0,
+  href: gallery(lang, key),
+  /** the middle plinths stand slightly forward, as in a real hall */
+  depth: [0.82, 0.9, 1, 1.06, 0.9, 0.82][ORDER.indexOf(key)],
+}));
+---
+
+<section class="hall" aria-labelledby="hall-title">
+  <div class="hall__scene" data-parallax aria-hidden="true">
+    <div class="layer layer--vault" data-depth="6">
+      <svg viewBox="0 0 1600 500" preserveAspectRatio="xMidYMin slice">
+        <defs>
+          <radialGradient id="dome" cx="0.5" cy="0.08" r="0.75">
+            <stop offset="0%" stop-color="#4a3115" stop-opacity="0.95" />
+            <stop offset="45%" stop-color="#2a1a0d" stop-opacity="0.7" />
+            <stop offset="100%" stop-color="#120c06" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="1600" height="500" fill="url(#dome)" />
+        {[300, 420, 540, 660, 780].map((r, i) => (
+          <ellipse cx="800" cy="-40" rx={r * 1.9} ry={r} fill="none"
+                   stroke="rgba(232,198,142,0.10)" stroke-width={i === 0 ? 1.8 : 1} />
+        ))}
+        {Array.from({ length: 13 }, (_, i) => {
+          const a = (Math.PI * (i + 1)) / 14;
+          return <line x1="800" y1="-40" x2={800 - Math.cos(a) * 1500} y2={-40 + Math.sin(a) * 790}
+                       stroke="rgba(232,198,142,0.07)" stroke-width="1" />;
+        })}
+      </svg>
+    </div>
+
+    <div class="layer layer--glow" data-depth="4"></div>
+    <div class="layer layer--colonnade" data-depth="14"></div>
+    <div class="layer layer--shaft" data-depth="8"></div>
+    <div class="layer layer--floor" data-depth="20"></div>
+    <div class="layer layer--motes" data-depth="26">
+      {Array.from({ length: 18 }, (_, i) => (
+        <span style={`--x:${(i * 53) % 100}%; --d:${9 + (i % 7) * 2.4}s; --y:${(i * 37) % 70 + 15}%; --s:${0.7 + (i % 4) * 0.35};`}></span>
+      ))}
+    </div>
+    <div class="layer layer--vignette"></div>
+  </div>
+
+  <div class="hall__masthead">
+    <img class="hall__crest" src={asset('ntu-logo.png')} alt="" width="96" height="96" />
+    <p class="hall__uni">{t('site.university')}</p>
+    <h1 id="hall-title" class="hall__title">{t('site.tagline')}</h1>
+    <p class="hall__hint">{t('hall.hint')}</p>
+  </div>
+
+  <nav class="hall__plinths" aria-label={t('hall.enter')}>
+    {cats.map((c) => (
+      <a class="plinth" href={c.href} data-cat={c.key} style={`--depth:${c.depth}`}>
+        <span class="plinth__art">
+          <Sculpture cat={c.key} size={185} id={`hall-${c.key}`} />
+          <span class="plinth__mirror" aria-hidden="true">
+            <Sculpture cat={c.key} size={185} id={`mir-${c.key}`} />
+          </span>
+        </span>
+        <span class="plinth__name">{c.name}</span>
+        <span class="plinth__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.nobelRoom')}</span>
+      </a>
+    ))}
+  </nav>
+</section>
+
+<style>
+  .hall {
+    position: relative;
+    min-block-size: min(100svh, 60rem);
+    display: grid;
+    grid-template-rows: auto 1fr;
+    align-content: start;
+    padding-block: clamp(1.5rem, 4vh, 3.5rem) clamp(3rem, 8vh, 6rem);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* ---------- scene ---------- */
+  .hall__scene { position: absolute; inset: -6% -4%; z-index: -1; }
+  .layer { position: absolute; inset: 0; will-change: transform; }
+
+  .layer--vault svg { inline-size: 100%; block-size: min(52%, 26rem); }
+
+  .layer--glow {
+    background:
+      radial-gradient(52% 40% at 50% 6%, rgba(255, 196, 106, 0.20), transparent 70%),
+      radial-gradient(80% 60% at 50% 42%, rgba(150, 92, 30, 0.14), transparent 75%);
+  }
+
+  .layer--colonnade {
+    background:
+      linear-gradient(90deg,
+        rgba(10, 6, 3, 0.96) 0%, rgba(38, 24, 12, 0.6) 5%, transparent 11%,
+        transparent 89%, rgba(38, 24, 12, 0.6) 95%, rgba(10, 6, 3, 0.96) 100%),
+      repeating-linear-gradient(90deg,
+        transparent 0 3.2%, rgba(232, 198, 142, 0.045) 3.2% 3.35%, transparent 3.35% 6.5%);
+    mask-image: linear-gradient(to bottom, #000 0 62%, transparent 88%);
+  }
+
+  .layer--shaft {
+    background:
+      conic-gradient(from 168deg at 50% -14%,
+        transparent 0deg, rgba(255, 206, 128, 0.10) 8deg, transparent 17deg,
+        transparent 343deg, rgba(255, 206, 128, 0.08) 352deg, transparent 360deg);
+    mask-image: linear-gradient(to bottom, #000 0 55%, transparent 80%);
+  }
+
+  .layer--floor {
+    inset-block-start: auto;
+    block-size: 46%;
+    inset-block-end: 0;
+    background:
+      linear-gradient(to bottom, rgba(58, 36, 16, 0.55), rgba(16, 10, 5, 0.98) 72%),
+      repeating-linear-gradient(to bottom,
+        transparent 0 5%, rgba(232, 198, 142, 0.035) 5% 5.2%, transparent 5.2% 10%);
+    box-shadow: inset 0 1px 0 rgba(232, 198, 142, 0.16);
+  }
+
+  .layer--motes span {
+    position: absolute;
+    inset-inline-start: var(--x);
+    inset-block-start: var(--y);
+    inline-size: 3px; block-size: 3px;
+    border-radius: 50%;
+    background: rgba(255, 216, 150, 0.55);
+    scale: var(--s);
+    animation: drift var(--d) linear infinite;
+    filter: blur(0.4px);
+  }
+  @keyframes drift {
+    0%   { transform: translate3d(0, 14px, 0); opacity: 0; }
+    18%  { opacity: 0.85; }
+    82%  { opacity: 0.6; }
+    100% { transform: translate3d(18px, -110px, 0); opacity: 0; }
+  }
+
+  .layer--vignette {
+    background: radial-gradient(78% 68% at 50% 42%, transparent 42%, rgba(9, 6, 3, 0.82) 100%);
+  }
+
+  /* ---------- masthead ---------- */
+  .hall__masthead { text-align: center; display: grid; justify-items: center; gap: 0.35rem; padding-inline: 1rem; }
+  .hall__crest {
+    inline-size: clamp(56px, 8vw, 92px);
+    block-size: auto;
+    filter: drop-shadow(0 4px 22px rgba(255, 190, 100, 0.32));
+  }
+  .hall__uni {
+    font-size: var(--step--1);
+    letter-spacing: 0.3em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-block-start: 0.5rem;
+  }
+  :global(:lang(zh)) .hall__uni { letter-spacing: 0.42em; text-indent: 0.42em; }
+  .hall__title {
+    font-size: var(--step-4);
+    color: var(--cream);
+    text-shadow: 0 2px 40px rgba(255, 190, 100, 0.25);
+    max-inline-size: 22ch;
+  }
+  .hall__hint {
+    font-size: var(--step--1);
+    color: var(--muted);
+    letter-spacing: 0.18em;
+    margin-block-start: 0.6rem;
+  }
+
+  /* ---------- plinths ---------- */
+  .hall__plinths {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    align-items: end;
+    gap: clamp(0.25rem, 1.4vw, 1.6rem);
+    inline-size: min(100% - 2rem, 82rem);
+    margin: clamp(1rem, 3vh, 2.5rem) auto 0;
+  }
+
+  .plinth {
+    display: grid;
+    justify-items: center;
+    gap: 0.15rem;
+    text-decoration: none;
+    color: var(--text);
+    padding: 0.5rem 0.2rem 1rem;
+    border-radius: var(--radius);
+    scale: var(--depth);
+    transform-origin: bottom center;
+    transition: scale 0.5s var(--ease), filter 0.5s var(--ease);
+    --sculpt-hi: #ffe9c2;
+    --sculpt-lo: #6d451a;
+  }
+  .plinth:hover, .plinth:focus-visible { scale: calc(var(--depth) * 1.07); filter: brightness(1.12); }
+  .hall__plinths:hover .plinth:not(:hover) { filter: brightness(0.62) saturate(0.7); }
+
+  .plinth__art { position: relative; display: block; }
+  .plinth__mirror {
+    position: absolute;
+    inset-block-start: 100%;
+    inset-inline-start: 0;
+    scale: 1 -1;
+    opacity: 0.16;
+    mask-image: linear-gradient(to top, transparent 8%, #000 78%);
+    pointer-events: none;
+  }
+
+  .plinth__name {
+    font-family: var(--font-han-serif);
+    font-size: var(--step-0);
+    color: var(--cream);
+    letter-spacing: 0.06em;
+    margin-block-start: 0.4rem;
+    text-align: center;
+  }
+  .plinth:hover .plinth__name, .plinth:focus-visible .plinth__name { color: var(--accent); }
+  .plinth__n { font-size: var(--step--1); color: var(--muted-dim); letter-spacing: 0.08em; }
+
+  @media (max-width: 60rem) {
+    .hall__plinths { grid-template-columns: repeat(3, 1fr); row-gap: 1.5rem; --sculpt-w: 130px; }
+    .plinth { scale: 1; }
+    .plinth:hover, .plinth:focus-visible { scale: 1.05; }
+    .plinth__mirror { display: none; }
+  }
+  @media (max-width: 30rem) {
+    .hall__plinths { grid-template-columns: repeat(2, 1fr); --sculpt-w: 104px; gap: 0.5rem; }
+    .hall { min-block-size: 0; }
+  }
+</style>
+
+<script>
+  // Pointer parallax. Cheap: one rAF, transform only, disabled for reduced motion.
+  const scene = document.querySelector<HTMLElement>('[data-parallax]');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+  if (scene && !reduce.matches && window.matchMedia('(pointer: fine)').matches) {
+    const layers = [...scene.querySelectorAll<HTMLElement>('.layer[data-depth]')];
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
+
+    const tick = () => {
+      cx += (tx - cx) * 0.06;
+      cy += (ty - cy) * 0.06;
+      for (const el of layers) {
+        const d = Number(el.dataset.depth ?? 0);
+        el.style.transform = `translate3d(${(cx * d).toFixed(2)}px, ${(cy * d * 0.45).toFixed(2)}px, 0)`;
+      }
+      raf = Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05 ? requestAnimationFrame(tick) : 0;
+    };
+
+    window.addEventListener('pointermove', (e) => {
+      tx = (e.clientX / window.innerWidth - 0.5) * -2;
+      ty = (e.clientY / window.innerHeight - 0.5) * -2;
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, { passive: true });
+  }
+</script>

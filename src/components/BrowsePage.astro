@@ -1,0 +1,127 @@
+---
+import Base from '../layouts/Base.astro';
+import LectureCard from './LectureCard.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { byDateAsc, categories, tags } from '../data/catalog';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+const recs = byDateAsc();
+const cats = Object.entries(categories)
+  .filter(([k]) => k !== 'nobel')
+  .sort((a, b) => a[1].order - b[1].order);
+const tagList = Object.entries(tags);
+---
+
+<Base lang={lang} title={t('browse.title')} segments={['lectures']}>
+  <div class="wrap browse">
+    <h1 class="browse__h">{t('browse.title')}</h1>
+
+    <form class="filters" id="filters" aria-label={t('browse.title')}>
+      <fieldset>
+        <legend>{t('browse.filterCat')}</legend>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="cat" value="" checked /><span>{t('browse.filterAll')}</span></label>
+          {cats.map(([k, v]) => (
+            <label class="chip" data-cat={k}><input type="radio" name="cat" value={k} /><span>{v[lang]}</span></label>
+          ))}
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>{t('browse.filterTopic')}</legend>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="tag" value="" checked /><span>{t('browse.filterAll')}</span></label>
+          {tagList.map(([k, v]) => (
+            <label class="chip"><input type="radio" name="tag" value={k} /><span>{v[lang]}</span></label>
+          ))}
+        </div>
+      </fieldset>
+    </form>
+
+    <p class="count" id="count" aria-live="polite">{t('browse.results', { n: recs.length })}</p>
+    <p class="empty" id="empty" hidden>{t('browse.empty')}</p>
+
+    <ul class="grid" id="results" role="list">
+      {recs.map((rec) => (
+        <li data-cat={rec.prize.category} data-tags={rec.topic_tags.join(' ')}>
+          <LectureCard lang={lang} rec={rec} />
+        </li>
+      ))}
+    </ul>
+  </div>
+</Base>
+
+<style>
+  .browse { padding-block: clamp(2rem, 5vw, 3.5rem); }
+  .browse__h { font-size: var(--step-3); color: var(--cream); }
+
+  .filters { display: grid; gap: 1.2rem; margin-block: 1.8rem 1.4rem; }
+  fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.55rem; }
+  legend { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-dim); padding: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .chip span {
+    display: block; font-size: var(--step--1); color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 0.28rem 0.9rem;
+    cursor: pointer; transition: all 0.25s var(--ease);
+  }
+  .chip:hover span { border-color: var(--line-hi); color: var(--text); }
+  .chip input:checked + span {
+    color: var(--bg-0); background: var(--accent, var(--gold));
+    border-color: var(--accent, var(--gold)); font-weight: 500;
+  }
+  .chip input:focus-visible + span { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+
+  .count { font-size: var(--step--1); color: var(--muted); letter-spacing: 0.1em; margin-block-end: 1.2rem; }
+  .empty { color: var(--muted); }
+  .grid {
+    display: grid; gap: clamp(0.9rem, 2vw, 1.5rem); padding: 0; margin: 0;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  }
+</style>
+
+<script>
+  const form = document.getElementById('filters') as HTMLFormElement | null;
+  const list = document.getElementById('results');
+  const count = document.getElementById('count');
+  const empty = document.getElementById('empty');
+  if (form && list && count && empty) {
+    const items = [...list.querySelectorAll<HTMLElement>('li')];
+    const tmpl = count.textContent ?? '';
+    const numFmt = tmpl.replace(/\d+/, '{n}');
+
+    const apply = () => {
+      const fd = new FormData(form);
+      const cat = String(fd.get('cat') ?? '');
+      const tag = String(fd.get('tag') ?? '');
+      let n = 0;
+      for (const li of items) {
+        const ok =
+          (!cat || li.dataset.cat === cat) &&
+          (!tag || (li.dataset.tags ?? '').split(' ').includes(tag));
+        li.hidden = !ok;
+        if (ok) n++;
+      }
+      count.textContent = numFmt.replace('{n}', String(n));
+      empty.hidden = n > 0;
+      const url = new URL(location.href);
+      cat ? url.searchParams.set('cat', cat) : url.searchParams.delete('cat');
+      tag ? url.searchParams.set('tag', tag) : url.searchParams.delete('tag');
+      history.replaceState(null, '', url);
+    };
+
+    // restore from the URL so a filtered view can be shared
+    const p = new URLSearchParams(location.search);
+    for (const k of ['cat', 'tag']) {
+      const v = p.get(k);
+      if (v) {
+        const el = form.querySelector<HTMLInputElement>(`input[name="${k}"][value="${CSS.escape(v)}"]`);
+        if (el) el.checked = true;
+      }
+    }
+    form.addEventListener('change', apply);
+    apply();
+  }
+</script>

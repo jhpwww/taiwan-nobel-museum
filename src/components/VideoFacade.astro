@@ -1,0 +1,233 @@
+---
+/**
+ * VideoFacade.astro — a YouTube embed that costs nothing until it is clicked.
+ *
+ * Idle    : one lazy poster image (~12 KB).
+ * Hover   : three real frames from across the video (1/2/3.jpg, ~3.5 KB each)
+ *           crossfade as a short cine-loop — the 極短視頻演示 hint, using
+ *           YouTube's own always-available thumbnails. Loaded on demand only.
+ * Click   : swaps in a youtube-nocookie iframe and plays.
+ *
+ * Nothing is downloaded, re-hosted or proxied; playback is always YouTube's.
+ */
+interface Props {
+  id: string;                 // YouTube video id
+  title: string;              // accessible label — what will play
+  kind?: 'guide' | 'lecture' | 'interview' | 'plain';
+  label?: string;             // small caption over the frame
+  note?: string;
+  playHint: string;
+  eager?: boolean;
+}
+const { id, title, kind = 'plain', label, note, playHint, eager = false } = Astro.props;
+const poster = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+---
+
+<figure class="vf" data-kind={kind}>
+  <button
+    class="vf__btn"
+    type="button"
+    data-yt={id}
+    aria-label={`${playHint} — ${title}`}
+  >
+    <img
+      class="vf__poster"
+      src={poster}
+      srcset={`${poster} 480w, ${posterHi} 1280w`}
+      sizes="(max-width: 48rem) 100vw, 46rem"
+      alt=""
+      width="1280"
+      height="720"
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+    <span class="vf__frames" aria-hidden="true"></span>
+    <span class="vf__scrim"></span>
+    <span class="vf__play" aria-hidden="true">
+      <svg viewBox="0 0 68 48" width="62" height="44">
+        <path class="vf__play-bg" d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.2 0 34 0 34 0S12.8 0 7.5 1.7a8.5 8.5 0 0 0-6 6A89 89 0 0 0 0 24a89 89 0 0 0 1.5 16.3 8.5 8.5 0 0 0 6 6C12.8 48 34 48 34 48s21.2 0 26.5-1.7a8.5 8.5 0 0 0 6-6A89 89 0 0 0 68 24a89 89 0 0 0-1.5-16.3z"/>
+        <path d="M27 34V14l18 10z" fill="#fff"/>
+      </svg>
+    </span>
+    {label && <span class="vf__label">{label}</span>}
+  </button>
+  {note && <figcaption class="vf__note">{note}</figcaption>}
+</figure>
+
+<style>
+  .vf { margin: 0; }
+
+  .vf__btn {
+    position: relative;
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 16 / 9;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-2);
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.35s var(--ease), transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
+  }
+  .vf__btn:hover, .vf__btn:focus-visible {
+    border-color: var(--line-hi);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .vf__poster,
+  .vf__frames {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .vf__poster { transition: opacity 0.5s var(--ease), transform 6s linear; }
+
+  /* the three sampled frames live here, stacked and crossfading */
+  .vf__frames { opacity: 0; transition: opacity 0.45s var(--ease); }
+  .vf__frames :global(img) {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    opacity: 0;
+    animation: vf-cine 4.5s steps(1, end) infinite;
+  }
+  .vf__frames :global(img:nth-child(1)) { animation-delay: 0s; }
+  .vf__frames :global(img:nth-child(2)) { animation-delay: 1.5s; }
+  .vf__frames :global(img:nth-child(3)) { animation-delay: 3s; }
+  @keyframes vf-cine {
+    0%, 33.32% { opacity: 1; }
+    33.33%, 100% { opacity: 0; }
+  }
+
+  .vf__btn[data-cine='on'] .vf__frames { opacity: 1; }
+  .vf__btn[data-cine='on'] .vf__poster { transform: scale(1.04); }
+
+  .vf__scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(60% 60% at 50% 45%, transparent 30%, rgba(18, 12, 6, 0.35) 100%),
+      linear-gradient(to top, rgba(18, 12, 6, 0.72), transparent 55%);
+    pointer-events: none;
+  }
+
+  .vf__play {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    translate: -50% -50%;
+    transition: scale 0.35s var(--ease);
+    filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.6));
+  }
+  .vf__play-bg { fill: #16100a; fill-opacity: 0.82; transition: fill 0.3s var(--ease), fill-opacity 0.3s var(--ease); }
+  .vf__btn:hover .vf__play, .vf__btn:focus-visible .vf__play { scale: 1.09; }
+  .vf__btn:hover .vf__play-bg { fill: #cc2027; fill-opacity: 1; }
+
+  .vf__label {
+    position: absolute;
+    inset-block-end: 0.7rem;
+    inset-inline-start: 0.85rem;
+    font-size: var(--step--1);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--cream);
+    background: rgba(18, 12, 6, 0.6);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    padding: 0.2rem 0.6rem;
+    backdrop-filter: blur(4px);
+  }
+
+  .vf__note {
+    margin-block-start: 0.55rem;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+
+  /* live iframe */
+  .vf :global(iframe) {
+    inline-size: 100%;
+    aspect-ratio: 16 / 9;
+    border: 1px solid var(--line-hi);
+    border-radius: var(--radius);
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .vf__frames { display: none; }
+    .vf__btn[data-cine='on'] .vf__poster { transform: none; }
+  }
+</style>
+
+<script>
+  // One delegated handler for every facade on the page.
+  const CINE = 'data-cine';
+
+  function addFrames(btn: HTMLElement) {
+    if (btn.dataset.framesLoaded) return;
+    btn.dataset.framesLoaded = '1';
+    const id = btn.dataset.yt;
+    const host = btn.querySelector('.vf__frames');
+    if (!id || !host) return;
+    for (const n of [1, 2, 3]) {
+      const img = document.createElement('img');
+      img.src = `https://i.ytimg.com/vi/${id}/${n}.jpg`;
+      img.alt = '';
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      host.appendChild(img);
+    }
+  }
+
+  function play(btn: HTMLElement) {
+    const id = btn.dataset.yt;
+    const fig = btn.closest('.vf');
+    if (!id || !fig) return;
+    const iframe = document.createElement('iframe');
+    iframe.src =
+      `https://www.youtube-nocookie.com/embed/${id}` +
+      `?autoplay=1&rel=0&modestbranding=1&playsinline=1&cc_load_policy=1`;
+    iframe.title = btn.getAttribute('aria-label') ?? 'YouTube';
+    iframe.allow =
+      'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    iframe.allowFullscreen = true;
+    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+    btn.replaceWith(iframe);
+    iframe.focus();
+  }
+
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+    if (btn) play(btn);
+  });
+
+  for (const ev of ['pointerenter', 'focusin'] as const) {
+    document.addEventListener(
+      ev,
+      (e) => {
+        const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+        if (!btn) return;
+        addFrames(btn);
+        btn.setAttribute(CINE, 'on');
+      },
+      true,
+    );
+  }
+  for (const ev of ['pointerleave', 'focusout'] as const) {
+    document.addEventListener(
+      ev,
+      (e) => {
+        const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+        if (btn) btn.removeAttribute(CINE);
+      },
+      true,
+    );
+  }
+</script>

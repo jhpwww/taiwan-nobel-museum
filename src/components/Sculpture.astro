@@ -1,0 +1,154 @@
+---
+/**
+ * Sculpture.astro — the six symbolic forms standing in the great hall.
+ *
+ * Pure inline SVG: resolution-independent, a few KB each, themeable by
+ * CSS custom property, and legible at 64px on a phone. Each form is
+ * distinct in silhouette so that colour is never the only cue.
+ */
+import type { CategoryKey } from '../data/catalog';
+export type { CategoryKey };
+interface Props { cat: CategoryKey; size?: number; id?: string; }
+const { cat, size = 200, id = `s-${cat}` } = Astro.props;
+const gid = `${id}-grad`;
+const glow = `${id}-glow`;
+---
+
+<svg
+  class="sculpt"
+  viewBox="0 0 200 300"
+  width={size}
+  height={size * 1.5}
+  style={`--sculpt-base:${size}px`}
+  role="presentation"
+  aria-hidden="true"
+  fill="none"
+>
+  <defs>
+    <linearGradient id={gid} gradientUnits="userSpaceOnUse" x1="56" y1="18" x2="148" y2="286">
+      <stop offset="0%"   stop-color="var(--sculpt-hi, #ffe6b8)" />
+      <stop offset="45%"  stop-color="var(--accent)" />
+      <stop offset="100%" stop-color="var(--sculpt-lo, #a06a2a)" />
+    </linearGradient>
+    <radialGradient id={glow} cx="0.5" cy="0.62" r="0.5">
+      <stop offset="0%"   stop-color="var(--accent)" stop-opacity="0.13" />
+      <stop offset="55%"  stop-color="var(--accent)" stop-opacity="0.045" />
+      <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <ellipse cx="100" cy="196" rx="128" ry="104" fill={`url(#${glow})`} class="sculpt__glow" />
+
+  <g class="sculpt__body" stroke={`url(#${gid})`} stroke-linecap="round" stroke-linejoin="round">
+    {cat === 'physics' && (
+      <g>
+        {/* three orbits around a nucleus — the atom, tilted like a sculpture */}
+        <ellipse cx="100" cy="130" rx="78" ry="30" stroke-width="3.5" transform="rotate(-22 100 130)" />
+        <ellipse cx="100" cy="130" rx="78" ry="30" stroke-width="3.5" transform="rotate(38 100 130)" />
+        <ellipse cx="100" cy="130" rx="78" ry="30" stroke-width="3.5" transform="rotate(96 100 130)" />
+        <circle cx="100" cy="130" r="16" fill={`url(#${gid})`} stroke="none" />
+        <circle cx="100" cy="130" r="25" stroke-width="1.6" opacity="0.5" />
+        <circle cx="171" cy="105" r="5.5" fill={`url(#${gid})`} stroke="none" />
+        <circle cx="46"  cy="163" r="4.5" fill={`url(#${gid})`} stroke="none" />
+        <circle cx="126" cy="61"  r="4"   fill={`url(#${gid})`} stroke="none" />
+        <path d="M100 172 L100 240" stroke-width="4" />
+      </g>
+    )}
+
+    {cat === 'chemistry' && (
+      <g>
+        {/* a molecular ring lifted on a stem — bonds and nodes */}
+        <path d="M100 52 L149 80 L149 136 L100 164 L51 136 L51 80 Z" stroke-width="3.5" />
+        <path d="M108 66 L138 84 M138 96 L138 128 M108 150 L138 132 M92 150 L62 132 M62 128 L62 96 M92 66 L62 84"
+              stroke-width="1.8" opacity="0.55" />
+        {[[100,52],[149,80],[149,136],[100,164],[51,136],[51,80]].map(([x,y]) => (
+          <circle cx={x} cy={y} r="9" fill={`url(#${gid})`} stroke="none" />
+        ))}
+        <path d="M100 164 L100 240" stroke-width="4" />
+        <path d="M100 24 L100 52" stroke-width="3" opacity="0.7" />
+        <circle cx="100" cy="20" r="7" fill={`url(#${gid})`} stroke="none" opacity="0.85" />
+      </g>
+    )}
+
+    {cat === 'medicine' && (
+      <g>
+        {/* the double helix */}
+        <path d="M66 34 C126 68 46 104 106 138 C166 172 86 208 146 242" stroke-width="4" />
+        <path d="M146 34 C86 68 166 104 106 138 C46 172 126 208 66 242" stroke-width="4" />
+        <path d="M79 56 L133 56 M62 86 L150 86 M79 118 L133 118 M79 158 L133 158 M62 190 L150 190 M79 220 L133 220"
+              stroke-width="2.2" opacity="0.6" />
+        <path d="M106 242 L106 252" stroke-width="4" />
+      </g>
+    )}
+
+    {cat === 'economics' && (
+      <g>
+        {/* a balance — allocation, matching, fairness */}
+        <path d="M100 44 L100 214" stroke-width="5" />
+        <path d="M34 76 L166 76" stroke-width="3.5" />
+        <circle cx="100" cy="44" r="8" fill={`url(#${gid})`} stroke="none" />
+        <path d="M34 76 L34 96 M166 76 L166 96" stroke-width="1.8" opacity="0.6" />
+        <path d="M10 96 C10 128 58 128 58 96 Z"    stroke-width="3" />
+        <path d="M142 96 C142 128 190 128 190 96 Z" stroke-width="3" />
+        <path d="M10 96 L58 96 M142 96 L190 96" stroke-width="2.4" />
+        <path d="M62 214 L138 214" stroke-width="4" />
+        <path d="M74 214 L126 214 L138 240 L62 240 Z" stroke-width="2.4" opacity="0.7" />
+      </g>
+    )}
+
+    {cat === 'peace' && (
+      <g>
+        {/* dove ascending — slim body, one wing swept high, tail streaming back */}
+        <path d="M148 88 C120 92 88 108 56 136 C74 134 90 134 104 138
+                 C92 150 84 162 78 176 C98 158 120 144 140 136
+                 C156 130 164 116 160 100 Z"
+              fill={`url(#${gid})`} stroke="none" opacity="0.95" />
+        {/* the raised wing */}
+        <path d="M132 108 C118 78 118 46 136 18 C148 48 156 82 152 110 Z"
+              fill={`url(#${gid})`} fill-opacity="0.72" stroke-width="2.4" />
+        {/* head and beak */}
+        <circle cx="158" cy="92" r="11" fill={`url(#${gid})`} stroke="none" />
+        <path d="M168 88 L186 94 L168 100 Z" fill={`url(#${gid})`} stroke="none" />
+        <circle cx="162" cy="89" r="2.3" fill="var(--bg-0)" stroke="none" />
+        {/* tail streaming back */}
+        <path d="M62 140 L28 150 M66 148 L32 166 M72 158 L44 182" stroke-width="3.2" />
+        <path d="M104 152 L104 240" stroke-width="4" />
+      </g>
+    )}
+
+    {cat === 'nobel' && (
+      <g>
+        {/* an open book — the prize itself, and the story behind it */}
+        <path d="M100 96 C78 78 46 70 18 72 L18 196 C46 194 78 202 100 220" stroke-width="3.5" />
+        <path d="M100 96 C122 78 154 70 182 72 L182 196 C154 194 122 202 100 220" stroke-width="3.5" />
+        <path d="M100 96 L100 220" stroke-width="2.6" opacity="0.7" />
+        <path d="M34 98 C56 98 78 104 90 114 M34 124 C56 124 78 130 90 140 M34 150 C56 150 78 156 90 166"
+              stroke-width="1.6" opacity="0.4" />
+        <path d="M166 98 C144 98 122 104 110 114 M166 124 C144 124 122 130 110 140 M166 150 C144 150 122 156 110 166"
+              stroke-width="1.6" opacity="0.4" />
+        <path d="M100 44 L100 88" stroke-width="2.4" opacity="0.55" />
+        <circle cx="100" cy="38" r="9" stroke-width="2.6" />
+        <path d="M100 220 L100 244" stroke-width="4" />
+      </g>
+    )}
+  </g>
+
+  {/* plinth */}
+  <g class="sculpt__plinth">
+    <ellipse cx="100" cy="252" rx="62" ry="12" fill="var(--bg-3)" opacity="0.95" />
+    <ellipse cx="100" cy="250" rx="62" ry="12" fill="none" stroke="var(--line-hi)" stroke-width="1.2" />
+    <path d="M38 250 L38 268 C38 275 66 281 100 281 C134 281 162 275 162 268 L162 250"
+          fill="var(--bg-2)" stroke="var(--line)" stroke-width="1.2" />
+    <ellipse cx="100" cy="250" rx="44" ry="8" fill="var(--accent)" opacity="0.10" />
+  </g>
+</svg>
+
+<style>
+  .sculpt {
+    overflow: visible;
+    inline-size: min(var(--sculpt-w, var(--sculpt-base, 200px)), 100%);
+    block-size: auto;
+  }
+  .sculpt__body { filter: drop-shadow(0 0 14px rgba(224, 170, 83, 0.18)); }
+  .sculpt__glow { transition: opacity 0.6s var(--ease); }
+</style>
