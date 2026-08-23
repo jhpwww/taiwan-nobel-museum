@@ -89,7 +89,6 @@ export const ui = {
     'special.exhibition': '特展',
 
     'about.title': '關於本站',
-    'foot.source': '影片來源',
   },
   en: {
     'site.title': 'Nobel Lecture Museum',
@@ -173,7 +172,6 @@ export const ui = {
     'special.exhibition': 'Exhibition',
 
     'about.title': 'About this site',
-    'foot.source': 'Video source',
   },
 } as const;
 

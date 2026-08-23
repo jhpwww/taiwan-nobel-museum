@@ -2,7 +2,6 @@
 import '../styles/global.css';
 import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
 import { home, browse, about, asset, otherLang } from '../i18n/routing';
-import ExtLink from '../components/ExtLink.astro';
 
 interface Props {
   lang: Lang;
@@ -94,11 +93,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
     <footer class="foot">
       <div class="wrap foot__in">
-        <p class="foot__src">
-          {t('foot.source')}:
-          <ExtLink lang={lang} href="https://www.youtube.com/@PeaceFoundationNET">International Peace Foundation</ExtLink>
-          <ExtLink lang={lang} href="https://www.youtube.com/@ntuspeech">臺大演講網</ExtLink>
-        </p>
         <p class="foot__copy">Copyright &copy; 2026 National Taiwan University - All rights reserved.</p>
         <p class="foot__copy foot__copy--zh" lang="zh-Hant-TW">
           國立臺灣大學，版權所有，禁止擅自轉貼節錄。本站為教育用途之獨立專案，與諾貝爾基金會無隸屬關係。
@@ -188,13 +182,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         padding-block: 2.5rem 3rem;
       }
       .foot__in { display: grid; gap: 0.55rem; }
-      .foot__src { font-size: var(--step--1); color: var(--muted-dim); display: flex; flex-wrap: wrap; gap: 0 1rem; }
-      .foot__src :global(a) { color: var(--muted); }
       .foot__copy {
         font-size: var(--step--1); color: var(--muted-dim);
         max-width: 78ch; line-height: 1.7; margin: 0;
       }
-      .foot__copy:first-of-type { margin-block-start: 0.9rem; padding-block-start: 0.9rem; border-block-start: 1px solid var(--line); }
     </style>
   </body>
 </html>
