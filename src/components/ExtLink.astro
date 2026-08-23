@@ -1,0 +1,28 @@
+---
+/**
+ * ExtLink.astro — the only way this site links off-site.
+ *
+ * Always opens in a new tab, always carries rel="noopener noreferrer", and
+ * always tells assistive tech that it will. Use it for every external href so
+ * the behaviour cannot drift between components.
+ */
+import { useT, type Lang } from '../i18n/ui';
+
+interface Props {
+  href: string;
+  lang: Lang;
+  class?: string;
+  arrow?: boolean;   // show the ↗ affordance
+}
+const { href, lang, class: cls, arrow = true } = Astro.props;
+const t = useT(lang);
+---
+<a href={href} class={cls} target="_blank" rel="noopener noreferrer">
+  <slot />
+  {arrow && <span class="ext-arrow" aria-hidden="true">↗</span>}
+  <span class="visually-hidden">{t('a11y.newTab')}</span>
+</a>
+
+<style>
+  .ext-arrow { font-size: 0.85em; opacity: 0.7; margin-inline-start: 0.35em; }
+</style>

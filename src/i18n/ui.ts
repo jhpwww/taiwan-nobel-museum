@@ -18,6 +18,7 @@ export const ui = {
     'nav.all': '所有講座',
     'nav.about': '關於本站',
     'nav.skip': '跳到主要內容',
+    'a11y.newTab': '（另開新視窗）',
 
     'hall.enter': '選擇一個展廳',
     'hall.hint': '點選雕塑進入展廳',
@@ -38,6 +39,10 @@ export const ui = {
     'hall.stat.laureates': '位諾貝爾獎得主',
     'hall.stat.videos': '支影片',
     'hall.featured': '本館推薦',
+    'home.upcoming': '即將登場',
+    'home.upcomingCta': '查看講座頁',
+    'home.upcomingNone': '本系列演講已全部完成',
+    'home.recommendWhy': '影片最完整的一場，適合第一次來的訪客',
     'hall.latest': '最新加入',
     'hall.watch': '觀看',
 
@@ -53,6 +58,8 @@ export const ui = {
     'lec.deeper': '延伸探索',
     'lec.nobelFacts': '諾貝爾獎官方介紹',
     'lec.nobelFactsNote': '得獎理由、生平與官方資料（英文）',
+    'lec.ntuCge': '臺大諾貝爾獎得主講座專頁',
+    'lec.ntuCgeNote': '共同教育中心彙整的六場臺大講座與相關資料',
     'lec.cwHub': '天下雜誌數位專區',
     'lec.cwHubNote': '本計畫的中文專題報導',
     'lec.ntuNews': '臺大校訊報導',
@@ -82,8 +89,6 @@ export const ui = {
     'special.exhibition': '特展',
 
     'about.title': '關於本站',
-    'foot.rights':
-      '所有影片均以 YouTube 嵌入方式播放，版權屬於原始發布單位。本站為教育用途之獨立專案，與諾貝爾基金會無隸屬關係。',
     'foot.source': '影片來源',
   },
   en: {
@@ -97,6 +102,7 @@ export const ui = {
     'nav.all': 'All lectures',
     'nav.about': 'About',
     'nav.skip': 'Skip to main content',
+    'a11y.newTab': '(opens in a new tab)',
 
     'hall.enter': 'Choose a gallery',
     'hall.hint': 'Select a sculpture to enter',
@@ -117,6 +123,10 @@ export const ui = {
     'hall.stat.laureates': 'Nobel laureates',
     'hall.stat.videos': 'videos',
     'hall.featured': 'Featured',
+    'home.upcoming': 'Coming up',
+    'home.upcomingCta': 'See the lecture page',
+    'home.upcomingNone': 'The series has finished',
+    'home.recommendWhy': 'The fullest set of material on the site — a good place to start',
     'hall.latest': 'Recently added',
     'hall.watch': 'Watch',
 
@@ -132,6 +142,8 @@ export const ui = {
     'lec.deeper': 'Go deeper',
     'lec.nobelFacts': 'Official Nobel Prize page',
     'lec.nobelFactsNote': 'Citation, biography and official material',
+    'lec.ntuCge': 'NTU Nobel Laureate Lecture page',
+    'lec.ntuCgeNote': 'The six NTU lectures and their material, gathered by NTU CGE',
     'lec.cwHub': 'CommonWealth Magazine hub',
     'lec.cwHubNote': 'Chinese-language coverage of the programme',
     'lec.ntuNews': 'NTU e-Paper report',
@@ -161,8 +173,6 @@ export const ui = {
     'special.exhibition': 'Exhibition',
 
     'about.title': 'About this site',
-    'foot.rights':
-      'All videos are embedded from YouTube and remain the copyright of their original publishers. This is an independent educational project, not affiliated with or endorsed by the Nobel Foundation.',
     'foot.source': 'Video source',
   },
 } as const;

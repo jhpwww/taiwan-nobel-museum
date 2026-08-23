@@ -46,6 +46,17 @@ src/
 **Links and routing**
 - Every internal URL comes from `src/i18n/routing.ts`. Never hardcode a leading `/` — this is
   a project site served from `/<repo>/` and `base` must be respected.
+- Every EXTERNAL link goes through `ExtLink.astro`, or carries the same three things it does:
+  `target="_blank"`, `rel="noopener noreferrer"`, and a visually-hidden "opens in a new tab".
+  The gallery material buttons are the one hand-rolled exception, because they need
+  `aria-describedby` for the popup. Audit with a grep over `dist/` for external `<a>` without
+  `target="_blank"` — it should return zero.
+
+**Home page**
+- The announcement slot is never empty: `nextUpcoming()` if the schedule still has a future
+  lecture, otherwise `recommended()`. "Today" is the BUILD date, so a lecture stops being
+  upcoming at the next rebuild, not at midnight. An upcoming lecture may have no video yet —
+  that branch must keep working.
 
 **Media and rights**
 - YouTube only, via `youtube-nocookie.com`, behind the click-to-load facade. Never download,
@@ -74,6 +85,10 @@ src/
 - nobelprize.org slugs are **not** uniform — Peace and Economic Sciences break the
   `…-nobel-prize-in-X` pattern. Every URL in `fetch-prize-facts.py` was checked with a live
   request. Verify before changing one; do not tidy them by pattern.
+
+**Badges**
+- The 導讀影片 badge is the same object in two components — `.card__badge` in LectureCard and
+  `.vf__label` in VideoFacade. Top-left, `--accent-block`, dark text. Restyle both or neither.
 
 **CSS**
 - Two accent tokens, and they are not interchangeable. `--accent` paints strokes, text, borders

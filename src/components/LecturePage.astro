@@ -3,6 +3,7 @@ import Base from '../layouts/Base.astro';
 import VideoFacade from './VideoFacade.astro';
 import LectureCard from './LectureCard.astro';
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
+import ExtLink from './ExtLink.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery } from '../i18n/routing';
 import { catName, tagName, relatedTo, localDate, type Lecture } from '../data/catalog';
@@ -18,6 +19,8 @@ const host = lang === 'zh' ? rec.event.host_zh : rec.event.host_en;
 const who = lang === 'zh' ? rec.laureate.zh : rec.laureate.en;
 
 const next = relatedTo(rec, 3);
+/** NTU 共同教育中心 collects all six NTU lectures and their material */
+const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
 
 ---
 
@@ -116,20 +119,24 @@ const next = relatedTo(rec, 3);
         <h3 id="h-deep" class="lec__h">{t('lec.deeper')}</h3>
         <ul class="links" role="list">
           <li>
-            <a href={rec.links.nobel_facts} rel="noopener">{t('lec.nobelFacts')}</a>
+            <ExtLink lang={lang} href={rec.links.nobel_facts}>{t('lec.nobelFacts')}</ExtLink>
             <span>{t('lec.nobelFactsNote')}</span>
           </li>
           {rec.links.ntu_spotlight && (
-            <li><a href={rec.links.ntu_spotlight} rel="noopener">{t('lec.ntuSpotlight')}</a></li>
+            <li><ExtLink lang={lang} href={rec.links.ntu_spotlight}>{t('lec.ntuSpotlight')}</ExtLink></li>
           )}
           {rec.links.ntu_epaper && (
-            <li><a href={rec.links.ntu_epaper} rel="noopener">{t('lec.ntuNews')}</a></li>
+            <li><ExtLink lang={lang} href={rec.links.ntu_epaper}>{t('lec.ntuNews')}</ExtLink></li>
           )}
           {rec.links.instagram && (
-            <li><a href={rec.links.instagram} rel="noopener">{t('lec.instagram')}</a></li>
+            <li><ExtLink lang={lang} href={rec.links.instagram}>{t('lec.instagram')}</ExtLink></li>
           )}
           <li>
-            <a href={rec.links.cw_hub} rel="noopener">{t('lec.cwHub')}</a>
+            <ExtLink lang={lang} href={NTU_CGE}>{t('lec.ntuCge')}</ExtLink>
+            <span>{t('lec.ntuCgeNote')}</span>
+          </li>
+          <li>
+            <ExtLink lang={lang} href={rec.links.cw_hub}>{t('lec.cwHub')}</ExtLink>
             <span>{t('lec.cwHubNote')}</span>
           </li>
         </ul>

@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import { useT, type Lang } from '../i18n/ui';
+import ExtLink from './ExtLink.astro';
 import { specialEvents, hosts } from '../data/catalog';
 
 interface Props { lang: Lang }
@@ -80,9 +81,9 @@ const hostList = Object.entries(hosts);
     <ul class="special" role="list">
       {special.map((s) => (
         <li>
-          <a href={`https://www.youtube.com/watch?v=${s.yt}`} rel="noopener">
+          <ExtLink lang={lang} href={`https://www.youtube.com/watch?v=${s.yt}`}>
             {lang === 'zh' ? s.title_zh : s.title_en}
-          </a>
+          </ExtLink>
           <span>{s.date}{s.note_zh && lang === 'zh' ? ` · ${s.note_zh}` : ''}</span>
         </li>
       ))}

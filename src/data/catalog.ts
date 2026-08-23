@@ -121,6 +121,31 @@ export function relatedTo(l: Lecture, n = 3) {
   ].filter((v, i, a) => a.indexOf(v) === i).slice(0, n);
 }
 
+/**
+ * The next lecture still to come, or null when the schedule is exhausted.
+ *
+ * `today` is the BUILD date, not the visitor's — this is a static site. A
+ * lecture therefore stops being "upcoming" at the next rebuild after it
+ * happens, not at midnight. Rebuild from the Actions tab to refresh it.
+ */
+export function nextUpcoming(today: string): Lecture | null {
+  return byDateAsc().find((l) => l.event.date > today) ?? null;
+}
+
+/** Every lecture still to come, earliest first. */
+export const allUpcoming = (today: string) => byDateAsc().filter((l) => l.event.date > today);
+
+/**
+ * What to show when nothing is upcoming: the richest lecture on the site —
+ * most videos, guide video preferred — so the slot is never empty.
+ */
+export function recommended(): Lecture {
+  return [...lectures].sort((a, b) => {
+    const g = Number(!!b.video.guide) - Number(!!a.video.guide);
+    return g !== 0 ? g : videoCount(b) - videoCount(a);
+  })[0];
+}
+
 export const localDate = (iso: string, lang: Lang, long = false) =>
   new Date(iso).toLocaleDateString(lang === 'zh' ? 'zh-TW' : 'en-GB', {
     year: 'numeric', month: long ? 'long' : 'short', day: 'numeric',

@@ -130,19 +130,20 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
   .vf__btn:hover .vf__play, .vf__btn:focus-visible .vf__play { scale: 1.09; }
   .vf__btn:hover .vf__play-bg { fill: #cc2027; fill-opacity: 1; }
 
+  /* same badge as LectureCard's — top-left, category block colour, dark text.
+     If you restyle one, restyle the other. */
   .vf__label {
     position: absolute;
-    inset-block-end: 0.7rem;
-    inset-inline-start: 0.85rem;
-    font-size: var(--step--1);
-    letter-spacing: 0.14em;
+    inset-block-start: 0.6rem;
+    inset-inline-start: 0.6rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--cream);
-    background: rgba(18, 12, 6, 0.6);
-    border: 1px solid var(--line);
+    font-weight: 500;
+    color: #150d05;
+    background: var(--accent-block);
     border-radius: 2px;
-    padding: 0.2rem 0.6rem;
-    backdrop-filter: blur(4px);
+    padding: 0.16rem 0.5rem;
   }
 
   .vf__note {
