@@ -43,14 +43,18 @@ if errors:
     sys.exit(1)
 
 cat["tags"] = {k: {"zh": v[0], "en": v[1]} for k, v in copy.TAGS.items()}
+# The six prize categories, in the order Alfred Nobel's will lists them
+# (Economic Sciences was added in 1968). `nobel` is not a prize category — it is
+# the introduction room, and the hall presents it separately.
 cat["categories"] = {
-    "physics":   {"zh": "物理學",     "en": "Physics",   "order": 1},
-    "chemistry": {"zh": "化學",       "en": "Chemistry", "order": 2},
-    "medicine":  {"zh": "生理學或醫學", "en": "Physiology or Medicine", "order": 3},
-    "economics": {"zh": "經濟學",     "en": "Economic Sciences", "order": 4},
-    "peace":     {"zh": "和平",       "en": "Peace",     "order": 5},
-    "nobel":     {"zh": "諾貝爾與他的獎", "en": "Nobel and his Prize", "order": 6},
+    "physics":    {"zh": "物理學",      "en": "Physics",                "order": 1},
+    "chemistry":  {"zh": "化學",        "en": "Chemistry",              "order": 2},
+    "medicine":   {"zh": "生理學或醫學",  "en": "Physiology or Medicine", "order": 3},
+    "literature": {"zh": "文學",        "en": "Literature",             "order": 4},
+    "peace":      {"zh": "和平",        "en": "Peace",                  "order": 5},
+    "economics":  {"zh": "經濟學",      "en": "Economic Sciences",      "order": 6},
 }
+cat["intro"] = {"key": "nobel", "zh": "諾貝爾與他的獎", "en": "Nobel and his Prize"}
 cat["lectures"].sort(key=lambda r: r["event"]["date"])
 
 out = ROOT / "src" / "data" / "lectures.json"

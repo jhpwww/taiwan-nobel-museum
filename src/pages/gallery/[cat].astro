@@ -1,9 +1,9 @@
 ---
 import GalleryPage from '../../components/GalleryPage.astro';
-import { categories, type CategoryKey } from '../../data/catalog';
+import { galleryKeys } from '../../data/catalog';
 
 export function getStaticPaths() {
-  return (Object.keys(categories) as CategoryKey[]).map((cat) => ({ params: { cat }, props: { cat } }));
+  return galleryKeys().map((cat) => ({ params: { cat }, props: { cat } }));
 }
 const { cat } = Astro.props;
 ---

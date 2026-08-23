@@ -1,7 +1,12 @@
 import raw from './lectures.json';
 import type { Lang } from '../i18n/ui';
 
-export type CategoryKey = 'physics' | 'chemistry' | 'medicine' | 'economics' | 'peace' | 'nobel';
+/** The six Nobel prize categories. */
+export type CategoryKey = 'physics' | 'chemistry' | 'medicine' | 'literature' | 'peace' | 'economics';
+/** Every gallery the museum has, including the introduction room. */
+export type GalleryKey = CategoryKey | 'nobel';
+/** The introduction room — not a prize category; the hall shows it on its own. */
+export const INTRO: GalleryKey = 'nobel';
 
 export interface Bilingual { zh: string; en: string }
 
@@ -46,6 +51,7 @@ interface Catalog {
   hosts: Record<string, { en: string; zh: string; city: string }>;
   tags: Record<string, Bilingual>;
   categories: Record<CategoryKey, Bilingual & { order: number }>;
+  intro: Bilingual & { key: string };
 }
 
 export const catalog = raw as unknown as Catalog;
@@ -55,9 +61,11 @@ export const specialEvents = catalog.special_events;
 export const hosts = catalog.hosts;
 export const tags = catalog.tags;
 export const categories = catalog.categories;
+export const intro = catalog.intro;
 
 /** Display name of a prize category in the given language. */
-export const catName = (key: CategoryKey, lang: Lang) => categories[key][lang];
+export const catName = (key: GalleryKey, lang: Lang) =>
+  key === INTRO ? intro[lang] : categories[key as CategoryKey][lang];
 /** Display name of a topic tag in the given language. */
 export const tagName = (key: string, lang: Lang) => tags[key]?.[lang] ?? key;
 
@@ -72,7 +80,11 @@ export function categoryList() {
     }));
 }
 
-export const byCategory = (key: CategoryKey) =>
+/** Every routable gallery: the six categories plus the introduction room. */
+export const galleryKeys = (): GalleryKey[] =>
+  [...categoryList().map((c) => c.key), INTRO];
+
+export const byCategory = (key: GalleryKey) =>
   lectures.filter((l) => l.prize.category === key)
           .sort((a, b) => a.event.date.localeCompare(b.event.date));
 

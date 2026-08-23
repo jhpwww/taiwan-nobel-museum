@@ -57,6 +57,13 @@ src/
 - Never add staff names, phone numbers or email addresses to content. They exist in the
   internal production sheet and must not reach the published tab or this repo.
 
+**Galleries**
+- `CategoryKey` is the six real prize categories. `GalleryKey` adds `nobel`, the introduction
+  room, which is *not* a prize category — the hall renders it separately from the plinths and
+  `categoryList()` deliberately excludes it. Use `galleryKeys()` for routing.
+- A category with zero lectures still gets a plinth and a page. Say so plainly and link out;
+  never hide the category or show a bare "0".
+
 **CSS**
 - Warm palette only. Prize category is the sole carrier of hue, via `[data-cat]` → `--accent`.
 - Tokens live in `src/styles/global.css`. Add a token rather than a one-off hex value.

@@ -2,25 +2,28 @@
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
-import { lectures, catName } from '../data/catalog';
+import { lectures, catName, intro, INTRO } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useT(lang);
 
-const ORDER: CategoryKey[] = ['peace', 'economics', 'physics', 'nobel', 'chemistry', 'medicine'];
+/** The six prize categories, in the order Alfred Nobel's will lists them. */
+const ORDER: CategoryKey[] = ['physics', 'chemistry', 'medicine', 'literature', 'peace', 'economics'];
+/** Plinths nearer the middle of the hall stand slightly forward. */
+const DEPTH = [0.86, 0.95, 1.04, 1.04, 0.95, 0.86];
+
 const counts = lectures.reduce<Record<string, number>>((a, l) => {
   a[l.prize.category] = (a[l.prize.category] ?? 0) + 1;
   return a;
 }, {});
 
-const cats = ORDER.map((key) => ({
+const cats = ORDER.map((key, i) => ({
   key,
   name: catName(key, lang),
   n: counts[key] ?? 0,
   href: gallery(lang, key),
-  /** the middle plinths stand slightly forward, as in a real hall */
-  depth: [0.82, 0.9, 1, 1.06, 0.9, 0.82][ORDER.indexOf(key)],
+  depth: DEPTH[i],
 }));
 ---
 
@@ -77,10 +80,22 @@ const cats = ORDER.map((key) => ({
           </span>
         </span>
         <span class="plinth__name">{c.name}</span>
-        <span class="plinth__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.nobelRoom')}</span>
+        <span class="plinth__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
       </a>
     ))}
   </nav>
+
+  <a class="intro" href={gallery(lang, INTRO)} data-cat={INTRO}>
+    <span class="intro__medal" aria-hidden="true">
+      <Sculpture cat={INTRO} size={150} id="hall-intro" />
+    </span>
+    <span class="intro__text">
+      <span class="intro__eyebrow">{t('hall.nobelRoom')}</span>
+      <span class="intro__title">{intro[lang]}</span>
+      <span class="intro__desc">{t('hall.introDesc')}</span>
+    </span>
+    <span class="intro__cta" aria-hidden="true">{t('hall.introCta')} →</span>
+  </a>
 </section>
 
 <style>
@@ -234,6 +249,56 @@ const cats = ORDER.map((key) => ({
   }
   .plinth:hover .plinth__name, .plinth:focus-visible .plinth__name { color: var(--accent); }
   .plinth__n { font-size: var(--step--1); color: var(--muted-dim); letter-spacing: 0.08em; }
+
+  /* ---------- the introduction room ---------- */
+  .intro {
+    display: flex;
+    align-items: center;
+    gap: clamp(0.75rem, 2.5vw, 2rem);
+    inline-size: min(100% - 2rem, 54rem);
+    margin: clamp(1.75rem, 4vh, 3rem) auto 0;
+    padding: 0.6rem clamp(1rem, 3vw, 1.9rem) 0.6rem 0.6rem;
+    text-decoration: none;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background:
+      radial-gradient(60% 180% at 8% 50%, color-mix(in srgb, var(--accent) 15%, transparent), transparent 70%),
+      color-mix(in srgb, var(--bg-1) 82%, transparent);
+    backdrop-filter: blur(6px);
+    transition: border-color 0.4s var(--ease), transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  }
+  .intro:hover, .intro:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lift);
+  }
+  .intro__medal {
+    flex: none;
+    display: grid;
+    place-items: center;
+    inline-size: clamp(4.2rem, 9vw, 6.2rem);
+    --sculpt-hi: #ffeccb;
+    --sculpt-lo: #8a6224;
+  }
+  /* the medal reads as an emblem here, not a statue — drop the plinth */
+  .intro__medal :global(.sculpt__plinth) { display: none; }
+  .intro__medal :global(.sculpt) { margin-block-end: -16%; }
+  .intro__text { display: grid; gap: 0.1rem; flex: 1 1 auto; min-inline-size: 0; }
+  .intro__eyebrow {
+    font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
+  }
+  .intro__title { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); line-height: 1.3; }
+  .intro__desc { font-size: var(--step--1); color: var(--muted); line-height: 1.6; }
+  .intro__cta {
+    flex: none; font-size: var(--step--1); letter-spacing: 0.1em; color: var(--gold);
+    transition: translate 0.35s var(--ease);
+  }
+  .intro:hover .intro__cta { translate: 0.25rem 0; }
+  @media (max-width: 40rem) {
+    .intro { border-radius: var(--radius); padding: 1rem; flex-wrap: wrap; }
+    .intro__cta { inline-size: 100%; }
+  }
 
   @media (max-width: 60rem) {
     .hall__plinths { grid-template-columns: repeat(3, 1fr); row-gap: 1.5rem; --sculpt-w: 130px; }

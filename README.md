@@ -19,8 +19,13 @@ Audience: high-school students, undergraduates, and the general public. Not spec
 | Interviews | 24, from 天下雜誌 CommonWealth Magazine and 風傳媒 The Storm Media |
 | Special events | Launch ceremony, two 北一女中 outreach lectures, a laureate panel, the 對話諾貝爾特展 |
 
-Prize categories: Physics 9 · Chemistry 8 · Medicine 7 · Economics 5 · Peace 2.
-There were no Literature lectures, so that gallery is a room about Alfred Nobel and the prize itself.
+Prize categories: Physics 9 · Chemistry 8 · Medicine 7 · Economics 5 · Peace 2 · Literature 0.
+
+The great hall shows all six prize categories, in the order Alfred Nobel's will lists them.
+Literature has a plinth like the others; its gallery says plainly that this series brought no
+Literature laureate and points to the official list instead. **諾貝爾與他的獎** — the room about
+Alfred Nobel and how the prizes are decided — is not a prize category, so it sits below the
+plinths as its own clearly marked entrance, with the medal as its emblem.
 
 ## Stack
 

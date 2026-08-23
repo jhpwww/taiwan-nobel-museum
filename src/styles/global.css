@@ -36,12 +36,13 @@ a { color: inherit; }
 
   /* prize categories — warm hues, each paired with its own sculpture form
      so colour is never the only thing telling them apart */
-  --c-physics:   #f0c063;
-  --c-chemistry: #e08a45;
-  --c-medicine:  #d4675f;
-  --c-economics: #c9a96e;
-  --c-peace:     #ecd8b0;
-  --c-nobel:     #bf8f52;
+  --c-physics:    #f0c063;   /* gold      */
+  --c-chemistry:  #e08a45;   /* copper    */
+  --c-medicine:   #d4675f;   /* terracotta*/
+  --c-literature: #cf9d7a;   /* clay      */
+  --c-peace:      #ecd9b4;   /* ivory     */
+  --c-economics:  #b39a56;   /* olive bronze */
+  --c-nobel:      #c9a24e;   /* medal gold — the introduction room */
 
   --accent: var(--gold);
 
@@ -128,9 +129,10 @@ a:hover { color: var(--gold-bright); text-decoration-color: currentColor; }
 [data-cat='physics']   { --accent: var(--c-physics); }
 [data-cat='chemistry'] { --accent: var(--c-chemistry); }
 [data-cat='medicine']  { --accent: var(--c-medicine); }
-[data-cat='economics'] { --accent: var(--c-economics); }
-[data-cat='peace']     { --accent: var(--c-peace); }
-[data-cat='nobel']     { --accent: var(--c-nobel); }
+[data-cat='literature'] { --accent: var(--c-literature); }
+[data-cat='peace']      { --accent: var(--c-peace); }
+[data-cat='economics']  { --accent: var(--c-economics); }
+[data-cat='nobel']      { --accent: var(--c-nobel); }
 
 /* ---------- motion ---------- */
 @media (prefers-reduced-motion: reduce) {

@@ -1,19 +1,21 @@
 ---
 import Base from '../layouts/Base.astro';
 import LectureCard from './LectureCard.astro';
-import Sculpture, { type CategoryKey } from './Sculpture.astro';
+import Sculpture from './Sculpture.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { home } from '../i18n/routing';
-import { byCategory, categories } from '../data/catalog';
+import { byCategory, catName, INTRO, type GalleryKey } from '../data/catalog';
 
-interface Props { lang: Lang; cat: CategoryKey }
+interface Props { lang: Lang; cat: GalleryKey }
 const { lang, cat } = Astro.props;
 const t = useT(lang);
-const meta = categories[cat];
+const title = catName(cat, lang);
 const recs = byCategory(cat);
 
-/** the Nobel gallery holds no lectures — it holds the story of the prize */
-const isNobelRoom = cat === 'nobel';
+/** the introduction room holds the story of the prize, not lectures */
+const isIntro = cat === INTRO;
+/** a real prize category that this lecture series never covered */
+const isEmpty = !isIntro && recs.length === 0;
 const NOBEL_LINKS = [
   { href: 'https://www.nobelprize.org/alfred-nobel/', zh: '諾貝爾其人', en: 'Alfred Nobel, the man',
     dzh: '一位炸藥發明家，為什麼留下了這座獎？', den: 'The inventor of dynamite — and why he left this prize behind.' },
@@ -26,20 +28,21 @@ const NOBEL_LINKS = [
 ];
 ---
 
-<Base lang={lang} title={meta[lang]} segments={['gallery', cat]}>
+<Base lang={lang} title={title} segments={['gallery', cat]}>
   <header class="gh" data-cat={cat}>
     <div class="wrap gh__in">
       <div class="gh__art" aria-hidden="true"><Sculpture cat={cat} size={150} id={`gal-${cat}`} /></div>
       <div>
         <p class="eyebrow"><a class="gh__back" href={home(lang)}>← {t('cat.back')}</a></p>
-        <h1 class="gh__title">{meta[lang]}</h1>
-        {!isNobelRoom && <p class="gh__n">{t('hall.count', { n: recs.length })}</p>}
+        <h1 class="gh__title">{title}</h1>
+        {!isIntro && <p class="gh__n">{recs.length > 0 ? t('hall.count', { n: recs.length }) : t('hall.soon')}</p>}
+        {isIntro && <p class="gh__n">{t('hall.nobelRoom')}</p>}
       </div>
     </div>
   </header>
 
   <div class="wrap gh__body">
-    {isNobelRoom ? (
+    {isIntro ? (
       <ul class="nobel" role="list">
         {NOBEL_LINKS.map((l) => (
           <li>
@@ -50,6 +53,16 @@ const NOBEL_LINKS = [
           </li>
         ))}
       </ul>
+    ) : isEmpty ? (
+      <div class="empty">
+        <h2 class="empty__t">{t('cat.emptyTitle')}</h2>
+        <p class="empty__b">{t('cat.emptyBody')}</p>
+        <p>
+          <a href="https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-literature/" rel="noopener">
+            {t('cat.emptyLink')} →
+          </a>
+        </p>
+      </div>
     ) : (
       <>
         <h2 class="visually-hidden">{t('cat.lectures')}</h2>
@@ -93,4 +106,13 @@ const NOBEL_LINKS = [
   .nobel a:hover { border-color: var(--line-hi); background: var(--surface-hi); transform: translateY(-2px); }
   .nobel__t { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); }
   .nobel__d { font-size: var(--step--1); color: var(--muted); line-height: 1.6; }
+
+  .empty {
+    display: grid; gap: 1rem; max-inline-size: 46rem;
+    border: 1px dashed var(--line-hi); border-radius: var(--radius);
+    padding: clamp(1.6rem, 5vw, 3rem);
+    background: var(--surface);
+  }
+  .empty__t { font-family: var(--font-han-serif); font-size: var(--step-2); color: var(--cream); }
+  .empty__b { color: var(--muted); line-height: 1.85; }
 </style>

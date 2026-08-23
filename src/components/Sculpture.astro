@@ -6,12 +6,14 @@
  * CSS custom property, and legible at 64px on a phone. Each form is
  * distinct in silhouette so that colour is never the only cue.
  */
-import type { CategoryKey } from '../data/catalog';
-export type { CategoryKey };
-interface Props { cat: CategoryKey; size?: number; id?: string; }
+import type { CategoryKey, GalleryKey } from '../data/catalog';
+export type { CategoryKey, GalleryKey };
+interface Props { cat: GalleryKey; size?: number; id?: string; }
 const { cat, size = 200, id = `s-${cat}` } = Astro.props;
 const gid = `${id}-grad`;
 const glow = `${id}-glow`;
+/** one laurel branch: [cx, cy, rotation]; the right branch is this one mirrored */
+const LAUREL: [number, number, number][] = [[92.0, 165.3, 10], [78.4, 160.6, 28], [66.9, 152.0, 46], [58.7, 140.2, 64], [54.4, 126.4, 82], [54.7, 112.0, 100]];
 ---
 
 <svg
@@ -116,21 +118,53 @@ const glow = `${id}-glow`;
       </g>
     )}
 
-    {cat === 'nobel' && (
+    {cat === 'literature' && (
       <g>
-        {/* an open book — the prize itself, and the story behind it */}
-        <path d="M100 96 C78 78 46 70 18 72 L18 196 C46 194 78 202 100 220" stroke-width="3.5" />
-        <path d="M100 96 C122 78 154 70 182 72 L182 196 C154 194 122 202 100 220" stroke-width="3.5" />
-        <path d="M100 96 L100 220" stroke-width="2.6" opacity="0.7" />
-        <path d="M34 98 C56 98 78 104 90 114 M34 124 C56 124 78 130 90 140 M34 150 C56 150 78 156 90 166"
+        {/* an open book with a quill standing in it */}
+        <path d="M100 138 C80 122 52 115 26 117 L26 222 C52 220 80 227 100 243" stroke-width="3.5" />
+        <path d="M100 138 C120 122 148 115 174 117 L174 222 C148 220 120 227 100 243" stroke-width="3.5" />
+        <path d="M100 138 L100 243" stroke-width="2.6" opacity="0.7" />
+        <path d="M40 140 C58 140 78 145 90 154 M40 163 C58 163 78 168 90 177 M40 186 C58 186 78 191 90 200"
               stroke-width="1.6" opacity="0.4" />
-        <path d="M166 98 C144 98 122 104 110 114 M166 124 C144 124 122 130 110 140 M166 150 C144 150 122 156 110 166"
+        <path d="M160 140 C142 140 122 145 110 154 M160 163 C142 163 122 168 110 177 M160 186 C142 186 122 191 110 200"
               stroke-width="1.6" opacity="0.4" />
-        <path d="M100 44 L100 88" stroke-width="2.4" opacity="0.55" />
-        <circle cx="100" cy="38" r="9" stroke-width="2.6" />
-        <path d="M100 220 L100 244" stroke-width="4" />
+        {/* quill */}
+        <path d="M146 22 C124 40 110 66 104 96 C122 84 138 64 148 42 Z"
+              fill={`url(#${gid})`} fill-opacity="0.68" stroke-width="2.4" />
+        <path d="M146 22 L101 104" stroke-width="2.6" />
+        <path d="M101 104 L96 118 L107 111 Z" fill={`url(#${gid})`} stroke="none" />
+        <path d="M100 243 L100 252" stroke-width="4" />
       </g>
     )}
+
+    {cat === 'nobel' && (
+      <g>
+        {/* the medal: a laurel wreath in a struck disc, on its ribbon */}
+        <circle cx="100" cy="120" r="70" stroke-width="4" />
+        <circle cx="100" cy="120" r="59" stroke-width="1.6" opacity="0.45" />
+        <g class="sculpt__laurel">
+          {LAUREL.map(([lx, ly, rot]) => (
+            <ellipse cx={lx} cy={ly} rx="8.5" ry="3.7" transform={`rotate(${rot} ${lx} ${ly})`}
+                     fill={`url(#${gid})`} stroke="none" opacity="0.85" />
+          ))}
+          <path d="M92.0 165.3 A 46 46 0 0 1 54.7 112.0" stroke-width="1.8" opacity="0.5" />
+        </g>
+        <g transform="scale(-1 1) translate(-200 0)">
+          {LAUREL.map(([lx, ly, rot]) => (
+            <ellipse cx={lx} cy={ly} rx="8.5" ry="3.7" transform={`rotate(${rot} ${lx} ${ly})`}
+                     fill={`url(#${gid})`} stroke="none" opacity="0.85" />
+          ))}
+          <path d="M92.0 165.3 A 46 46 0 0 1 54.7 112.0" stroke-width="1.8" opacity="0.5" />
+        </g>
+        {/* a struck star at the centre of the disc */}
+        <path d="M100 92 L107 111 L126 118 L107 125 L100 144 L93 125 L74 118 L93 111 Z"
+              fill={`url(#${gid})`} stroke="none" opacity="0.9" />
+        {/* ribbon */}
+        <path d="M76 182 L76 226 L100 212 L124 226 L124 182" stroke-width="3" />
+        <path d="M100 212 L100 250" stroke-width="4" />
+      </g>
+    )}
+
   </g>
 
   {/* plinth */}
