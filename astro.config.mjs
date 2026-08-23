@@ -7,8 +7,9 @@ import sitemap from '@astrojs/sitemap';
  * SITE_URL and drop BASE_PATH to '/' — nothing else needs to change,
  * because every internal link goes through src/i18n/routing.ts.
  */
-const SITE = process.env.SITE_URL ?? 'https://jhpwww.github.io';
-const BASE = process.env.BASE_PATH ?? '/taiwan-nobel-museum';
+// `??` is not enough: CI passes an empty string when the repo variable is unset.
+const SITE = process.env.SITE_URL || 'https://jhpwww.github.io';
+const BASE = process.env.BASE_PATH || '/taiwan-nobel-museum';
 
 export default defineConfig({
   site: SITE,
