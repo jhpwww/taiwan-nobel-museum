@@ -51,6 +51,20 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <body>
     <a class="skip-link" href="#main">{t('nav.skip')}</a>
 
+    {bare && (
+      <header class="topbar topbar--ghost">
+        <div class="wrap topbar__in topbar__in--end">
+          <nav class="topbar__nav" aria-label={t('nav.hall')}>
+            <a href={browse(lang)}>{t('nav.all')}</a>
+            <a href={about(lang)}>{t('nav.about')}</a>
+            <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}>
+              {LANG_LABEL[other.lang]}
+            </a>
+          </nav>
+        </div>
+      </header>
+    )}
+
     {!bare && (
       <header class="topbar">
         <div class="wrap topbar__in">
@@ -97,6 +111,33 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         backdrop-filter: blur(10px);
         border-block-end: 1px solid var(--line);
       }
+      /* over the hall: no panel, no brand — just a readability scrim so the
+         controls stay legible against both the dark vault and the content
+         further down the page */
+      /* out of flow, so the hall fills the viewport behind it rather than
+         starting below a 54px band of bare body background */
+      .topbar--ghost {
+        position: fixed;
+        inset-inline: 0;
+        inset-block-start: 0;
+        background: none;
+        backdrop-filter: none;
+        border-block-end: 0;
+      }
+      /* the scrim is a pseudo-element so it can fade well past the bar's own
+         height — a gradient squeezed into 3.4rem leaves a visible hard edge */
+      .topbar--ghost::before {
+        content: '';
+        position: absolute;
+        inset-inline: 0;
+        inset-block-start: 0;
+        block-size: 9rem;
+        pointer-events: none;
+        background: linear-gradient(to bottom, rgba(15, 10, 5, 0.66), rgba(15, 10, 5, 0.12) 55%, transparent);
+      }
+      .topbar--ghost .topbar__nav { position: relative; z-index: 1; }
+      .topbar--ghost .topbar__in { justify-content: flex-end; min-block-size: 3.4rem; }
+
       .topbar__in {
         display: flex;
         align-items: center;

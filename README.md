@@ -1,4 +1,4 @@
-# 諾貝爾獎得主講座虛擬博物館 · Nobel Laureate Lectures — A Virtual Museum
+# 諾貝爾演講博物館 · Nobel Lecture Museum
 
 A web-based virtual museum for the Nobel laureate lectures delivered in Taiwan under the
 **臺灣橋樑計畫 (Taiwan Bridges Program)** — the lectures themselves, their 導讀影片, and the
@@ -29,8 +29,8 @@ below the plinths as its own marked entrance, with the medal as its emblem.
 Every gallery opens with more than video: what the prize recognises, a short history, five counted
 statistics, and a strip of links into the Nobel Foundation's own site (the category hub, the full
 searchable laureate list, the facts page, and the education resources). The strip shows titles
-only; each description appears in a popup on hover or keyboard focus, and inline on touch devices,
-where hover never fires. The statistics come from the official
+only, as solid filled buttons; each description appears in a popup on hover or keyboard focus, and
+inline on touch devices, where hover never fires. The statistics come from the official
 Nobel API via `scripts/fetch-prize-facts.py` and are stamped with the date they were fetched —
 re-run it once a year after the October announcements.
 

@@ -76,6 +76,9 @@ src/
   request. Verify before changing one; do not tidy them by pattern.
 
 **CSS**
+- Button text sits on the category accent, so any change to `--c-*` or to the button gradient
+  must be re-checked for WCAG AA (4.5:1). Medicine is the tightest at 4.74:1; it fails if the
+  gradient's dark stop is deepened.
 - Warm palette only. Prize category is the sole carrier of hue, via `[data-cat]` → `--accent`.
 - Tokens live in `src/styles/global.css`. Add a token rather than a one-off hex value.
 - Every animation must be disabled under `prefers-reduced-motion`.
