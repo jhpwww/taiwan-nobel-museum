@@ -16,7 +16,10 @@ const cat: CategoryKey = rec.prize.category;
 const catLabel = catName(cat, lang);
 const date = localDate(rec.event.date, lang, true);
 const host = lang === 'zh' ? rec.event.host_zh : rec.event.host_en;
-const who = lang === 'zh' ? rec.laureate.zh : rec.laureate.en;
+/* English is primary for names, as it is for the lecture titles; the Chinese
+   rendering sits under it as a gloss. `who` is the plain-text form used for
+   page titles and accessible labels. */
+const who = rec.laureate.en;
 
 const next = relatedTo(rec, 3);
 /** NTU 共同教育中心 collects all six NTU lectures and their material */
@@ -38,8 +41,8 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
           <p class="eyebrow lec__prize">
             <a href={gallery(lang, cat)}>{t('lec.prize', { year: rec.prize.year, category: catLabel })}</a>
           </p>
-          <h1 class="lec__who">{who}</h1>
-          {lang === 'zh' && <p class="gloss lec__who-en">{rec.laureate.en}</p>}
+          <h1 class="lec__who">{rec.laureate.en}</h1>
+          {lang === 'zh' && <p class="gloss lec__who-zh">{rec.laureate.zh}</p>}
           <p class="lec__hook">{rec.hook[lang]}</p>
           <h2 class="lec__title">{rec.title.en}</h2>
           {lang === 'zh' && <p class="gloss lec__title-zh">{rec.title.zh}</p>}
@@ -167,8 +170,11 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
 
   .lec__prize a { color: var(--accent); text-decoration: none; letter-spacing: 0.16em; }
   .lec__prize a:hover { text-decoration: underline; }
-  .lec__who { font-size: var(--step-3); color: var(--cream); margin-block-start: 0.35rem; }
-  .lec__who-en { margin-block-start: 0.1rem; }
+  .lec__who {
+    font-family: var(--font-display);
+    font-size: var(--step-3); color: var(--cream); margin-block-start: 0.35rem;
+  }
+  .lec__who-zh { margin-block-start: 0.1rem; }
   .lec__hook {
     font-family: var(--font-han-serif); font-size: var(--step-1);
     color: var(--accent); line-height: 1.55; margin-block-start: 0.9rem; max-inline-size: 34ch;

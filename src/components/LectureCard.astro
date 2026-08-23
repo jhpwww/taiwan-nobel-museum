@@ -24,8 +24,8 @@ const nVideos = videoCount(rec);
 
   <span class="card__body">
     <span class="card__prize">{t('lec.prize', { year: rec.prize.year, category: catLabel })}</span>
-    <span class="card__who">{lang === 'zh' ? rec.laureate.zh : rec.laureate.en}</span>
-    {lang === 'zh' && <span class="card__who-en gloss">{rec.laureate.en}</span>}
+    <span class="card__who">{rec.laureate.en}</span>
+    {lang === 'zh' && <span class="card__who-zh gloss">{rec.laureate.zh}</span>}
     <span class="card__hook">{rec.hook[lang]}</span>
     <span class="card__meta">{date} · {lang === 'zh' ? rec.event.host_zh : rec.event.host_en}</span>
   </span>
@@ -81,8 +81,8 @@ const nVideos = videoCount(rec);
     font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
     color: var(--accent);
   }
-  .card__who { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); line-height: 1.3; }
-  .card__who-en { display: block; margin-block-start: -0.1rem; }
+  .card__who { font-family: var(--font-display); font-size: var(--step-1); color: var(--cream); line-height: 1.3; }
+  .card__who-zh { display: block; margin-block-start: -0.1rem; }
   .card__hook {
     margin-block-start: 0.45rem;
     color: var(--text); line-height: 1.65; font-size: var(--step-0);

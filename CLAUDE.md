@@ -41,6 +41,9 @@ src/
 - zh-TW is primary, en is secondary, with a switch in the header. Taiwanese usage throughout
   — 軟體, 資訊, 程式. Never mainland variants.
 - English lecture titles stay as delivered; the Chinese rendering sits under them in `.gloss`.
+  Laureate names follow the same rule: English is primary, the Chinese name is the gloss
+  beneath it. Set names in `--font-display`, not `--font-han-serif`, or the `:lang(zh) h1`
+  rule will render Latin text in the CJK serif.
 - No hardcoded user-facing strings in components. Everything goes through `src/i18n/ui.ts`.
 
 **Links and routing**
