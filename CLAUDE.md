@@ -76,9 +76,12 @@ src/
   request. Verify before changing one; do not tidy them by pattern.
 
 **CSS**
-- Button text sits on the category accent, so any change to `--c-*` or to the button gradient
-  must be re-checked for WCAG AA (4.5:1). Medicine is the tightest at 4.74:1; it fails if the
-  gradient's dark stop is deepened.
+- Two accent tokens, and they are not interchangeable. `--accent` paints strokes, text, borders
+  and the sculptures — full-strength hue. `--accent-block` paints solid fills (material buttons,
+  the 導讀影片 badge); for chemistry and medicine it is the white-tinted pastel, because those two
+  hues read as garish over a large filled area. Never use `--accent` for a solid block.
+- Dark text sits on `--accent-block`, so any change to those tokens or to the button gradient
+  must be re-checked for WCAG AA (4.5:1). Economics is currently the tightest at 6.40:1.
 - Warm palette only. Prize category is the sole carrier of hue, via `[data-cat]` → `--accent`.
 - Tokens live in `src/styles/global.css`. Add a token rather than a one-off hex value.
 - Every animation must be disabled under `prefers-reduced-motion`.

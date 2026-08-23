@@ -44,7 +44,16 @@ a { color: inherit; }
   --c-economics:  #b39a56;   /* olive bronze */
   --c-nobel:      #c9a24e;   /* medal gold — the introduction room */
 
+  /* Chemistry and medicine are the only two accents saturated enough to look
+     harsh as a large filled block. Tinted with white they sit in the same
+     soft band as the rest; line art keeps the full-strength hue. */
+  --c-chemistry-block: #ecb98f;   /* copper  + 40% white — peach */
+  --c-medicine-block:  #e5a49f;   /* terracotta + 40% white — dusty rose */
+
   --accent: var(--gold);
+  /* --accent paints strokes, text and borders; --accent-block paints solid
+     fills. They differ only where a full-strength hue would read as garish. */
+  --accent-block: var(--gold);
 
   /* type */
   --font-display: 'Cormorant Garamond', 'Noto Serif TC', 'Source Han Serif TC',
@@ -126,13 +135,13 @@ a:hover { color: var(--gold-bright); text-decoration-color: currentColor; }
 .rule { border: 0; border-block-start: 1px solid var(--line); }
 
 /* ---------- category accent ---------- */
-[data-cat='physics']   { --accent: var(--c-physics); }
-[data-cat='chemistry'] { --accent: var(--c-chemistry); }
-[data-cat='medicine']  { --accent: var(--c-medicine); }
-[data-cat='literature'] { --accent: var(--c-literature); }
-[data-cat='peace']      { --accent: var(--c-peace); }
-[data-cat='economics']  { --accent: var(--c-economics); }
-[data-cat='nobel']      { --accent: var(--c-nobel); }
+[data-cat='physics']    { --accent: var(--c-physics);    --accent-block: var(--c-physics); }
+[data-cat='chemistry']  { --accent: var(--c-chemistry);  --accent-block: var(--c-chemistry-block); }
+[data-cat='medicine']   { --accent: var(--c-medicine);   --accent-block: var(--c-medicine-block); }
+[data-cat='literature'] { --accent: var(--c-literature); --accent-block: var(--c-literature); }
+[data-cat='peace']      { --accent: var(--c-peace);      --accent-block: var(--c-peace); }
+[data-cat='economics']  { --accent: var(--c-economics);  --accent-block: var(--c-economics); }
+[data-cat='nobel']      { --accent: var(--c-nobel);      --accent-block: var(--c-nobel); }
 
 /* ---------- motion ---------- */
 @media (prefers-reduced-motion: reduce) {
