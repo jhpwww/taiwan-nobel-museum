@@ -18,6 +18,7 @@ def load(name, path):
     return mod
 
 copy = load("copy", "scripts/copy-zh-en.py")
+gal  = load("gal",  "scripts/copy-galleries.py")
 cat  = json.loads((ROOT / "data" / "catalog.json").read_text(encoding="utf-8"))
 
 errors = []
@@ -43,18 +44,44 @@ if errors:
     sys.exit(1)
 
 cat["tags"] = {k: {"zh": v[0], "en": v[1]} for k, v in copy.TAGS.items()}
-# The six prize categories, in the order Alfred Nobel's will lists them
-# (Economic Sciences was added in 1968). `nobel` is not a prize category — it is
-# the introduction room, and the hall presents it separately.
+# The six prize categories. Nobel's will lists Literature fourth, but this
+# series brought no Literature laureate, so it stands at the far right rather
+# than leaving a gap mid-row. `nobel` is not a prize category — it is the
+# introduction room, and the hall presents it separately.
 cat["categories"] = {
     "physics":    {"zh": "物理學",      "en": "Physics",                "order": 1},
     "chemistry":  {"zh": "化學",        "en": "Chemistry",              "order": 2},
     "medicine":   {"zh": "生理學或醫學",  "en": "Physiology or Medicine", "order": 3},
-    "literature": {"zh": "文學",        "en": "Literature",             "order": 4},
-    "peace":      {"zh": "和平",        "en": "Peace",                  "order": 5},
-    "economics":  {"zh": "經濟學",      "en": "Economic Sciences",      "order": 6},
+    "peace":      {"zh": "和平",        "en": "Peace",                  "order": 4},
+    "economics":  {"zh": "經濟學",      "en": "Economic Sciences",      "order": 5},
+    "literature": {"zh": "文學",        "en": "Literature",             "order": 6},
 }
 cat["intro"] = {"key": "nobel", "zh": "諾貝爾與他的獎", "en": "Nobel and his Prize"}
+
+# ---- gallery material: editorial prose + counted facts + verified links ----
+facts = json.loads((ROOT / "data" / "prize-facts.json").read_text(encoding="utf-8"))
+cat["prize_facts_asof"] = facts["fetched"]
+cat["stat_labels"] = gal.STAT_LABELS
+for key, meta in cat["categories"].items():
+    g = gal.GALLERIES.get(key)
+    f = facts["categories"].get(key)
+    if not g:  errors.append(f"gallery copy missing for {key}")
+    if not f:  errors.append(f"prize facts missing for {key}")
+    if not (g and f): continue
+    meta["intro"]   = {"zh": g["intro_zh"],   "en": g["intro_en"]}
+    meta["history"] = {"zh": g["history_zh"], "en": g["history_en"]}
+    meta["stats"] = [
+        {"key": k, "value": f[k], "zh": gal.STAT_LABELS[k]["zh"], "en": gal.STAT_LABELS[k]["en"]}
+        for k in ("first_year", "prizes_awarded", "laureates", "women_laureates", "years_not_awarded")
+    ]
+    meta["links"] = [
+        {"url": f["links"][slot], **gal.LINK_LABELS[slot]} for slot in ("hub", "all", "facts")
+    ] + gal.SHARED_LINKS
+
+if errors:
+    print("BUILD FAILED:", file=sys.stderr)
+    for e in errors: print("  -", e, file=sys.stderr)
+    sys.exit(1)
 cat["lectures"].sort(key=lambda r: r["event"]["date"])
 
 out = ROOT / "src" / "data" / "lectures.json"

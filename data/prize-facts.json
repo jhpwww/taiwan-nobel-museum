@@ -1,0 +1,90 @@
+{
+  "fetched": "2026-08-23",
+  "source": "https://api.nobelprize.org/2.1/",
+  "categories": {
+    "physics": {
+      "code": "phy",
+      "first_year": 1901,
+      "latest_year": 2025,
+      "prizes_awarded": 119,
+      "laureates": 230,
+      "women_laureates": 5,
+      "years_not_awarded": 6,
+      "links": {
+        "all": "https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-physics/",
+        "facts": "https://www.nobelprize.org/prizes/facts/facts-on-the-nobel-prize-in-physics/",
+        "hub": "https://www.nobelprize.org/prizes/physics/"
+      }
+    },
+    "chemistry": {
+      "code": "che",
+      "first_year": 1901,
+      "latest_year": 2025,
+      "prizes_awarded": 117,
+      "laureates": 200,
+      "women_laureates": 8,
+      "years_not_awarded": 8,
+      "links": {
+        "all": "https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-chemistry/",
+        "facts": "https://www.nobelprize.org/prizes/facts/facts-on-the-nobel-prize-in-chemistry/",
+        "hub": "https://www.nobelprize.org/prizes/chemistry/"
+      }
+    },
+    "medicine": {
+      "code": "med",
+      "first_year": 1901,
+      "latest_year": 2025,
+      "prizes_awarded": 116,
+      "laureates": 232,
+      "women_laureates": 14,
+      "years_not_awarded": 9,
+      "links": {
+        "all": "https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-physiology-or-medicine/",
+        "facts": "https://www.nobelprize.org/prizes/facts/facts-on-the-nobel-prize-in-physiology-or-medicine/",
+        "hub": "https://www.nobelprize.org/prizes/medicine/"
+      }
+    },
+    "literature": {
+      "code": "lit",
+      "first_year": 1901,
+      "latest_year": 2025,
+      "prizes_awarded": 118,
+      "laureates": 122,
+      "women_laureates": 18,
+      "years_not_awarded": 7,
+      "links": {
+        "all": "https://www.nobelprize.org/prizes/lists/all-nobel-prizes-in-literature/",
+        "facts": "https://www.nobelprize.org/prizes/facts/facts-on-the-nobel-prize-in-literature/",
+        "hub": "https://www.nobelprize.org/prizes/literature/"
+      }
+    },
+    "peace": {
+      "code": "pea",
+      "first_year": 1901,
+      "latest_year": 2025,
+      "prizes_awarded": 106,
+      "laureates": 143,
+      "women_laureates": 20,
+      "years_not_awarded": 19,
+      "links": {
+        "all": "https://www.nobelprize.org/prizes/lists/all-nobel-peace-prizes/",
+        "facts": "https://www.nobelprize.org/prizes/facts/facts-on-the-nobel-peace-prize/",
+        "hub": "https://www.nobelprize.org/prizes/peace/"
+      }
+    },
+    "economics": {
+      "code": "eco",
+      "first_year": 1969,
+      "latest_year": 2025,
+      "prizes_awarded": 57,
+      "laureates": 99,
+      "women_laureates": 3,
+      "years_not_awarded": 0,
+      "links": {
+        "all": "https://www.nobelprize.org/prizes/lists/all-prizes-in-economic-sciences/",
+        "facts": "https://www.nobelprize.org/prizes/facts/facts-on-the-prize-in-economic-sciences/",
+        "hub": "https://www.nobelprize.org/prizes/economic-sciences/"
+      }
+    }
+  }
+}

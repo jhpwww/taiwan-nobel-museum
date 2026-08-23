@@ -62,7 +62,13 @@ src/
   room, which is *not* a prize category — the hall renders it separately from the plinths and
   `categoryList()` deliberately excludes it. Use `galleryKeys()` for routing.
 - A category with zero lectures still gets a plinth and a page. Say so plainly and link out;
-  never hide the category or show a bare "0".
+  never hide the category or show a bare "0". Hall order comes from `categoryList()`, which reads
+  the `order` field — change it in `scripts/build-catalog.py`, not in the component.
+- Every gallery must carry material beyond video: intro, history, statistics, official links.
+  Category prose lives in `scripts/copy-galleries.py`; the numbers in `data/prize-facts.json`.
+- nobelprize.org slugs are **not** uniform — Peace and Economic Sciences break the
+  `…-nobel-prize-in-X` pattern. Every URL in `fetch-prize-facts.py` was checked with a live
+  request. Verify before changing one; do not tidy them by pattern.
 
 **CSS**
 - Warm palette only. Prize category is the sole carrier of hue, via `[data-cat]` → `--accent`.

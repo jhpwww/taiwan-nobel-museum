@@ -21,11 +21,16 @@ Audience: high-school students, undergraduates, and the general public. Not spec
 
 Prize categories: Physics 9 · Chemistry 8 · Medicine 7 · Economics 5 · Peace 2 · Literature 0.
 
-The great hall shows all six prize categories, in the order Alfred Nobel's will lists them.
-Literature has a plinth like the others; its gallery says plainly that this series brought no
-Literature laureate and points to the official list instead. **諾貝爾與他的獎** — the room about
-Alfred Nobel and how the prizes are decided — is not a prize category, so it sits below the
-plinths as its own clearly marked entrance, with the medal as its emblem.
+The great hall shows all six prize categories. Literature has a plinth like the others but
+stands at the far right, since this series brought no Literature laureate. **諾貝爾與他的獎** —
+the room about Alfred Nobel and how the prizes are decided — is not a prize category, so it sits
+below the plinths as its own marked entrance, with the medal as its emblem.
+
+Every gallery carries more than video: what the prize recognises, a short history, five counted
+statistics, and links into the Nobel Foundation's own site (the category hub, the full searchable
+laureate list, the facts page, and the education resources). The statistics come from the official
+Nobel API via `scripts/fetch-prize-facts.py` and are stamped with the date they were fetched —
+re-run it once a year after the October announcements.
 
 ## Stack
 
@@ -59,6 +64,8 @@ Google Sheet ──(publish tab as CSV)──> SHEET_CSV_URL ──> scripts/syn
 **To add or edit a lecture:** edit the Sheet, then press **Run workflow** on the repository's
 Actions tab. There is no schedule — nothing publishes until someone decides to publish it.
 
+- `data/prize-facts.json` holds the per-category statistics; regenerate with
+  `python3 scripts/fetch-prize-facts.py`.
 - `data/sheet-seed.csv` is the CSV to import when first creating the Sheet.
 - `scripts/sync-sheet.mjs` validates every row and **fails the build** on a malformed field
   rather than shipping partial content.

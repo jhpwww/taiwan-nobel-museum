@@ -2,14 +2,14 @@
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
-import { lectures, catName, intro, INTRO } from '../data/catalog';
+import { lectures, catName, categoryList, intro, INTRO } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useT(lang);
 
-/** The six prize categories, in the order Alfred Nobel's will lists them. */
-const ORDER: CategoryKey[] = ['physics', 'chemistry', 'medicine', 'literature', 'peace', 'economics'];
+/** Hall order comes from the catalogue, so it is decided in one place. */
+const ORDER: CategoryKey[] = categoryList().map((c) => c.key);
 /** Plinths nearer the middle of the hall stand slightly forward. */
 const DEPTH = [0.86, 0.95, 1.04, 1.04, 0.95, 0.86];
 

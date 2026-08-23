@@ -38,6 +38,16 @@ export interface Lecture {
   topic_tags: string[];
 }
 
+export interface Stat { key: string; value: number; zh: string; en: string }
+export interface MaterialLink { url: string; zh: string; en: string; dzh: string; den: string }
+export interface CategoryMeta extends Bilingual {
+  order: number;
+  intro: Bilingual;
+  history: Bilingual;
+  stats: Stat[];
+  links: MaterialLink[];
+}
+
 export interface SpecialEvent {
   id: string; kind: string; date: string; yt: string;
   title_en: string; title_zh: string;
@@ -50,7 +60,8 @@ interface Catalog {
   special_events: SpecialEvent[];
   hosts: Record<string, { en: string; zh: string; city: string }>;
   tags: Record<string, Bilingual>;
-  categories: Record<CategoryKey, Bilingual & { order: number }>;
+  categories: Record<CategoryKey, CategoryMeta>;
+  prize_facts_asof: string;
   intro: Bilingual & { key: string };
 }
 
@@ -62,6 +73,7 @@ export const hosts = catalog.hosts;
 export const tags = catalog.tags;
 export const categories = catalog.categories;
 export const intro = catalog.intro;
+export const factsAsOf = catalog.prize_facts_asof;
 
 /** Display name of a prize category in the given language. */
 export const catName = (key: GalleryKey, lang: Lang) =>
