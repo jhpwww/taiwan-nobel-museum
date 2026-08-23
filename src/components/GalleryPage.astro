@@ -61,14 +61,37 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
           <p class="about__lede">{meta.intro[lang]}</p>
           <p class="about__hist">{meta.history[lang]}</p>
         </div>
-        <dl class="stats">
-          {meta.stats.map((s) => (
-            <div class="stats__item">
-              <dt>{lang === 'zh' ? s.zh : s.en}</dt>
-              <dd>{s.value}</dd>
-            </div>
-          ))}
-        </dl>
+        <div class="about__figures">
+          <dl class="stats">
+            {meta.stats.map((s) => (
+              <div class="stats__item">
+                <dt>{lang === 'zh' ? s.zh : s.en}</dt>
+                <dd>{s.value}</dd>
+              </div>
+            ))}
+          </dl>
+          <p class="asof">{t('cat.asOf', { date: factsAsOf })}</p>
+        </div>
+      </div>
+
+      <div class="wrap">
+        <nav class="mats" aria-label={t('cat.materials')}>
+          <p class="mats__label">{t('cat.materials')}</p>
+          <ul class="mats__list" role="list">
+            {links.map((l, i) => (
+              <li class="mat">
+                <a class="mat__link" href={l.url} rel="noopener" aria-describedby={`tip-${i}`}>
+                  {lang === 'zh' ? l.zh : l.en}
+                  <span class="mat__ext" aria-hidden="true">↗</span>
+                </a>
+                <span class="mat__tip" id={`tip-${i}`} role="tooltip">
+                  <span class="mat__tip-d">{lang === 'zh' ? l.dzh : l.den}</span>
+                  <span class="mat__tip-h">{new URL(l.url).hostname.replace(/^www\./, '')}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </nav>
       </div>
     </section>
   )}
@@ -90,22 +113,23 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
       </section>
     )}
 
-    <section class="materials" aria-labelledby="h-mat">
-      <h2 id="h-mat" class="sec-h">{t('cat.materials')}</h2>
-      <p class="materials__note">{t('cat.materialsNote')}</p>
-      <ul class="cards" role="list">
-        {links.map((l) => (
-          <li>
-            <a href={l.url} rel="noopener">
-              <span class="cards__t">{lang === 'zh' ? l.zh : l.en}</span>
-              <span class="cards__d">{lang === 'zh' ? l.dzh : l.den}</span>
-              <span class="cards__host">{new URL(l.url).hostname.replace(/^www\./, '')} ↗</span>
-            </a>
-          </li>
-        ))}
-      </ul>
-      {meta && <p class="asof">{t('cat.asOf', { date: factsAsOf })}</p>}
-    </section>
+    {isIntro && (
+      <section class="materials" aria-labelledby="h-mat">
+        <h2 id="h-mat" class="sec-h">{t('cat.materials')}</h2>
+        <p class="materials__note">{t('cat.materialsNote')}</p>
+        <ul class="cards" role="list">
+          {links.map((l) => (
+            <li>
+              <a href={l.url} rel="noopener">
+                <span class="cards__t">{lang === 'zh' ? l.zh : l.en}</span>
+                <span class="cards__d">{lang === 'zh' ? l.dzh : l.den}</span>
+                <span class="cards__host">{new URL(l.url).hostname.replace(/^www\./, '')} ↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 </Base>
 
@@ -127,10 +151,10 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
   .gh__n { font-size: var(--step--1); color: var(--accent); letter-spacing: 0.14em; margin-block-start: 0.3rem; }
 
   /* ---------- what this prize is ---------- */
-  .about { border-block-end: 1px solid var(--line); background: var(--bg-0); }
+  .about { border-block-end: 1px solid var(--line); background: var(--bg-0); overflow: visible; }
   .about__in {
     display: grid; gap: clamp(1.5rem, 4vw, 3rem);
-    padding-block: clamp(1.8rem, 5vw, 2.8rem);
+    padding-block: clamp(1.8rem, 5vw, 2.8rem) clamp(1.2rem, 3vw, 1.8rem);
   }
   @media (min-width: 58rem) { .about__in { grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); align-items: start; } }
   .about__lede { font-size: var(--step-1); line-height: 1.9; color: var(--text); max-inline-size: 56ch; }
@@ -140,6 +164,7 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
     padding-inline-start: 1rem; border-inline-start: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
   }
 
+  .about__figures { display: grid; gap: 0.6rem; align-content: start; }
   .stats {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
     gap: 0.9rem; margin: 0;
@@ -153,6 +178,75 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
     font-size: var(--step-2); color: var(--accent); line-height: 1.1;
     font-variant-numeric: lining-nums tabular-nums;
   }
+
+  /* ---------- materials strip: titles only, detail on hover/focus ---------- */
+  .mats {
+    display: flex;
+    padding-block-end: clamp(1.4rem, 4vw, 2.2rem); flex-wrap: wrap; align-items: baseline;
+    gap: 0.6rem clamp(0.9rem, 2vw, 1.6rem);
+    padding-block-start: clamp(1.1rem, 3vw, 1.6rem);
+    border-block-start: 1px solid var(--line);
+  }
+  .mats__label {
+    flex: none; margin: 0;
+    font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted-dim);
+  }
+  /* the tooltip anchors to this list, so it always spans the strip and can
+     never overflow the viewport, whichever chip is hovered */
+  .mats__list {
+    position: relative; flex: 1 1 22rem;
+    display: flex; flex-wrap: wrap; gap: 0.45rem; padding: 0; margin: 0;
+  }
+
+  .mat__link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: var(--step--1); color: var(--text); text-decoration: none;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    transition: border-color 0.25s var(--ease), background 0.25s var(--ease), color 0.25s var(--ease);
+  }
+  .mat__link:hover, .mat__link:focus-visible {
+    color: var(--cream);
+    border-color: color-mix(in srgb, var(--accent) 60%, transparent);
+    background: var(--surface-hi);
+  }
+  .mat__ext { font-size: 0.72em; color: var(--accent); }
+
+  .mat__tip {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: calc(100% + 0.6rem);
+    z-index: 20;
+    display: grid; gap: 0.3rem;
+    padding: 0.85rem 1.05rem;
+    background: var(--bg-2);
+    border: 1px solid color-mix(in srgb, var(--accent) 42%, var(--line));
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lift);
+    opacity: 0; visibility: hidden; translate: 0 -0.35rem;
+    transition: opacity 0.22s var(--ease), translate 0.22s var(--ease), visibility 0.22s;
+    pointer-events: none;
+  }
+  .mat__tip-d { font-size: var(--step--1); color: var(--text); line-height: 1.65; }
+  .mat__tip-h { font-size: 0.66rem; letter-spacing: 0.08em; color: var(--accent); }
+
+  .mat:hover .mat__tip,
+  .mat__link:focus-visible + .mat__tip {
+    opacity: 1; visibility: visible; translate: 0 0;
+  }
+
+  /* no hover on touch — show the detail inline instead of hiding it entirely */
+  @media (hover: none) {
+    .mat__tip {
+      position: static; opacity: 1; visibility: visible; translate: 0;
+      box-shadow: none; background: transparent; border: 0;
+      padding: 0.15rem 0 0.5rem 0.2rem;
+    }
+    .mats__list { flex-direction: column; align-items: stretch; gap: 0.2rem; }
+    .mat { display: grid; justify-items: start; }
+  }
+
+  .asof { margin: 0; font-size: 0.66rem; color: var(--muted-dim); line-height: 1.6; }
 
   /* ---------- body ---------- */
   .gh__body { display: grid; gap: clamp(2.5rem, 7vw, 4.5rem); padding-block: clamp(2rem, 5vw, 3rem); }
@@ -199,5 +293,4 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
   }
   .cards a:hover .cards__host { color: var(--accent); }
 
-  .asof { margin-block-start: 1.1rem; font-size: 0.68rem; color: var(--muted-dim); }
 </style>

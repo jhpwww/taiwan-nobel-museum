@@ -26,9 +26,11 @@ stands at the far right, since this series brought no Literature laureate. **諾
 the room about Alfred Nobel and how the prizes are decided — is not a prize category, so it sits
 below the plinths as its own marked entrance, with the medal as its emblem.
 
-Every gallery carries more than video: what the prize recognises, a short history, five counted
-statistics, and links into the Nobel Foundation's own site (the category hub, the full searchable
-laureate list, the facts page, and the education resources). The statistics come from the official
+Every gallery opens with more than video: what the prize recognises, a short history, five counted
+statistics, and a strip of links into the Nobel Foundation's own site (the category hub, the full
+searchable laureate list, the facts page, and the education resources). The strip shows titles
+only; each description appears in a popup on hover or keyboard focus, and inline on touch devices,
+where hover never fires. The statistics come from the official
 Nobel API via `scripts/fetch-prize-facts.py` and are stamped with the date they were fetched —
 re-run it once a year after the October announcements.
 

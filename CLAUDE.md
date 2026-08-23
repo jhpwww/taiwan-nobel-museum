@@ -66,6 +66,11 @@ src/
   the `order` field — change it in `scripts/build-catalog.py`, not in the component.
 - Every gallery must carry material beyond video: intro, history, statistics, official links.
   Category prose lives in `scripts/copy-galleries.py`; the numbers in `data/prize-facts.json`.
+- The materials strip sits in the summary band, above the lectures, and shows titles only.
+  Descriptions live in a popup anchored to the *list*, not to each chip — that is deliberate,
+  so the popup spans the strip and can never overflow the viewport whichever chip is hovered.
+  Always pair a hover affordance with `:focus-visible` and a `@media (hover: none)` fallback
+  that reveals the text inline; a tooltip a touch user cannot open is a tooltip that does not exist.
 - nobelprize.org slugs are **not** uniform — Peace and Economic Sciences break the
   `…-nobel-prize-in-X` pattern. Every URL in `fetch-prize-facts.py` was checked with a live
   request. Verify before changing one; do not tidy them by pattern.
