@@ -2456,8 +2456,20 @@
   },
   "intro": {
     "key": "nobel",
-    "zh": "諾貝爾與他的獎",
-    "en": "Nobel and his Prize"
+    "zh": "諾貝爾與諾貝爾獎",
+    "en": "Nobel and the Nobel Prize",
+    "parts": {
+      "zh": [
+        "諾貝爾",
+        "與",
+        "諾貝爾獎"
+      ],
+      "en": [
+        "Nobel",
+        "and",
+        "the Nobel Prize"
+      ]
+    }
   },
   "prize_facts_asof": "2026-08-23",
   "stat_labels": {

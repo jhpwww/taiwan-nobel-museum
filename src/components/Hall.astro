@@ -2,7 +2,7 @@
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
-import { lectures, catName, categoryList, intro, INTRO } from '../data/catalog';
+import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -17,6 +17,8 @@ const counts = lectures.reduce<Record<string, number>>((a, l) => {
   a[l.prize.category] = (a[l.prize.category] ?? 0) + 1;
   return a;
 }, {});
+
+const [introA, introConj, introB] = introParts(lang);
 
 const cats = ORDER.map((key, i) => ({
   key,
@@ -91,7 +93,7 @@ const cats = ORDER.map((key, i) => ({
     </span>
     <span class="intro__text">
       <span class="intro__eyebrow">{t('hall.nobelRoom')}</span>
-      <span class="intro__title">{intro[lang]}</span>
+      <span class="intro__title">{introA}<span class="conj">{introConj}</span>{introB}</span>
       <span class="intro__desc">{t('hall.introDesc')}</span>
     </span>
     <span class="intro__cta" aria-hidden="true">{t('hall.introCta')} →</span>
@@ -289,6 +291,10 @@ const cats = ORDER.map((key, i) => ({
     font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent);
   }
   .intro__title { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); line-height: 1.3; }
+  /* the connector is not a subject — shrink it so the two names read apart */
+  .intro__title .conj {
+    font-size: 0.62em; opacity: 0.7; margin-inline: 0.18em; vertical-align: 0.08em;
+  }
   .intro__desc { font-size: var(--step--1); color: var(--muted); line-height: 1.6; }
   .intro__cta {
     flex: none; font-size: var(--step--1); letter-spacing: 0.1em; color: var(--gold);

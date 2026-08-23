@@ -56,7 +56,16 @@ cat["categories"] = {
     "economics":  {"zh": "經濟學",      "en": "Economic Sciences",      "order": 5},
     "literature": {"zh": "文學",        "en": "Literature",             "order": 6},
 }
-cat["intro"] = {"key": "nobel", "zh": "諾貝爾與他的獎", "en": "Nobel and his Prize"}
+# Two subjects, one connector. Chinese has no spaces, so the 與 is set smaller
+# to keep 諾貝爾 and 諾貝爾獎 legible as separate things; English gets the same
+# treatment on "and" for consistency.
+cat["intro"] = {
+    "key": "nobel",
+    "zh": "諾貝爾與諾貝爾獎",
+    "en": "Nobel and the Nobel Prize",
+    "parts": {"zh": ["諾貝爾", "與", "諾貝爾獎"],
+              "en": ["Nobel", "and", "the Nobel Prize"]},
+}
 
 # ---- gallery material: editorial prose + counted facts + verified links ----
 facts = json.loads((ROOT / "data" / "prize-facts.json").read_text(encoding="utf-8"))

@@ -2,11 +2,10 @@
 import Base from '../layouts/Base.astro';
 import LectureCard from './LectureCard.astro';
 import Sculpture from './Sculpture.astro';
-import ExtLink from './ExtLink.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { home } from '../i18n/routing';
 import {
-  byCategory, catName, categories, factsAsOf, INTRO,
+  byCategory, catName, categories, factsAsOf, intro, introParts, INTRO,
   type GalleryKey, type CategoryKey,
 } from '../data/catalog';
 
@@ -22,6 +21,7 @@ const isIntro = cat === INTRO;
 const meta = isIntro ? null : categories[cat as CategoryKey];
 /** a real prize category that this lecture series never covered */
 const isEmpty = !isIntro && recs.length === 0;
+const [introA, introConj, introB] = introParts(lang);
 
 const INTRO_LINKS = [
   { url: 'https://www.nobelprize.org/alfred-nobel/',
@@ -46,7 +46,9 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
       <div class="gh__art" aria-hidden="true"><Sculpture cat={cat} size={150} id={`gal-${cat}`} /></div>
       <div class="gh__id">
         <p class="eyebrow"><a class="gh__back" href={home(lang)}>← {t('cat.back')}</a></p>
-        <h1 class="gh__title">{title}</h1>
+        <h1 class="gh__title">
+          {isIntro ? <>{introA}<span class="conj">{introConj}</span>{introB}</> : title}
+        </h1>
         <p class="gh__n">
           {isIntro ? t('hall.nobelRoom') : recs.length > 0 ? t('hall.count', { n: recs.length }) : t('hall.soon')}
         </p>
@@ -116,9 +118,7 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
     )}
 
     {isIntro && (
-      <section class="materials" aria-labelledby="h-mat">
-        <h2 id="h-mat" class="sec-h">{t('cat.materials')}</h2>
-        <p class="materials__note">{t('cat.materialsNote')}</p>
+      <section class="materials" aria-label={intro[lang]}>
         <ul class="cards" role="list">
           {links.map((l) => (
             <li>
@@ -151,6 +151,7 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
   .gh__back { text-decoration: none; color: var(--muted); }
   .gh__back:hover { color: var(--gold); }
   .gh__title { font-size: var(--step-3); color: var(--cream); margin-block-start: 0.3rem; }
+  .gh__title .conj { font-size: 0.55em; opacity: 0.68; margin-inline: 0.2em; vertical-align: 0.1em; }
   .gh__n { font-size: var(--step--1); color: var(--accent); letter-spacing: 0.14em; margin-block-start: 0.3rem; }
 
   /* ---------- what this prize is ---------- */

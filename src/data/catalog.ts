@@ -62,7 +62,7 @@ interface Catalog {
   tags: Record<string, Bilingual>;
   categories: Record<CategoryKey, CategoryMeta>;
   prize_facts_asof: string;
-  intro: Bilingual & { key: string };
+  intro: Bilingual & { key: string; parts: { zh: string[]; en: string[] } };
 }
 
 export const catalog = raw as unknown as Catalog;
@@ -74,6 +74,10 @@ export const tags = catalog.tags;
 export const categories = catalog.categories;
 export const intro = catalog.intro;
 export const factsAsOf = catalog.prize_facts_asof;
+
+/** [subject, connector, subject] — the connector is rendered smaller. */
+export const introParts = (lang: Lang): [string, string, string] =>
+  intro.parts[lang] as [string, string, string];
 
 /** Display name of a prize category in the given language. */
 export const catName = (key: GalleryKey, lang: Lang) =>
