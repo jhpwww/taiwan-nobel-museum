@@ -11,6 +11,11 @@ body { min-height: 100dvh; text-rendering: optimizeLegibility; -webkit-font-smoo
 img, svg, video { display: block; max-width: 100%; }
 button, input, select { font: inherit; color: inherit; }
 a { color: inherit; }
+/* Browsers may hold a click back to see whether a double-tap-zoom follows.
+   Everything tappable here is a control, not text to zoom into. */
+a, button, label, summary, input, select, textarea, [role='button'] {
+  touch-action: manipulation;
+}
 :where(ul, ol)[role='list'] { list-style: none; padding: 0; }
 
 /* ---------- tokens ---------- */

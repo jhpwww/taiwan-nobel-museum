@@ -338,11 +338,14 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
     transform-style: preserve-3d;
     transition: transform .55s cubic-bezier(.22,.61,.36,1), filter .45s;
   }
-  .plinth:hover, .plinth:focus-visible {
+  .plinth:focus-visible {
     transform: rotateY(0deg) translateZ(58px);
     filter: brightness(1.14);
   }
-  .plinths:hover .plinth:not(:hover) { filter: brightness(.55) saturate(.6); }
+  @media (hover: hover) and (pointer: fine) {
+    .plinth:hover { transform: rotateY(0deg) translateZ(58px); filter: brightness(1.14); }
+    .plinths:hover .plinth:not(:hover) { filter: brightness(.55) saturate(.6); }
+  }
   .plinth__art { display: block; transform-style: preserve-3d; }
   .plinth__name {
     font-family: var(--font-han-serif); font-size: var(--step-0); color: var(--cream);

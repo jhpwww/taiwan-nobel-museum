@@ -69,12 +69,24 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     background: var(--bg-2);
     cursor: pointer;
     overflow: hidden;
+    touch-action: manipulation;      /* no double-tap-zoom delay before the click */
+    -webkit-tap-highlight-color: transparent;
     transition: border-color 0.35s var(--ease), transform 0.35s var(--ease), box-shadow 0.35s var(--ease);
   }
-  .vf__btn:hover, .vf__btn:focus-visible {
+  .vf__btn:focus-visible {
     border-color: var(--line-hi);
     transform: translateY(-2px);
     box-shadow: var(--shadow-lift);
+  }
+  /* hover only where a pointer can actually hover */
+  @media (hover: hover) and (pointer: fine) {
+    .vf__btn:hover {
+      border-color: var(--line-hi);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lift);
+    }
+    .vf__btn:hover .vf__play { scale: 1.09; }
+    .vf__btn:hover .vf__play-bg { fill: #cc2027; fill-opacity: 1; }
   }
 
   .vf__poster,
@@ -127,11 +139,16 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.6));
   }
   .vf__play-bg { fill: #16100a; fill-opacity: 0.82; transition: fill 0.3s var(--ease), fill-opacity 0.3s var(--ease); }
-  .vf__btn:hover .vf__play, .vf__btn:focus-visible .vf__play { scale: 1.09; }
-  .vf__btn:hover .vf__play-bg { fill: #cc2027; fill-opacity: 1; }
+  .vf__btn:focus-visible .vf__play { scale: 1.09; }
 
   /* same badge as LectureCard's — top-left, category block colour, dark text.
      If you restyle one, restyle the other. */
+  /* immediate acknowledgement: the player takes a moment to appear */
+  .vf__btn[data-loading] { pointer-events: none; }
+  .vf__btn[data-loading] .vf__poster { filter: brightness(0.45); }
+  .vf__btn[data-loading] .vf__play { animation: vf-pulse 0.9s ease-in-out infinite; }
+  @keyframes vf-pulse { 50% { scale: 0.86; opacity: 0.55; } }
+
   .vf__label {
     position: absolute;
     inset-block-start: 0.6rem;
@@ -188,11 +205,12 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
   function play(btn: HTMLElement) {
     const id = btn.dataset.yt;
     const fig = btn.closest('.vf');
-    if (!id || !fig) return;
+    if (!id || !fig || btn.hasAttribute('data-loading')) return;
+    btn.setAttribute('data-loading', '');
     const iframe = document.createElement('iframe');
     iframe.src =
       `https://www.youtube-nocookie.com/embed/${id}` +
-      `?autoplay=1&rel=0&modestbranding=1&playsinline=1&cc_load_policy=1`;
+      `?autoplay=1&rel=0&modestbranding=1&playsinline=1&cc_load_policy=1&enablejsapi=1`;
     iframe.title = btn.getAttribute('aria-label') ?? 'YouTube';
     iframe.allow =
       'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
@@ -207,22 +225,35 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     if (btn) play(btn);
   });
 
-  for (const ev of ['pointerenter', 'focusin'] as const) {
-    document.addEventListener(
-      ev,
-      (e) => {
-        const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
-        if (!btn) return;
-        addFrames(btn);
-        btn.setAttribute(CINE, 'on');
-      },
-      true,
-    );
-  }
+  // The cine preview belongs to a hovering mouse. On touch, pointerenter fires
+  // as part of the tap, and reacting to it changes the page before the click —
+  // which is what makes a browser swallow the first tap.
+  document.addEventListener(
+    'pointerenter',
+    (e) => {
+      if ((e as PointerEvent).pointerType !== 'mouse') return;
+      const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+      if (!btn) return;
+      addFrames(btn);
+      btn.setAttribute(CINE, 'on');
+    },
+    true,
+  );
+  document.addEventListener(
+    'focusin',
+    (e) => {
+      const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+      if (!btn) return;
+      addFrames(btn);
+      btn.setAttribute(CINE, 'on');
+    },
+    true,
+  );
   for (const ev of ['pointerleave', 'focusout'] as const) {
     document.addEventListener(
       ev,
       (e) => {
+        if (ev === 'pointerleave' && (e as PointerEvent).pointerType !== 'mouse') return;
         const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
         if (btn) btn.removeAttribute(CINE);
       },

@@ -144,6 +144,18 @@ src/
 - The 導讀影片 badge is the same object in two components — `.card__badge` in LectureCard and
   `.vf__label` in VideoFacade. Top-left, `--accent-block`, dark text. Restyle both or neither.
 
+**Touch**
+- Never leave a `:hover` rule ungated on anything that navigates or acts on tap. On a touch
+  device the first tap applies hover; if the page visibly changes the browser withholds the
+  click, so the control only fires on the second or third tap. Put hover effects inside
+  `@media (hover: hover) and (pointer: fine)` and give the same affordance to `:focus-visible`.
+- Gate `pointerenter`/`pointerleave` handlers on `pointerType === 'mouse'` for the same reason —
+  reacting to the pointer events of a tap is itself the visible change that eats the tap.
+- Interactive elements carry `touch-action: manipulation` (set globally in global.css) so the
+  browser does not hold the click waiting for a possible double-tap-zoom.
+- Playwright's device emulation does NOT reproduce these behaviours: it delivers a clean tap and
+  ignores sticky hover. A green emulated test is not evidence the bug is fixed on a real phone.
+
 **CSS**
 - Two accent tokens, and they are not interchangeable. `--accent` paints strokes, text, borders
   and the sculptures — full-strength hue. `--accent-block` paints solid fills (material buttons,

@@ -240,8 +240,11 @@ const cats = ORDER.map((key, i) => ({
     --sculpt-hi: #ffe9c2;
     --sculpt-lo: #6d451a;
   }
-  .plinth:hover, .plinth:focus-visible { scale: calc(var(--depth) * 1.07); filter: brightness(1.12); }
-  .hall__plinths:hover .plinth:not(:hover) { filter: brightness(0.62) saturate(0.7); }
+  .plinth:focus-visible { scale: calc(var(--depth) * 1.07); filter: brightness(1.12); }
+  @media (hover: hover) and (pointer: fine) {
+    .plinth:hover { scale: calc(var(--depth) * 1.07); filter: brightness(1.12); }
+    .hall__plinths:hover .plinth:not(:hover) { filter: brightness(0.62) saturate(0.7); }
+  }
 
   .plinth__art { position: relative; display: block; }
   .plinth__mirror {

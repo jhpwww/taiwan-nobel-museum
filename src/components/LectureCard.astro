@@ -44,7 +44,7 @@ const nVideos = videoCount(rec);
     transition: border-color 0.35s var(--ease), transform 0.35s var(--ease),
                 box-shadow 0.35s var(--ease), background 0.35s var(--ease);
   }
-  .card:hover, .card:focus-visible {
+  .card:focus-visible {
     border-color: color-mix(in srgb, var(--accent) 55%, transparent);
     background: var(--surface-hi);
     transform: translateY(-3px);
@@ -57,7 +57,15 @@ const nVideos = videoCount(rec);
     transition: transform 0.7s var(--ease), filter 0.5s var(--ease);
     filter: saturate(0.85) contrast(1.02) brightness(0.82);
   }
-  .card:hover .card__media img { transform: scale(1.055); filter: saturate(1) brightness(0.95); }
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover {
+      border-color: color-mix(in srgb, var(--accent) 55%, transparent);
+      background: var(--surface-hi);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lift);
+    }
+    .card:hover .card__media img { transform: scale(1.055); filter: saturate(1) brightness(0.95); }
+  }
   .card__scrim {
     position: absolute; inset: 0;
     background: linear-gradient(to top, rgba(18, 12, 6, 0.88), transparent 62%);

@@ -134,10 +134,17 @@ const stills = lectures
     backdrop-filter: blur(7px);
     transition: transform .4s var(--ease), border-color .4s, background .4s;
   }
-  .tile:hover, .tile:focus-visible {
+  .tile:focus-visible {
     transform: translateY(-6px);
     border-color: color-mix(in srgb, var(--accent) 62%, transparent);
     background: color-mix(in srgb, #1d1309 78%, transparent);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .tile:hover {
+      transform: translateY(-6px);
+      border-color: color-mix(in srgb, var(--accent) 62%, transparent);
+      background: color-mix(in srgb, #1d1309 78%, transparent);
+    }
   }
   .tile__art { inline-size: clamp(28px, 3.2vw, 38px); opacity: .8; }
   .tile__art :global(svg) { inline-size: 100%; block-size: auto; }
