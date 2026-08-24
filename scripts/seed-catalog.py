@@ -171,6 +171,14 @@ SPECIAL = [
       note_zh="展期 2026/5/4–5/28，臺大校總區綜合教學館2樓，獲瑞典駐臺辦事處特別授權"),
 ]
 
+# 影像紀實 that belong to the programme rather than to a single laureate
+STANDALONE_RECORDS = [
+    dict(id="morawetz-storm", source="storm", yt="fxqhag7i8zE",
+         person_en="Uwe Morawetz", person_zh="烏維‧莫拉維茨",
+         role_en="Chairman, International Peace Foundation",
+         role_zh="世界和平基金會主席", date="2026-06-25"),
+]
+
 CW_HUB = "https://event.cw.com.tw/2026taiwanbridge/index.html"
 
 def build():
@@ -206,6 +214,7 @@ def build():
         }
         out.append(rec)
     return {"lectures": out, "special_events": SPECIAL,
+            "standalone_records": STANDALONE_RECORDS,
             "hosts": {k: {"en": v[0], "zh": v[1], "city": v[2]} for k, v in HOSTS.items()}}
 
 if __name__ == "__main__":

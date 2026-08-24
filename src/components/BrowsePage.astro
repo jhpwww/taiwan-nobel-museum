@@ -1,17 +1,26 @@
 ---
 import Base from '../layouts/Base.astro';
-import LectureCard from './LectureCard.astro';
+import VideoCard from './VideoCard.astro';
 import { useT, type Lang } from '../i18n/ui';
-import { byDateAsc, categories, tags } from '../data/catalog';
+import { videoList, videoCounts, categories, tags } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useT(lang);
-const recs = byDateAsc();
+
+const videos = videoList();
+const counts = videoCounts();
+
 const cats = Object.entries(categories)
   .filter(([k]) => k !== 'nobel')
   .sort((a, b) => a[1].order - b[1].order);
 const tagList = Object.entries(tags);
+
+const KINDS = [
+  { key: 'guide',   label: t('browse.kindGuide'),   n: counts.guide },
+  { key: 'lecture', label: t('browse.kindLecture'), n: counts.lecture },
+  { key: 'record',  label: t('browse.kindRecord'),  n: counts.record },
+] as const;
 ---
 
 <Base lang={lang} title={t('browse.title')} segments={['lectures']}>
@@ -19,6 +28,19 @@ const tagList = Object.entries(tags);
     <h1 class="browse__h">{t('browse.title')}</h1>
 
     <form class="filters" id="filters" aria-label={t('browse.title')}>
+      <fieldset>
+        <legend>{t('browse.filterKind')}</legend>
+        <div class="chips">
+          <label class="chip"><input type="radio" name="kind" value="" checked /><span>{t('browse.filterAll')}</span></label>
+          {KINDS.map((k) => (
+            <label class="chip chip--kind" data-kind={k.key}>
+              <input type="radio" name="kind" value={k.key} />
+              <span>{k.label} <b>{k.n}</b></span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
       <fieldset>
         <legend>{t('browse.filterCat')}</legend>
         <div class="chips">
@@ -28,6 +50,7 @@ const tagList = Object.entries(tags);
           ))}
         </div>
       </fieldset>
+
       <fieldset>
         <legend>{t('browse.filterTopic')}</legend>
         <div class="chips">
@@ -39,13 +62,13 @@ const tagList = Object.entries(tags);
       </fieldset>
     </form>
 
-    <p class="count" id="count" aria-live="polite">{t('browse.results', { n: recs.length })}</p>
+    <p class="count" id="count" aria-live="polite">{t('browse.results', { n: videos.length })}</p>
     <p class="empty" id="empty" hidden>{t('browse.empty')}</p>
 
     <ul class="grid" id="results" role="list">
-      {recs.map((rec) => (
-        <li data-cat={rec.prize.category} data-tags={rec.topic_tags.join(' ')}>
-          <LectureCard lang={lang} rec={rec} />
+      {videos.map((v) => (
+        <li data-kind={v.kind} data-cat={v.category ?? ''} data-tags={v.topics.join(' ')}>
+          <VideoCard lang={lang} v={v} />
         </li>
       ))}
     </ul>
@@ -56,7 +79,7 @@ const tagList = Object.entries(tags);
   .browse { padding-block: clamp(2rem, 5vw, 3.5rem); }
   .browse__h { font-size: var(--step-3); color: var(--cream); }
 
-  .filters { display: grid; gap: 1.2rem; margin-block: 1.8rem 1.4rem; }
+  .filters { display: grid; gap: 1.1rem; margin-block: 1.8rem 1.4rem; }
   fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.55rem; }
   legend { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-dim); padding: 0; }
   .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
@@ -67,12 +90,18 @@ const tagList = Object.entries(tags);
     border: 1px solid var(--line); border-radius: 999px; padding: 0.28rem 0.9rem;
     cursor: pointer; transition: all 0.25s var(--ease);
   }
+  .chip span b { font-weight: 400; opacity: 0.62; margin-inline-start: 0.2em; }
   .chip:hover span { border-color: var(--line-hi); color: var(--text); }
   .chip input:checked + span {
-    color: var(--bg-0); background: var(--accent, var(--gold));
-    border-color: var(--accent, var(--gold)); font-weight: 500;
+    color: var(--bg-0); background: var(--accent-block, var(--gold));
+    border-color: var(--accent-block, var(--gold)); font-weight: 500;
   }
+  .chip input:checked + span b { opacity: 0.75; }
   .chip input:focus-visible + span { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+  /* the video-type chips carry their own colour so the three read apart */
+  .chip--kind[data-kind='guide']   input:checked + span { background: #e8c07d; border-color: #e8c07d; }
+  .chip--kind[data-kind='lecture'] input:checked + span { background: #d9a441; border-color: #d9a441; }
+  .chip--kind[data-kind='record']  input:checked + span { background: #cf9d7a; border-color: #cf9d7a; }
 
   .count { font-size: var(--step--1); color: var(--muted); letter-spacing: 0.1em; margin-block-end: 1.2rem; }
   .empty { color: var(--muted); }
@@ -89,16 +118,17 @@ const tagList = Object.entries(tags);
   const empty = document.getElementById('empty');
   if (form && list && count && empty) {
     const items = [...list.querySelectorAll<HTMLElement>('li')];
-    const tmpl = count.textContent ?? '';
-    const numFmt = tmpl.replace(/\d+/, '{n}');
+    const numFmt = (count.textContent ?? '').replace(/\d+/, '{n}');
 
     const apply = () => {
       const fd = new FormData(form);
+      const kind = String(fd.get('kind') ?? '');
       const cat = String(fd.get('cat') ?? '');
       const tag = String(fd.get('tag') ?? '');
       let n = 0;
       for (const li of items) {
         const ok =
+          (!kind || li.dataset.kind === kind) &&
           (!cat || li.dataset.cat === cat) &&
           (!tag || (li.dataset.tags ?? '').split(' ').includes(tag));
         li.hidden = !ok;
@@ -107,14 +137,14 @@ const tagList = Object.entries(tags);
       count.textContent = numFmt.replace('{n}', String(n));
       empty.hidden = n > 0;
       const url = new URL(location.href);
-      cat ? url.searchParams.set('cat', cat) : url.searchParams.delete('cat');
-      tag ? url.searchParams.set('tag', tag) : url.searchParams.delete('tag');
+      for (const [k, v] of [['kind', kind], ['cat', cat], ['tag', tag]] as const) {
+        v ? url.searchParams.set(k, v) : url.searchParams.delete(k);
+      }
       history.replaceState(null, '', url);
     };
 
-    // restore from the URL so a filtered view can be shared
     const p = new URLSearchParams(location.search);
-    for (const k of ['cat', 'tag']) {
+    for (const k of ['kind', 'cat', 'tag']) {
       const v = p.get(k);
       if (v) {
         const el = form.querySelector<HTMLInputElement>(`input[name="${k}"][value="${CSS.escape(v)}"]`);

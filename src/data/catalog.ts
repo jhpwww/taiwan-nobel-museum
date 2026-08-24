@@ -48,6 +48,12 @@ export interface CategoryMeta extends Bilingual {
   links: MaterialLink[];
 }
 
+export interface StandaloneRecord {
+  id: string; source: string; yt: string;
+  person_en: string; person_zh: string;
+  role_en: string; role_zh: string; date: string;
+}
+
 export interface SpecialEvent {
   id: string; kind: string; date: string; yt: string;
   title_en: string; title_zh: string;
@@ -58,6 +64,7 @@ export interface SpecialEvent {
 interface Catalog {
   lectures: Lecture[];
   special_events: SpecialEvent[];
+  standalone_records: StandaloneRecord[];
   hosts: Record<string, { en: string; zh: string; city: string }>;
   tags: Record<string, Bilingual>;
   categories: Record<CategoryKey, CategoryMeta>;
@@ -69,6 +76,7 @@ export const catalog = raw as unknown as Catalog;
 
 export const lectures = catalog.lectures;
 export const specialEvents = catalog.special_events;
+export const standaloneRecords = catalog.standalone_records ?? [];
 export const hosts = catalog.hosts;
 export const tags = catalog.tags;
 export const categories = catalog.categories;
@@ -149,6 +157,79 @@ export function recommended(): Lecture {
     return g !== 0 ? g : videoCount(b) - videoCount(a);
   })[0];
 }
+
+/* ------------------------------------------------------------------ *
+ * Every video the museum holds, as one flat list.
+ *
+ * Three kinds, which is what the 影片類別 filter switches between:
+ *   guide   導讀影片 — the short introduction filmed for each lecture
+ *   lecture 講座     — the lecture itself
+ *   record  影像紀實 — the interviews by 天下雜誌 and 風傳媒
+ * ------------------------------------------------------------------ */
+export type VideoKind = 'guide' | 'lecture' | 'record';
+
+export interface VideoItem {
+  key: string;                 // unique within the list
+  yt: string;                  // youtube id
+  kind: VideoKind;
+  lecture: Lecture | null;     // null for records not tied to one laureate
+  personZh: string;
+  personEn: string;
+  category: CategoryKey | null;
+  topics: string[];
+  date: string;
+  /** 天下雜誌 / 風傳媒, for records only */
+  sourceZh?: string;
+  sourceEn?: string;
+  /** a second upload of the same lecture, shown as a note */
+  altOf?: string;
+}
+
+export function videoList(): VideoItem[] {
+  const out: VideoItem[] = [];
+
+  for (const l of byDateAsc()) {
+    const base = {
+      lecture: l,
+      personZh: l.laureate.zh,
+      personEn: l.laureate.en,
+      category: l.prize.category,
+      topics: l.topic_tags,
+      date: l.event.date,
+    };
+    if (l.video.guide) out.push({ key: `${l.id}-guide`, yt: l.video.guide, kind: 'guide', ...base });
+    // one 講座 row per lecture: 31. Second-day sessions and alternate uploads
+    // stay on the lecture page rather than doubling up in the list.
+    if (l.video.lecture) out.push({ key: `${l.id}-lecture`, yt: l.video.lecture, kind: 'lecture', ...base });
+    for (const iv of l.interviews) {
+      out.push({
+        key: `${l.id}-${iv.id}`, yt: iv.id, kind: 'record',
+        sourceZh: iv.source_zh, sourceEn: iv.source_en, ...base,
+      });
+    }
+  }
+
+  for (const r of standaloneRecords) {
+    out.push({
+      key: r.id, yt: r.yt, kind: 'record', lecture: null,
+      personZh: r.person_zh, personEn: r.person_en,
+      category: null, topics: [], date: r.date,
+      sourceZh: r.source === 'cw' ? '天下雜誌' : '風傳媒',
+      sourceEn: r.source === 'cw' ? 'CommonWealth Magazine' : 'The Storm Media',
+    });
+  }
+  return out;
+}
+
+export const videoCounts = () => {
+  const v = videoList();
+  return {
+    all: v.length,
+    guide: v.filter((x) => x.kind === 'guide').length,
+    lecture: v.filter((x) => x.kind === 'lecture').length,
+    record: v.filter((x) => x.kind === 'record').length,
+  };
+};
 
 export const localDate = (iso: string, lang: Lang, long = false) =>
   new Date(iso).toLocaleDateString(lang === 'zh' ? 'zh-TW' : 'en-GB', {

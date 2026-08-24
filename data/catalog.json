@@ -1610,6 +1610,18 @@
       "note_zh": "展期 2026/5/4–5/28，臺大校總區綜合教學館2樓，獲瑞典駐臺辦事處特別授權"
     }
   ],
+  "standalone_records": [
+    {
+      "id": "morawetz-storm",
+      "source": "storm",
+      "yt": "fxqhag7i8zE",
+      "person_en": "Uwe Morawetz",
+      "person_zh": "烏維‧莫拉維茨",
+      "role_en": "Chairman, International Peace Foundation",
+      "role_zh": "世界和平基金會主席",
+      "date": "2026-06-25"
+    }
+  ],
   "hosts": {
     "NTU": {
       "en": "National Taiwan University",
