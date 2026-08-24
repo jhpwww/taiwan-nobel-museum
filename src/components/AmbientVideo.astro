@@ -48,6 +48,9 @@ const { opacity = 0.55 } = Astro.props;
       if (u) s.setAttribute('src', u);
     });
     v.load();
+    // the loop is rendered fast so it compresses well; slowed here so the
+    // embers drift rather than race
+    v.playbackRate = 0.4;
     const play = () => v.play().then(() => v.setAttribute('data-on', '')).catch(() => {});
     if (v.readyState >= 2) play();
     else v.addEventListener('canplay', play, { once: true });

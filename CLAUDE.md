@@ -94,6 +94,9 @@ src/
   behind text.
 
 **Media and rights**
+- The hall backdrop is real lecture footage via `LectureScreen.astro`, not a stock loop. A
+  cross-origin YouTube iframe CANNOT be read into a WebGL texture — that is why the rotunda
+  cycles the 1/2/3.jpg frames instead. Do not try to sample the player.
 - YouTube only, via `youtube-nocookie.com`, behind the click-to-load facade. Never download,
   re-host, re-cut or proxy a video.
 - Nobel Foundation material is linked, never copied into the repo.

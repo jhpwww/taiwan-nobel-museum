@@ -183,22 +183,61 @@ export function createRotunda(opts: RotundaOptions) {
   }
   scene.add(wallGroup);
 
+  /*
+   * The wall has to move — a still gallery does not read as a video museum.
+   * A cross-origin YouTube iframe cannot be sampled into a WebGL texture, so
+   * each panel cycles the three real frames YouTube publishes per video
+   * (1/2/3.jpg, ~3.5 KB each). Real lecture imagery, in motion, for almost
+   * nothing.
+   */
+  type Panel = { mat: MeshBasicMaterial; canvas: HTMLCanvasElement; tex: CanvasTexture | null; frames: HTMLImageElement[]; at: number };
+  const wallPanels: Panel[] = [];
+
   stills.slice(0, N).forEach((url, i) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      const c = document.createElement('canvas');
-      c.width = 256; c.height = 144;
-      const g2 = c.getContext('2d'); if (!g2) return;
-      g2.drawImage(img, 0, 0, 256, 144);
-      const t = new CanvasTexture(c);
-      t.colorSpace = SRGBColorSpace;
-      panels[i].map = t;
-      panels[i].color.setHex(0xa89070);
-      panels[i].needsUpdate = true;
-    };
-    img.src = url;
+    const vid = url.match(/\/vi\/([\w-]{11})\//)?.[1];
+    if (!vid) return;
+    const canvas = document.createElement('canvas');
+    canvas.width = 256; canvas.height = 144;
+    const panel: Panel = { mat: panels[i], canvas, tex: null, frames: [], at: 0 };
+    wallPanels.push(panel);
+
+    for (const n of [1, 2, 3]) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        panel.frames.push(img);
+        if (panel.frames.length === 1) drawPanel(panel, 0);
+      };
+      img.src = `https://i.ytimg.com/vi/${vid}/${n}.jpg`;
+    }
   });
+
+  function drawPanel(p: Panel, idx: number) {
+    const g = p.canvas.getContext('2d');
+    const img = p.frames[idx % Math.max(1, p.frames.length)];
+    if (!g || !img) return;
+    g.drawImage(img, 0, 0, p.canvas.width, p.canvas.height);
+    if (!p.tex) {
+      p.tex = new CanvasTexture(p.canvas);
+      p.tex.colorSpace = SRGBColorSpace;
+      p.mat.map = p.tex;
+      p.mat.color.setHex(0xa89070);
+      p.mat.needsUpdate = true;
+    } else {
+      p.tex.needsUpdate = true;
+    }
+  }
+
+  let wallTick = 0;
+  function advanceWall(now: number) {
+    if (now - wallTick < 900) return;      // a slow flicker, not a strobe
+    wallTick = now;
+    for (const p of wallPanels) {
+      if (p.frames.length < 2) continue;
+      p.at++;
+      drawPanel(p, p.at);
+    }
+  }
 
   /* ================= lighting ================= */
   const oculusLight = new PointLight('#ffe3b6', 430, 58, 2);
@@ -511,6 +550,7 @@ export function createRotunda(opts: RotundaOptions) {
       s.g.position.y = s.base + Math.sin(t * 0.9 + s.phase) * 0.045;
     }
     dust.rotation.y = t * 0.014;
+    advanceWall(now);
     oculusLight.intensity = 430 + Math.sin(t * 0.7) * 22;
 
     if (usePost) composer.render(); else renderer.render(scene, camera);

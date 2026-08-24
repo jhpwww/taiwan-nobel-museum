@@ -1,0 +1,139 @@
+---
+/**
+ * LectureScreen.astro — actual lecture footage running behind the hall.
+ *
+ * This is the "video museum" cue: not an abstract loop, but the lectures
+ * themselves, muted and dimmed, cycling one after another behind the
+ * sculptures.
+ *
+ * Nothing is downloaded or re-hosted — it is the same youtube-nocookie embed
+ * used everywhere else on the site, with the chrome turned off. It costs a
+ * real network stream, so it is gated hard: never on small screens, never
+ * under Save-Data, never when motion is off, and never before the poster has
+ * already given the page something to show.
+ */
+import { lectures } from '../data/catalog';
+interface Props { opacity?: number; count?: number }
+const { opacity = 0.5, count = 6 } = Astro.props;
+
+/** lectures that actually have footage, richest first so the cycle opens well */
+const picks = lectures
+  .filter((l) => l.video.lecture || l.video.guide)
+  .slice(0, count)
+  .map((l) => ({
+    id: (l.video.guide ?? l.video.lecture)!,
+    start: l.video.guide ? 8 : 120,      // skip titles; land inside the talk
+  }));
+const first = picks[0];
+---
+
+<div class="ls" style={`--ls-o:${opacity}`} aria-hidden="true">
+  <img
+    class="ls__still"
+    src={`https://i.ytimg.com/vi/${first.id}/maxresdefault.jpg`}
+    alt=""
+    width="1280" height="720" loading="eager" decoding="async"
+  />
+  <div class="ls__stage" data-lecture-screen data-picks={JSON.stringify(picks)}></div>
+  <div class="ls__grade"></div>
+</div>
+
+<style>
+  .ls { position: absolute; inset: 0; z-index: -4; overflow: hidden; pointer-events: none; }
+  .ls__still, .ls__stage {
+    position: absolute;
+    /* overscan: the player's own letterboxing must never show an edge */
+    inset: -8%;
+    inline-size: 116%;
+    block-size: 116%;
+  }
+  .ls__still {
+    object-fit: cover;
+    opacity: var(--ls-o);
+    filter: saturate(0.45) brightness(0.5) contrast(1.05);
+    transition: opacity 1.6s ease;
+  }
+  .ls__stage { opacity: 0; transition: opacity 1.8s ease; }
+  .ls__stage[data-on] { opacity: var(--ls-o); }
+  .ls__stage[data-on] ~ .ls__grade + .ls__still,
+  .ls:has(.ls__stage[data-on]) .ls__still { opacity: 0; }
+
+  .ls__stage :global(iframe) {
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+    display: block;
+    filter: saturate(0.42) brightness(0.46) contrast(1.06);
+    pointer-events: none;
+  }
+
+  /* keeps the footage as a backdrop rather than a distraction */
+  .ls__grade {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(72% 62% at 50% 42%, rgba(24, 14, 5, 0.34), rgba(10, 6, 3, 0.9) 100%),
+      linear-gradient(to bottom, rgba(10, 6, 3, 0.72) 0 14%, rgba(10, 6, 3, 0.3) 42%, rgba(10, 6, 3, 0.92) 100%);
+  }
+</style>
+
+<script>
+  import { motionOn } from '../scripts/motion';
+
+  const el = document.querySelector<HTMLElement>('[data-lecture-screen]');
+  if (el) {
+    const stage = el;
+    const picks: { id: string; start: number }[] = JSON.parse(stage.dataset.picks ?? '[]');
+    const tooSmall = matchMedia('(max-width: 48rem)').matches;
+    const saveData = (navigator as any).connection?.saveData === true;
+    let i = 0, timer = 0;
+
+    const src = (p: { id: string; start: number }) =>
+      `https://www.youtube-nocookie.com/embed/${p.id}` +
+      `?autoplay=1&mute=1&controls=0&loop=1&playlist=${p.id}` +
+      `&start=${p.start}&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
+
+    function mount() {
+      const p = picks[i % picks.length];
+      const f = document.createElement('iframe');
+      f.src = src(p);
+      f.title = '';
+      f.setAttribute('allow', 'autoplay; encrypted-media');
+      f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+      f.setAttribute('tabindex', '-1');
+      f.setAttribute('aria-hidden', 'true');
+      stage.replaceChildren(f);
+      // only reveal once it has had time to start, so we never flash a black box
+      setTimeout(() => stage.setAttribute('data-on', ''), 2600);
+    }
+
+    function cycle() {
+      i++;
+      mount();
+      timer = window.setTimeout(cycle, 42000);
+    }
+
+    function startScreen() {
+      if (tooSmall || saveData || !motionOn() || stage.dataset.live) return;
+      stage.dataset.live = '1';
+      mount();
+      timer = window.setTimeout(cycle, 42000);
+    }
+
+    function stopScreen() {
+      clearTimeout(timer);
+      stage.replaceChildren();
+      stage.removeAttribute('data-on');
+      delete stage.dataset.live;
+    }
+
+    // wait for a quiet moment so the hall paints first
+    const kick = () => setTimeout(startScreen, 900);
+    if (document.readyState === 'complete') kick();
+    else addEventListener('load', kick, { once: true });
+
+    addEventListener('motionpref', () => (motionOn() ? startScreen() : stopScreen()));
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) { clearTimeout(timer); } else if (stage.dataset.live) { timer = window.setTimeout(cycle, 42000); }
+    });
+  }
+</script>
