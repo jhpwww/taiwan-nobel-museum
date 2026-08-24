@@ -105,10 +105,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
     <footer class="foot">
       <div class="wrap foot__in">
-        <p class="foot__copy">Copyright &copy; 2026 National Taiwan University - All rights reserved.</p>
-        <p class="foot__copy foot__copy--zh" lang="zh-Hant-TW">
-          國立臺灣大學，版權所有，禁止擅自轉貼節錄。本站為教育用途之獨立專案，與諾貝爾基金會無隸屬關係。
-        </p>
+        <img class="foot__crest" src={asset('ntu-logo.png')} alt="" width="56" height="56" />
+        <div class="foot__lines">
+          <p class="foot__copy foot__copy--zh" lang="zh-Hant-TW"><span class="foot__uni">國立臺灣大學</span>，版權所有，禁止擅自轉貼節錄。本站為教育用途之獨立專案，與諾貝爾基金會無隸屬關係。</p>
+          <p class="foot__copy">Copyright &copy; 2026 National Taiwan University - All rights reserved.</p>
+        </div>
       </div>
     </footer>
 
@@ -193,7 +194,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         background: var(--bg-1);
         padding-block: 2.5rem 3rem;
       }
-      .foot__in { display: grid; gap: 0.55rem; }
+      .foot__in {
+        display: flex;
+        align-items: center;
+        gap: clamp(0.7rem, 2vw, 1.4rem);
+      }
+      .foot__crest {
+        flex: none;
+        inline-size: clamp(34px, 4.4vw, 56px);
+        block-size: auto;
+        opacity: 0.92;
+      }
+      .foot__lines { display: grid; gap: 0.2rem; min-inline-size: 0; }
       /* the copyright must stay on one line at every width, so it scales with
          the viewport rather than wrapping */
       .foot__copy {
@@ -202,11 +214,22 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         color: var(--muted-dim);
         line-height: 1.8;
         white-space: nowrap;
-        font-size: clamp(0.4rem, 1.42vw, 0.82rem);
+        font-size: clamp(0.34rem, 1.38vw, 0.82rem);
       }
       .foot__copy--zh { letter-spacing: 0.01em; }
+      /* the university's own name reads first */
+      .foot__uni {
+        color: var(--cream);
+        font-size: 1.22em;
+        letter-spacing: 0.04em;
+      }
       /* tiny screens need the extra gutter back to keep it on one line */
-      @media (max-width: 26rem) { .foot .wrap { width: min(100% - 1rem, 76rem); } }
+      /* the crest takes width the line needs, so both shrink together here */
+      @media (max-width: 26rem) {
+        .foot .wrap { width: min(100% - 0.75rem, 76rem); }
+        .foot__in { gap: 0.5rem; }
+        .foot__crest { inline-size: 26px; }
+      }
     </style>
   </body>
 </html>

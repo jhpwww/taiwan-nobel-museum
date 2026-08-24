@@ -47,7 +47,6 @@ const nVideos = totalVideos();
   <section class="feature wrap" aria-labelledby="feat-h">
     <div class="section-head">
       <h2 id="feat-h" class="section-h">{upcoming ? t('home.upcoming') : t('hall.featured')}</h2>
-      {!upcoming && <p class="feature__why">{t('home.upcomingNone')}</p>}
     </div>
 
     <div class="feature__grid" data-cat={featured.prize.category}>
@@ -127,7 +126,6 @@ const nVideos = totalVideos();
     color: var(--accent); line-height: 1.5;
   }
   .feature__who { font-family: var(--font-display); }
-  .feature__why { font-size: var(--step--1); color: var(--muted); }
   .feature__when {
     font-size: var(--step-0); color: var(--cream);
     border-inline-start: 2px solid var(--accent); padding-inline-start: 0.85rem;
