@@ -147,8 +147,17 @@ Two dates that the programme book left ambiguous were settled from the video tit
 python3 scripts/check-links.py dist
 ```
 
-Does a real GET on every external URL in the built site, follows redirects, and prints the final
-URL and page title, so a wrong-but-200 destination is visible. 165 links, currently all good.
+Audits four kinds of reference, because each fails differently:
+
+| | |
+|---|---|
+| internal | resolved against the build — the target file must exist |
+| assets | img/script/link/video sources, including `data-src` and posters |
+| youtube | the ids actually embedded — these live in `data-yt` and iframe srcs, **not** in `href`, so an href-only sweep skips the most important links on the site |
+| external | a real GET, following redirects, printing the destination title so a wrong-but-200 target is visible |
+
+Current state: 1004 internal, 10 local assets, 68 video ids, 165 external — all good, and all 68
+videos separately confirmed embeddable (public is not the same as embeddable).
 
 ## Editorial copy
 

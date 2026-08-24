@@ -98,6 +98,9 @@ src/
   request is NOT enough — it misses dead DNS and soft 404s. `educational.nobelprize.org` was
   shipped broken because only the per-category URLs were verified and the shared ones were not.
 - Verify every link that gets added, not a sample of them.
+- The YouTube ids are NOT in `href` — they sit in `data-yt`, iframe srcs and `data-picks`. Any
+  link audit that only reads `href` misses every video on the site.
+- oEmbed 200 proves a video is public, not that it is embeddable. Check the embed endpoint too.
 
 **Media and rights**
 - The hall backdrop is real lecture footage via `LectureScreen.astro`, not a stock loop. A
