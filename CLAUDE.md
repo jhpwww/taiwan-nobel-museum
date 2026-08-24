@@ -102,6 +102,13 @@ src/
   link audit that only reads `href` misses every video on the site.
 - oEmbed 200 proves a video is public, not that it is embeddable. Check the embed endpoint too.
 
+**Framing**
+- This site is a MUSEUM. Its name, its home page and its navigation are the museum's.
+- The learning tools are museum features that happen to suit a course. Course-specific framing
+  must stay subordinate: an aside at the foot of `/learn/`, or a parenthetical note — never a
+  page title, never a nav item, never the first thing on a lecture page. A visitor who is not
+  taking the course must not feel they have wandered into a classroom.
+
 **Media and rights**
 - The hall backdrop is real lecture footage via `LectureScreen.astro`, not a stock loop. A
   cross-origin YouTube iframe CANNOT be read into a WebGL texture — that is why the rotunda

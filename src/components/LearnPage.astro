@@ -1,11 +1,16 @@
 ---
 /**
- * CoursePage.astro — the course area for 走進諾貝爾 (LibEdu1140).
+ * LearnPage.astro — the museum's learning area.
  *
- * The syllabus is the source of truth; this page exists so a student can see
- * the whole shape of the course in one screen and jump straight to the work.
- * Facts here are transcribed from the official course outline — if the
- * outline changes, change them here and nowhere else.
+ * This is a MUSEUM feature, for anyone who wants to study the collection
+ * seriously: a way in, a way to keep notes, a way to compare the two versions
+ * of a laureate's talk.
+ *
+ * One NTU course, 走進諾貝爾 (LibEdu1140), is built around this material and
+ * its requirements are described in a subordinate section near the foot of
+ * the page. That section must stay subordinate — the museum is not a course
+ * tool, and a visitor who is not taking the course should never feel they
+ * have wandered into someone's classroom.
  */
 import Base from '../layouts/Base.astro';
 import ExtLink from './ExtLink.astro';
@@ -61,24 +66,17 @@ const cycle = [
 ];
 ---
 
-<Base lang={lang} title={t('course.title')} description={t('course.blurb')} segments={['course']}>
+<Base lang={lang} title={t('learn.title')} description={t('learn.blurb')} segments={['learn']}>
   <div class="wrap course">
     <header class="course__head">
-      <p class="eyebrow">{t('course.eyebrow')}</p>
-      <h1>{zh ? '走進諾貝爾：跨域思辨與時代對話' : 'Into the Nobel'}</h1>
-      {zh && <p class="gloss">Into the Nobel: Interdisciplinary Thinking and Dialogue of Our Time</p>}
-      <p class="course__blurb">{t('course.blurb')}</p>
-      <dl class="course__facts">
-        {facts.map(([k, v]) => (<div><dt>{k}</dt><dd>{v}</dd></div>))}
-      </dl>
-      <p class="course__links">
-        <ExtLink lang={lang} href={SYLLABUS}>{t('course.syllabus')}</ExtLink>
-        <ExtLink lang={lang} href={ADD_FORM}>{t('course.addCode')}</ExtLink>
-      </p>
+      <p class="eyebrow">{t('learn.eyebrow')}</p>
+      <h1>{t('learn.title')}</h1>
+      <p class="course__blurb">{t('learn.blurb')}</p>
     </header>
 
     <section class="course__sec" aria-labelledby="cy">
-      <h2 id="cy">{t('course.cycleTitle')}</h2>
+      <h2 id="cy">{t('learn.cycleTitle')}</h2>
+      <p class="course__note">{t('learn.cycleNote')}</p>
       <ol class="cycle" role="list">
         {cycle.map((c, i) => (
           <li>
@@ -91,46 +89,30 @@ const cycle = [
     </section>
 
     <section class="course__sec" aria-labelledby="tools">
-      <h2 id="tools">{t('course.toolsTitle')}</h2>
-      <p class="course__note">{t('course.toolsNote')}</p>
+      <h2 id="tools">{t('learn.toolsTitle')}</h2>
+      <p class="course__note">{t('learn.toolsNote')}</p>
       <div class="tools">
         <a class="tool" href={path(lang, 'study')}>
-          <span class="tool__t">{t('course.toolProgress')}</span>
-          <span class="tool__d">{t('course.toolProgressD')}</span>
+          <span class="tool__t">{t('learn.toolProgress')}</span>
+          <span class="tool__d">{t('learn.toolProgressD')}</span>
         </a>
         <a class="tool" href={browse(lang) + '?kind=guide'}>
-          <span class="tool__t">{t('course.toolGuides')}</span>
-          <span class="tool__d">{t('course.toolGuidesD')}</span>
+          <span class="tool__t">{t('learn.toolGuides')}</span>
+          <span class="tool__d">{t('learn.toolGuidesD')}</span>
         </a>
         <a class="tool" href={browse(lang)}>
-          <span class="tool__t">{t('course.toolAll')}</span>
-          <span class="tool__d">{t('course.toolAllD', { n: lectures.length })}</span>
+          <span class="tool__t">{t('learn.toolAll')}</span>
+          <span class="tool__d">{t('learn.toolAllD', { n: lectures.length })}</span>
         </a>
       </div>
     </section>
 
-    <section class="course__sec" aria-labelledby="mk">
-      <h2 id="mk">{t('course.marksTitle')}</h2>
-      <ul class="marks" role="list">
-        {marks.map((m) => (
-          <li>
-            <span class="marks__pct">{m.pct}%</span>
-            <span class="marks__body">
-              <b>{zh ? m.zh : m.en}</b>
-              <span>{zh ? m.zhN : m.enN}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-      <p class="course__note">{t('course.marksNote')}</p>
-    </section>
-
     <section class="course__sec" aria-labelledby="rd">
-      <h2 id="rd">{t('course.readTitle')}</h2>
+      <h2 id="rd">{t('learn.readTitle')}</h2>
       <ul class="links" role="list">
         <li>
           <ExtLink lang={lang} href={NOBEL}>nobelprize.org</ExtLink>
-          <span>{t('course.readNobel')}</span>
+          <span>{t('learn.readNobel')}</span>
         </li>
         <li>
           <ExtLink lang={lang} href={CGE}>{t('lec.ntuCge')}</ExtLink>
@@ -138,6 +120,34 @@ const cycle = [
         </li>
       </ul>
     </section>
+
+    <!-- Subordinate by design: one course happens to use this collection. -->
+    <aside class="forcourse" aria-labelledby="fc">
+      <h2 id="fc">{t('learn.courseTitle')}</h2>
+      <p class="forcourse__lede">{t('learn.courseLede')}</p>
+      <dl class="course__facts">
+        {facts.map(([k, v]) => (<div><dt>{k}</dt><dd>{v}</dd></div>))}
+      </dl>
+      <details class="forcourse__more">
+        <summary>{t('learn.courseMarks')}</summary>
+        <ul class="marks" role="list">
+          {marks.map((m) => (
+            <li>
+              <span class="marks__pct">{m.pct}%</span>
+              <span class="marks__body">
+                <b>{zh ? m.zh : m.en}</b>
+                <span>{zh ? m.zhN : m.enN}</span>
+              </span>
+            </li>
+          ))}
+        </ul>
+        <p class="course__note">{t('learn.marksNote')}</p>
+      </details>
+      <p class="course__links">
+        <ExtLink lang={lang} href={SYLLABUS}>{t('learn.syllabus')}</ExtLink>
+        <ExtLink lang={lang} href={ADD_FORM}>{t('learn.addCode')}</ExtLink>
+      </p>
+    </aside>
   </div>
 </Base>
 
@@ -199,4 +209,28 @@ const cycle = [
   .links li { display: grid; gap: .15rem; }
   .links :global(a) { font-size: var(--step-0); text-decoration: none; border-block-end: 1px solid var(--line-hi); justify-self: start; }
   .links span { font-size: var(--step--1); color: var(--muted-dim); line-height: 1.6; }
+
+  /* deliberately quieter than everything above: this is a footnote about one
+     course, not the purpose of the page */
+  .forcourse {
+    margin-block-start: clamp(2.5rem, 6vw, 4rem);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: color-mix(in srgb, var(--bg-1) 70%, transparent);
+    padding: 1.2rem 1.3rem 1.1rem;
+  }
+  .forcourse h2 {
+    font-size: var(--step-1); color: var(--muted); border: 0; padding: 0;
+    font-family: var(--font-han-serif);
+  }
+  .forcourse__lede { font-size: var(--step--1); color: var(--muted); line-height: 1.8; margin-block-start: .5rem; max-inline-size: 60ch; }
+  .forcourse .course__facts { margin-block-start: 1rem; }
+  .forcourse__more { margin-block-start: .4rem; }
+  .forcourse__more summary {
+    cursor: pointer; font-size: var(--step--1); color: var(--gold);
+    list-style: none;
+  }
+  .forcourse__more summary::-webkit-details-marker { display: none; }
+  .forcourse__more summary::before { content: '▸'; margin-inline-end: .45rem; transition: rotate .2s; display: inline-block; }
+  .forcourse__more[open] summary::before { rotate: 90deg; }
+  .forcourse .marks { margin-block-start: 1rem; }
 </style>

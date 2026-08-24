@@ -1,0 +1,95 @@
+---
+/**
+ * CompareBlock.astro — the two versions of one laureate, side by side.
+ *
+ * The syllabus asks students to watch the original Nobel Lecture and compare
+ * it against the Taiwan lecture. That comparison is the point, so it gets its
+ * own block with the prompts written out, rather than being left implicit in
+ * a link at the bottom of the page.
+ *
+ * The Stockholm lecture lives on nobelprize.org and cannot be embedded, so it
+ * is presented as a card that says plainly what the student will find there.
+ */
+import ExtLink from './ExtLink.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { type Lecture, localDate } from '../data/catalog';
+
+interface Props { lang: Lang; rec: Lecture }
+const { lang, rec } = Astro.props;
+const t = useT(lang);
+const zh = lang === 'zh';
+
+const prompts = [
+  zh ? '同一個研究，兩場演講各挑了什麼來講？為什麼？'
+     : 'Same research, two talks — what did each choose to include, and why?',
+  zh ? '對象不同（斯德哥爾摩的同行 vs 臺灣的學生），講法差在哪裡？'
+     : 'Different audiences (peers in Stockholm vs students in Taiwan) — how does the telling change?',
+  zh ? '得獎當年到今天，他的說法有什麼改變或修正？'
+     : 'Between the prize year and now, what has he or she revised?',
+];
+---
+
+<section class="cmp" aria-labelledby="cmp-h">
+  <h3 id="cmp-h" class="cmp__h">{t('compare.title')}</h3>
+  <p class="cmp__lede">{t('compare.lede')}</p>
+
+  <div class="cmp__pair">
+    <div class="cmp__side">
+      <p class="cmp__tag">{t('compare.taiwan')}</p>
+      <p class="cmp__when">{localDate(rec.event.date, lang, true)}</p>
+      <p class="cmp__where">{zh ? rec.event.host_zh : rec.event.host_en}</p>
+      <p class="cmp__note">{t('compare.taiwanNote')}</p>
+    </div>
+
+    <span class="cmp__vs" aria-hidden="true">vs</span>
+
+    <div class="cmp__side cmp__side--nobel">
+      <p class="cmp__tag">{t('compare.stockholm')}</p>
+      <p class="cmp__when">{rec.prize.year}</p>
+      <p class="cmp__where">Stockholm</p>
+      <p class="cmp__note">{t('compare.stockholmNote')}</p>
+      <p class="cmp__go">
+        <ExtLink lang={lang} href={rec.links.nobel_lecture}>{t('compare.open')}</ExtLink>
+      </p>
+    </div>
+  </div>
+
+  <ol class="cmp__prompts" role="list">
+    {prompts.map((p) => <li>{p}</li>)}
+  </ol>
+</section>
+
+<style>
+  .cmp {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: 1.1rem 1.2rem 1rem;
+  }
+  .cmp__h { font-size: var(--step-1); color: var(--cream); }
+  .cmp__h::before {
+    content: ''; display: inline-block; inline-size: .5rem; block-size: .5rem;
+    background: var(--accent); margin-inline-end: .6rem; vertical-align: .12em; border-radius: 1px;
+  }
+  .cmp__lede { font-size: var(--step--1); color: var(--muted); line-height: 1.75; margin-block-start: .6rem; max-inline-size: none; }
+
+  .cmp__pair { display: grid; gap: .7rem; align-items: stretch; margin-block-start: 1rem; }
+  @media (min-width: 44rem) { .cmp__pair { grid-template-columns: 1fr auto 1fr; } }
+  .cmp__side {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: .85rem .95rem; display: grid; gap: .12rem; align-content: start;
+    background: var(--bg-1);
+  }
+  .cmp__side--nobel { border-color: color-mix(in srgb, var(--accent) 40%, transparent); }
+  .cmp__tag { font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--accent); }
+  .cmp__when { font-family: var(--font-display); font-size: var(--step-1); color: var(--cream); font-variant-numeric: lining-nums; }
+  .cmp__where { font-size: var(--step--1); color: var(--muted); }
+  .cmp__note { font-size: var(--step--1); color: var(--muted-dim); line-height: 1.65; margin-block-start: .4rem; max-inline-size: none; }
+  .cmp__go { margin-block-start: .5rem; }
+  .cmp__go :global(a) { font-size: var(--step--1); }
+  .cmp__vs {
+    align-self: center; justify-self: center;
+    font-family: var(--font-display); font-size: var(--step-1); color: var(--muted-dim);
+  }
+
+  .cmp__prompts { margin: 1rem 0 0; padding-inline-start: 1.2rem; display: grid; gap: .35rem; }
+  .cmp__prompts li { font-size: var(--step--1); color: var(--text); line-height: 1.7; }
+</style>

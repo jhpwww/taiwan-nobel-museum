@@ -141,6 +141,19 @@ Everything in `data/catalog.json` is traceable. See the header of `scripts/seed-
 Two dates that the programme book left ambiguous were settled from the video titles:
 **Wüthrich 2026-04-07** and **Semenza 2026-04-14**.
 
+## The learning area
+
+`/learn/` is a **museum** feature, not a course site: how to get something out of a lecture,
+a place to keep notes, and the two-version comparison. Every lecture page carries a notes panel
+(save the lecture, mark each version watched, write 摘要 / 反思 / 延伸問題, draft a question) and
+`/study/` aggregates it with export, backup and restore. No account and no server — it all lives
+in `localStorage`, and the page says so.
+
+One NTU course, 走進諾貝爾 (LibEdu1140), is built around this collection. It appears as a
+subordinate aside at the foot of `/learn/` and as short parenthetical notes in the tools. **Keep
+it subordinate**: the museum is not a course tool, and a visitor who is not enrolled should never
+feel they have wandered into someone's classroom.
+
 ## Browsing
 
 `/lectures/` lists every video the museum holds — 62 of them — filterable by three independent

@@ -1,7 +1,7 @@
 ---
 import '../styles/global.css';
 import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
-import { home, browse, about, course, asset, otherLang } from '../i18n/routing';
+import { home, browse, about, learn, asset, otherLang } from '../i18n/routing';
 
 interface Props {
   lang: Lang;
@@ -68,7 +68,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         <div class="wrap topbar__in topbar__in--end">
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
             <a href={browse(lang)}>{t('nav.all')}</a>
-            <a href={course(lang)}>{t('nav.course')}</a>
+            <a href={learn(lang)}>{t('nav.learn')}</a>
             <a href={about(lang)}>{t('nav.about')}</a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}>
               {LANG_LABEL[other.lang]}
@@ -91,7 +91,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
             <a href={home(lang)}>{t('nav.hall')}</a>
             <a href={browse(lang)}>{t('nav.all')}</a>
-            <a href={course(lang)}>{t('nav.course')}</a>
+            <a href={learn(lang)}>{t('nav.learn')}</a>
             <a href={about(lang)}>{t('nav.about')}</a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}>
               {LANG_LABEL[other.lang]}
