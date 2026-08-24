@@ -171,7 +171,7 @@ SPECIAL = [
       note_zh="展期 2026/5/4–5/28，臺大校總區綜合教學館2樓，獲瑞典駐臺辦事處特別授權"),
 ]
 
-# 影像紀實 that belong to the programme rather than to a single laureate
+# 專訪 that belong to the programme rather than to a single laureate
 STANDALONE_RECORDS = [
     dict(id="morawetz-storm", source="storm", yt="fxqhag7i8zE",
          person_en="Uwe Morawetz", person_zh="烏維‧莫拉維茨",

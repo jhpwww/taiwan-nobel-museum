@@ -16,7 +16,7 @@ Audience: high-school students, undergraduates, and the general public. Not spec
 |---|---|
 | 31 lectures | Nov 2025 – May 2026, 31 Nobel laureates, 12 host institutions |
 | 導讀影片 | 6 published so far; the schema carries all 31 as they are released |
-| 影像紀實 | 25 interviews — 9 by 天下雜誌 CommonWealth Magazine, 16 by 風傳媒 The Storm Media |
+| 專訪 | 25 interviews — 9 by 天下雜誌 CommonWealth Magazine, 16 by 風傳媒 The Storm Media |
 | Special events | Launch ceremony, two 北一女中 outreach lectures, a laureate panel, the 對話諾貝爾特展 |
 
 Prize categories: Physics 9 · Chemistry 8 · Medicine 7 · Economics 5 · Peace 2 · Literature 0.
@@ -144,7 +144,7 @@ Two dates that the programme book left ambiguous were settled from the video tit
 ## Browsing
 
 `/lectures/` lists every video the museum holds — 62 of them — filterable by three independent
-groups: **影片類別** (導讀 6 · 講座 31 · 紀實 25), **獎項類別**, and **主題**. Filter state lives
+groups: **影片類別** (導讀 6 · 講座 31 · 專訪 25), **獎項類別**, and **主題**. Filter state lives
 in the URL, so a filtered view can be shared and survives a reload.
 
 ## Checking links

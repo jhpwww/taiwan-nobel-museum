@@ -164,7 +164,7 @@ export function recommended(): Lecture {
  * Three kinds, which is what the 影片類別 filter switches between:
  *   guide   導讀影片 — the short introduction filmed for each lecture
  *   lecture 講座     — the lecture itself
- *   record  影像紀實 — the interviews by 天下雜誌 and 風傳媒
+ *   record  專訪     — the interviews by 天下雜誌 and 風傳媒
  * ------------------------------------------------------------------ */
 export type VideoKind = 'guide' | 'lecture' | 'record';
 

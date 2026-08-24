@@ -79,7 +79,7 @@ export const ui = {
     'browse.filterKind': '影片類別',
     'browse.kindGuide': '導讀',
     'browse.kindLecture': '講座',
-    'browse.kindRecord': '紀實',
+    'browse.kindRecord': '專訪',
     'browse.results': '共 {n} 支影片',
     'browse.watchOn': '在 YouTube 觀看',
     'browse.filterAll': '全部',
