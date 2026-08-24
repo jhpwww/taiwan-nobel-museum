@@ -34,10 +34,14 @@ const { opacity = 0.55 } = Astro.props;
 </style>
 
 <script>
+  import { motionOn } from '../scripts/motion';
+
   const v = document.querySelector<HTMLVideoElement>('[data-ambient]');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   const saveData = (navigator as any).connection?.saveData === true;
-  if (v && !reduce.matches && !saveData) {
+
+  function enable() {
+    if (!v || saveData || v.dataset.wired) return;
+    v.dataset.wired = '1';
     // sources are inert until we opt in, so the poster alone costs 6 KB
     v.querySelectorAll('source').forEach((s) => {
       const u = s.getAttribute('data-src');
@@ -47,7 +51,16 @@ const { opacity = 0.55 } = Astro.props;
     const play = () => v.play().then(() => v.setAttribute('data-on', '')).catch(() => {});
     if (v.readyState >= 2) play();
     else v.addEventListener('canplay', play, { once: true });
-    // don't decode video for a tab nobody is looking at
+    // some profiles refuse autoplay even when muted; a first gesture recovers it
+    addEventListener('pointerdown', play, { once: true });
     document.addEventListener('visibilitychange', () => (document.hidden ? v.pause() : play()));
   }
+
+  function sync() {
+    if (!v) return;
+    if (motionOn()) enable();
+    else { v.pause(); v.removeAttribute('data-on'); }
+  }
+  sync();
+  addEventListener('motionpref', sync);
 </script>

@@ -71,6 +71,12 @@ src/
   Keep it that way. DPR is capped at 1.5, there are no shadow maps, and the loop must stop on
   IntersectionObserver and visibilitychange.
 - Anything drawn on the canvas is decoration. Every link must exist in the markup underneath.
+- NEVER gate an animation on `@media (prefers-reduced-motion: reduce)` or on
+  `matchMedia(...).matches` alone. Ask `motionOn()` (`src/scripts/motion.ts`) in JS and key CSS
+  off `html[data-motion='off']`. The OS switch is system-wide and unoverridable; used raw it
+  leaves visitors with a completely static museum and no way back.
+- Overlays that need clicking must be checked against the fixed header, which spans the full
+  width. Painting above it (z-index) is not enough — the header still swallows the pointer.
 - Camera moves are WALL-CLOCK driven (`performance.now()` against a stored `t0`), never by
   accumulating a clamped per-frame delta. With a clamp, a slow renderer stretches a 1.15 s move
   into tens of seconds and any navigation waiting on its callback never happens.

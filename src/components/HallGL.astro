@@ -8,6 +8,7 @@
  */
 import Sculpture from './Sculpture.astro';
 import StyleSwitch from './StyleSwitch.astro';
+import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
@@ -33,6 +34,7 @@ const stills = lectures
 
 <section class="hallgl" aria-labelledby="hall-title">
   <StyleSwitch lang={lang} current="gl" />
+  <MotionToggle lang={lang} />
   <canvas
     class="hallgl__canvas"
     data-rotunda

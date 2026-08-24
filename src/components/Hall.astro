@@ -2,6 +2,7 @@
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
 import AmbientVideo from './AmbientVideo.astro';
 import StyleSwitch from './StyleSwitch.astro';
+import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
@@ -33,6 +34,7 @@ const cats = ORDER.map((key, i) => ({
 
 <section class="hall" aria-labelledby="hall-title">
   <StyleSwitch lang={lang} current="flat" />
+  <MotionToggle lang={lang} />
   <AmbientVideo opacity={0.62} />
   <div class="hall__scene" data-parallax aria-hidden="true">
     <div class="layer layer--vault" data-depth="6">
@@ -344,6 +346,7 @@ const cats = ORDER.map((key, i) => ({
 
 <script>
   import { wireWalkIn } from '../scripts/walkin';
+  import { motionOn } from '../scripts/motion';
   const hallEl = document.querySelector<HTMLElement>('.hall');
   const veilEl = document.querySelector<HTMLElement>('[data-veil]');
   const plinthLinks = document.querySelectorAll<HTMLAnchorElement>('.plinth[data-cat]');
@@ -352,7 +355,7 @@ const cats = ORDER.map((key, i) => ({
   // Pointer parallax. Cheap: one rAF, transform only, disabled for reduced motion.
   const scene = document.querySelector<HTMLElement>('[data-parallax]');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (scene && !reduce.matches && window.matchMedia('(pointer: fine)').matches) {
+  if (scene && motionOn() && window.matchMedia('(pointer: fine)').matches) {
     const layers = [...scene.querySelectorAll<HTMLElement>('.layer[data-depth]')];
     let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
 

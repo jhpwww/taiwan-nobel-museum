@@ -12,6 +12,7 @@
 import Sculpture3D from './Sculpture3D.astro';
 import AmbientVideo from './AmbientVideo.astro';
 import StyleSwitch from './StyleSwitch.astro';
+import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
@@ -47,6 +48,7 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
 
 <section class="hall3d" aria-labelledby="hall-title">
   <StyleSwitch lang={lang} current="room" />
+  <MotionToggle lang={lang} />
   <AmbientVideo opacity={0.28} />
   <div class="stage" aria-hidden="true">
     <div class="camera" data-camera>
@@ -407,6 +409,7 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
 
 <script>
   import { wireWalkIn } from '../scripts/walkin';
+  import { motionOn } from '../scripts/motion';
 
   const hall = document.querySelector<HTMLElement>('.hall3d');
   const veilEl = document.querySelector<HTMLElement>('[data-veil]');
@@ -417,8 +420,8 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
 
   // One rAF, two rotations, one element. Everything else is compositor work.
   const cam = document.querySelector<HTMLElement>('[data-camera]');
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
-  if (cam && !reduce.matches && matchMedia('(pointer: fine)').matches) {
+  
+  if (cam && motionOn() && matchMedia('(pointer: fine)').matches) {
     let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;
     const tick = () => {
       cx += (tx - cx) * 0.05;

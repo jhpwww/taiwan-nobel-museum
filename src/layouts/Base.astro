@@ -46,6 +46,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Noto+Sans+TC:wght@300;400;500&family=Noto+Serif+TC:wght@400;500;600&display=swap"
     />
+
+    <!-- decide motion before first paint, so nothing flashes on either setting -->
+    <script is:inline>
+      (function () {
+        var p = 'auto';
+        try { p = localStorage.getItem('nlm:motion') || 'auto'; } catch (e) {}
+        var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+        document.documentElement.setAttribute(
+          'data-motion', p === 'auto' ? (reduce ? 'off' : 'on') : p
+        );
+      })();
+    </script>
   </head>
 
   <body>

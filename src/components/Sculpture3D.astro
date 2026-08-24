@@ -117,7 +117,9 @@ const gap = 1.5;   // px between slices
     filter: blur(8px);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .is-turning { animation: none; transform: translateZ(calc(var(--depth) / 2)) rotateY(-12deg); }
+  /* motion is decided by data-motion, never by the media query alone */
+  :global(html[data-motion='off']) .is-turning {
+    animation: none;
+    transform: translateZ(calc(var(--depth) / 2)) rotateY(-12deg);
   }
 </style>

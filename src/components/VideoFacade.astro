@@ -161,10 +161,8 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     display: block;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .vf__frames { display: none; }
-    .vf__btn[data-cine='on'] .vf__poster { transform: none; }
-  }
+  :global(html[data-motion='off']) .vf__frames { display: none; }
+  :global(html[data-motion='off']) .vf__btn[data-cine='on'] .vf__poster { transform: none; }
 </style>
 
 <script>

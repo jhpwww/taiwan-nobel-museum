@@ -29,6 +29,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { makeStudioEnv, makeShadowTexture } from './env';
+import { motionOn } from './motion';
 
 export interface RotundaOptions {
   canvas: HTMLCanvasElement;
@@ -431,7 +432,7 @@ export function createRotunda(opts: RotundaOptions) {
 
   /* ================= loop ================= */
   let raf = 0, running = false, t = 0, last = performance.now();
-  const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+
 
   /*
    * Adaptive quality. Software renderers (no GPU acceleration, some VMs and
@@ -533,7 +534,7 @@ export function createRotunda(opts: RotundaOptions) {
     if (running) return;
     running = true;
     last = performance.now();
-    if (reduce.matches) { camera.position.copy(HOME.pos); camera.lookAt(HOME.look); composer.render(); running = false; return; }
+    if (!motionOn()) { camera.position.copy(HOME.pos); lookNow.copy(HOME.look); camera.lookAt(lookNow); composer.render(); running = false; return; }
     raf = requestAnimationFrame(frame);
   }
   function stop() { running = false; if (raf) cancelAnimationFrame(raf); raf = 0; }
@@ -541,7 +542,7 @@ export function createRotunda(opts: RotundaOptions) {
   resize();
   start();
   // the entrance: a slow dolly in from the doorway
-  if (!reduce.matches) fly(HOME.pos.clone(), HOME.look.clone(), 3.4);
+  if (motionOn()) fly(HOME.pos.clone(), HOME.look.clone(), 3.4);
 
   const io = new IntersectionObserver(([e]) => (e.isIntersecting ? start() : stop()), { threshold: 0.02 });
   io.observe(canvas);
@@ -557,11 +558,16 @@ export function createRotunda(opts: RotundaOptions) {
   /** fly the camera into a gallery, then hand back so the page can navigate */
   function walkInto(key: string, done: () => void) {
     const target = targets.find((x) => x.key === key);
-    if (!target || reduce.matches) { done(); return; }
+    if (!target || !motionOn()) { done(); return; }
     start();
     const to = target.pos.clone().add(new Vector3(0, 0.2, 3.2));
     fly(to, target.pos.clone(), 1.15, done);
   }
+
+  // the visitor may switch motion on after arrival
+  addEventListener('motionpref', () => {
+    if (motionOn()) { start(); } else { stop(); camera.position.copy(HOME.pos); lookNow.copy(HOME.look); camera.lookAt(lookNow); composer.render(); }
+  });
 
   return { stop, start, walkInto, renderer };
 }

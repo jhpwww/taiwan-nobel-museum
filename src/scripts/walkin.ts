@@ -8,17 +8,21 @@
  * Skipped entirely under reduced motion, and for modified clicks (open in a
  * new tab must keep working).
  */
+import { motionOn } from './motion';
+
 export function wireWalkIn(opts: {
   scene: HTMLElement;          // the element that gets pushed
   veil: HTMLElement;           // the colour wash
   links: NodeListOf<HTMLAnchorElement> | HTMLAnchorElement[];
 }) {
   const { scene, veil, links } = opts;
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  // asked per click, not once at load: the visitor can flip the preference
+  const animate = () => motionOn();
 
   for (const a of Array.from(links)) {
     a.addEventListener('click', (e) => {
       if (e.metaKey || e.ctrlKey || e.shiftKey || (e as MouseEvent).button !== 0) return;
+      if (!animate()) return;               // no transition: let the link behave normally
       e.preventDefault();
 
       const r = a.getBoundingClientRect();
