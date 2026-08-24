@@ -144,7 +144,6 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
   /* same badge as LectureCard's — top-left, category block colour, dark text.
      If you restyle one, restyle the other. */
   /* immediate acknowledgement: the player takes a moment to appear */
-  .vf__btn[data-loading] { pointer-events: none; }
   .vf__btn[data-loading] .vf__poster { filter: brightness(0.45); }
   .vf__btn[data-loading] .vf__play { animation: vf-pulse 0.9s ease-in-out infinite; }
   @keyframes vf-pulse { 50% { scale: 0.86; opacity: 0.55; } }
@@ -169,6 +168,15 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     color: var(--muted);
   }
 
+  /* the player, built on pointerdown and hidden until the tap completes */
+  .vf :global(.vf__frame.is-waiting) {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .vf { position: relative; }
+
   /* live iframe */
   .vf :global(iframe) {
     inline-size: 100%;
@@ -183,8 +191,26 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
 </style>
 
 <script>
-  // One delegated handler for every facade on the page.
+  /*
+   * One delegated handler for every facade on the page.
+   *
+   * Getting playback to start on the FIRST tap is the whole difficulty here.
+   * Mobile browsers refuse to start unmuted video in an iframe that was
+   * created after the gesture, so a player built inside the click handler
+   * arrives paused and needs a second tap on YouTube's own button.
+   *
+   * So the player is built on pointerdown — before the gesture finishes —
+   * hidden behind the poster. The click that follows then lands on a player
+   * that already exists, and the play command goes out inside a real user
+   * gesture. If the finger turns out to be scrolling rather than tapping, the
+   * half-built player is thrown away again.
+   */
   const CINE = 'data-cine';
+  const ORIGIN = 'https://www.youtube-nocookie.com';
+  const MOVE_CANCEL = 12;               // px of travel that means "scroll", not "tap"
+
+  type Pending = { btn: HTMLElement; frame: HTMLIFrameElement; x: number; y: number };
+  let pending: Pending | null = null;
 
   function addFrames(btn: HTMLElement) {
     if (btn.dataset.framesLoaded) return;
@@ -202,62 +228,123 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     }
   }
 
-  function play(btn: HTMLElement) {
+  function buildFrame(btn: HTMLElement): HTMLIFrameElement | null {
     const id = btn.dataset.yt;
-    const fig = btn.closest('.vf');
-    if (!id || !fig || btn.hasAttribute('data-loading')) return;
-    btn.setAttribute('data-loading', '');
-    const iframe = document.createElement('iframe');
-    iframe.src =
-      `https://www.youtube-nocookie.com/embed/${id}` +
+    if (!id) return null;
+    const f = document.createElement('iframe');
+    f.src =
+      `${ORIGIN}/embed/${id}` +
       `?autoplay=1&rel=0&modestbranding=1&playsinline=1&cc_load_policy=1&enablejsapi=1`;
-    iframe.title = btn.getAttribute('aria-label') ?? 'YouTube';
-    iframe.allow =
-      'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
-    iframe.allowFullscreen = true;
-    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-    btn.replaceWith(iframe);
-    iframe.focus();
+    f.title = btn.getAttribute('aria-label') ?? 'YouTube';
+    f.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+    f.allowFullscreen = true;
+    f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+    return f;
   }
 
-  document.addEventListener('click', (e) => {
+  /** ask the player to start, repeatedly, until it says it has */
+  function urge(frame: HTMLIFrameElement) {
+    const send = (func: string) =>
+      frame.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args: [] }), ORIGIN);
+    let tries = 0;
+    const timer = window.setInterval(() => {
+      if (++tries > 8) return window.clearInterval(timer);
+      frame.contentWindow?.postMessage(JSON.stringify({ event: 'listening' }), ORIGIN);
+      send('playVideo');
+    }, 300);
+    const onMsg = (e: MessageEvent) => {
+      if (e.origin !== ORIGIN || e.source !== frame.contentWindow) return;
+      try {
+        const d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+        if (d?.event === 'onStateChange' && d.info === 1) {
+          window.clearInterval(timer);
+          removeEventListener('message', onMsg);
+        }
+      } catch { /* not ours */ }
+    };
+    addEventListener('message', onMsg);
+    send('playVideo');
+  }
+
+  /** build the player now, keeping the poster in front of it */
+  function prepare(btn: HTMLElement, x: number, y: number) {
+    if (pending || btn.hasAttribute('data-live')) return;
+    const fig = btn.closest('.vf');
+    const frame = buildFrame(btn);
+    if (!fig || !frame) return;
+    frame.classList.add('vf__frame', 'is-waiting');
+    fig.appendChild(frame);
+    btn.setAttribute('data-loading', '');
+    pending = { btn, frame, x, y };
+  }
+
+  function discard() {
+    if (!pending) return;
+    pending.frame.remove();
+    pending.btn.removeAttribute('data-loading');
+    pending = null;
+  }
+
+  /** the gesture completed on the facade: reveal the player and start it */
+  function reveal(btn: HTMLElement) {
+    let frame = pending && pending.btn === btn ? pending.frame : null;
+    if (!frame) {                       // keyboard, or a browser with no pointerdown
+      frame = buildFrame(btn);
+      if (!frame) return;
+      frame.classList.add('vf__frame');
+      btn.closest('.vf')?.appendChild(frame);
+    }
+    pending = null;
+    frame.classList.remove('is-waiting');
+    btn.setAttribute('data-live', '');
+    btn.remove();
+    urge(frame);
+    frame.focus();
+  }
+
+  addEventListener('pointerdown', (e) => {
     const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
-    if (btn) play(btn);
+    if (!btn || (e as PointerEvent).button !== 0) return;
+    prepare(btn, (e as PointerEvent).clientX, (e as PointerEvent).clientY);
+  }, { passive: true });
+
+  addEventListener('pointermove', (e) => {
+    if (!pending) return;
+    const ev = e as PointerEvent;
+    if (Math.hypot(ev.clientX - pending.x, ev.clientY - pending.y) > MOVE_CANCEL) discard();
+  }, { passive: true });
+
+  addEventListener('pointercancel', discard, { passive: true });
+  addEventListener('scroll', () => { if (pending) discard(); }, { passive: true });
+
+  addEventListener('click', (e) => {
+    const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+    if (btn) { e.preventDefault(); reveal(btn); }
   });
 
   // The cine preview belongs to a hovering mouse. On touch, pointerenter fires
   // as part of the tap, and reacting to it changes the page before the click —
   // which is what makes a browser swallow the first tap.
-  document.addEventListener(
-    'pointerenter',
-    (e) => {
-      if ((e as PointerEvent).pointerType !== 'mouse') return;
-      const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
-      if (!btn) return;
-      addFrames(btn);
-      btn.setAttribute(CINE, 'on');
-    },
-    true,
-  );
-  document.addEventListener(
-    'focusin',
-    (e) => {
-      const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
-      if (!btn) return;
-      addFrames(btn);
-      btn.setAttribute(CINE, 'on');
-    },
-    true,
-  );
+  addEventListener('pointerenter', (e) => {
+    if ((e as PointerEvent).pointerType !== 'mouse') return;
+    const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+    if (!btn) return;
+    addFrames(btn);
+    btn.setAttribute(CINE, 'on');
+  }, true);
+
+  addEventListener('focusin', (e) => {
+    const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+    if (!btn) return;
+    addFrames(btn);
+    btn.setAttribute(CINE, 'on');
+  }, true);
+
   for (const ev of ['pointerleave', 'focusout'] as const) {
-    document.addEventListener(
-      ev,
-      (e) => {
-        if (ev === 'pointerleave' && (e as PointerEvent).pointerType !== 'mouse') return;
-        const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
-        if (btn) btn.removeAttribute(CINE);
-      },
-      true,
-    );
+    addEventListener(ev, (e) => {
+      if (ev === 'pointerleave' && (e as PointerEvent).pointerType !== 'mouse') return;
+      const btn = (e.target as Element)?.closest?.('.vf__btn') as HTMLElement | null;
+      if (btn) btn.removeAttribute(CINE);
+    }, true);
   }
 </script>

@@ -156,6 +156,15 @@ src/
 - Playwright's device emulation does NOT reproduce these behaviours: it delivers a clean tap and
   ignores sticky hover. A green emulated test is not evidence the bug is fixed on a real phone.
 
+**The video facade**
+- The player is built on `pointerdown`, hidden behind the poster, and revealed on `click`.
+  That ordering is the point: mobile browsers refuse to start unmuted video in an iframe created
+  AFTER the gesture, so building it first lets the tap land on a player that already exists.
+  A gesture that turns into a scroll (pointermove past ~12px, pointercancel, or a scroll event)
+  discards the half-built player.
+- Never put `pointer-events: none` on the facade button. It is still waiting for the pointerup
+  and click that hand over to the player; suppressing them strands the video permanently.
+
 **CSS**
 - Two accent tokens, and they are not interchangeable. `--accent` paints strokes, text, borders
   and the sculptures — full-strength hue. `--accent-block` paints solid fills (material buttons,
