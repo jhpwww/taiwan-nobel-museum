@@ -30,6 +30,7 @@ export interface Lecture {
   interviews: { source: string; source_en: string; source_zh: string; id: string }[];
   links: {
     nobel_facts: string;
+    nobel_lecture: string;
     cw_hub: string;
     instagram?: string;
     ntu_epaper?: string;

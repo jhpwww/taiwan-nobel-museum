@@ -205,6 +205,10 @@ def build():
             ],
             "links": {
                 "nobel_facts": f"https://www.nobelprize.org/prizes/{nslug}/facts/",
+                # the original Nobel Lecture. The course requires students to
+                # watch this and compare it with the Taiwan lecture, so it is
+                # not optional extra reading — all 31 verified present.
+                "nobel_lecture": f"https://www.nobelprize.org/prizes/{nslug}/lecture/",
                 "cw_hub": CW_HUB,
                 **({"instagram": f"https://www.instagram.com/reel/{NTU_LINKS[lid]['ig']}/",
                     "ntu_epaper": NTU_LINKS[lid]["epaper"],

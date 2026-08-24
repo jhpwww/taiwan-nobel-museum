@@ -1,0 +1,242 @@
+---
+/**
+ * StudyPage.astro — the student's own progress across the course.
+ *
+ * Reads only from localStorage, so the page ships as an empty shell and is
+ * filled in by script. That also means it is correct for a visitor who is not
+ * taking the course: they simply see the empty state.
+ */
+import Base from '../layouts/Base.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { path } from '../i18n/routing';
+import { lectures } from '../data/catalog';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+/** the script needs id → title and id → url without refetching the catalogue */
+const index = lectures.map((l) => ({
+  id: l.id,
+  name: lang === 'zh' ? `${l.laureate.en}（${l.laureate.zh}）` : l.laureate.en,
+  title: l.title.en,
+  href: path(lang, 'lecture', l.id),
+  cat: l.prize.category,
+}));
+---
+
+<Base lang={lang} title={t('study.pageTitle')} segments={['study']}>
+  <div class="wrap study" data-study-page data-index={JSON.stringify(index)}
+       data-ok-restore={t('study.restoreOk')} data-bad-restore={t('study.restoreBad')}
+       data-confirm-clear={t('study.clearConfirm')}>
+    <header class="study__head">
+      <p class="eyebrow"><a href={path(lang, 'course')}>{t('study.forCourse')}</a></p>
+      <h1>{t('study.pageTitle')}</h1>
+      <p class="study__blurb">{t('study.pageBlurb')}</p>
+    </header>
+
+    <section class="study__stats" aria-label={t('study.progress')}>
+      <div><b data-stat="picked">0</b><span>{t('study.statPicked')}</span></div>
+      <div><b data-stat="both">0</b><span>{t('study.statBoth')}</span></div>
+      <div><b data-stat="notes">0</b><span>{t('study.statNotes')}</span></div>
+      <div><b data-stat="questions">0</b><span>{t('study.statQuestions')}</span></div>
+    </section>
+
+    <p class="study__bar" aria-hidden="true"><span data-bar></span></p>
+
+    <section class="study__sec">
+      <h2>{t('study.myPicks')}</h2>
+      <ul class="picks" data-picks role="list"
+          data-tw={t('study.tagTw')} data-nobel={t('study.tagNobel')} data-note={t('study.tagNote')}></ul>
+      <p class="study__empty" data-empty>{t('study.emptyPicks')}</p>
+    </section>
+
+    <section class="study__sec">
+      <h2>{t('study.exportTitle')}</h2>
+      <p class="study__note">{t('study.exportNote')}</p>
+      <div class="study__actions">
+        <button type="button" data-export-notes>{t('study.exportNotes')}</button>
+        <button type="button" data-export-all>{t('study.exportAll')}</button>
+        <button type="button" data-download>{t('study.download')}</button>
+        <span data-msg class="study__msg"></span>
+      </div>
+      <textarea data-out rows="12" readonly aria-label={t('study.exportTitle')}></textarea>
+    </section>
+
+    <section class="study__sec">
+      <h2>{t('study.manageTitle')}</h2>
+      <p class="study__note">{t('study.manageNote')}</p>
+      <div class="study__actions">
+        <button type="button" data-backup>{t('study.backup')}</button>
+        <label class="study__file">
+          <input type="file" accept="application/json,.json" data-restore hidden />
+          <span>{t('study.restore')}</span>
+        </label>
+        <button type="button" class="danger" data-clear>{t('study.clear')}</button>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .study { padding-block: clamp(2rem, 5vw, 3.5rem); max-inline-size: 58rem; }
+  .study__head h1 { font-size: var(--step-3); color: var(--cream); margin-block-start: .3rem; }
+  .study__head a { text-decoration: none; }
+  .study__blurb { color: var(--text); line-height: 1.9; margin-block-start: .8rem; }
+
+  .study__stats {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+    gap: .8rem; margin-block-start: 1.8rem;
+  }
+  .study__stats div {
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: .9rem 1rem; display: grid; gap: .1rem;
+  }
+  .study__stats b {
+    font-family: var(--font-display); font-size: var(--step-3); color: var(--gold-bright);
+    line-height: 1; font-weight: 500; font-variant-numeric: lining-nums tabular-nums;
+  }
+  .study__stats span { font-size: var(--step--1); color: var(--muted); }
+
+  .study__bar {
+    block-size: 5px; border-radius: 3px; background: var(--surface-hi);
+    margin-block-start: .9rem; overflow: hidden; max-inline-size: none;
+  }
+  .study__bar span { display: block; block-size: 100%; inline-size: 0; background: var(--gold); transition: inline-size .5s var(--ease); }
+
+  .study__sec { margin-block-start: clamp(2rem, 5vw, 3rem); }
+  .study__sec h2 {
+    font-size: var(--step-2); color: var(--cream);
+    padding-block-start: 1.4rem; border-block-start: 1px solid var(--line);
+  }
+  .study__note, .study__empty { font-size: var(--step--1); color: var(--muted); margin-block-start: .8rem; }
+
+  .picks { display: grid; gap: .55rem; padding: 0; margin-block-start: 1.1rem; }
+  .picks li {
+    display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: .7rem .9rem;
+  }
+  .picks a { text-decoration: none; color: var(--cream); font-size: var(--step-0); }
+  .picks a:hover { color: var(--gold); }
+  .picks .tags { display: flex; gap: .35rem; margin-inline-start: auto; flex-wrap: wrap; }
+  .picks .tag {
+    font-size: .64rem; letter-spacing: .06em; padding: .12rem .5rem;
+    border-radius: 999px; border: 1px solid var(--line); color: var(--muted-dim);
+  }
+  .picks .tag[data-on] { color: #150d05; background: var(--gold); border-color: var(--gold); }
+
+  .study__actions { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-block-start: 1rem; }
+  .study button, .study__file span {
+    font-size: var(--step--1); color: #150d05; background: var(--gold);
+    border: 0; border-radius: 999px; padding: .42rem 1.05rem; cursor: pointer;
+    transition: filter .2s;
+  }
+  .study button:hover, .study__file span:hover { filter: brightness(1.1); }
+  .study button.danger { background: transparent; color: var(--c-medicine); border: 1px solid currentColor; }
+  .study__file { display: inline-flex; }
+  .study__msg { font-size: var(--step--1); color: var(--muted); }
+
+  .study textarea {
+    inline-size: 100%; margin-block-start: 1rem; resize: vertical;
+    background: var(--bg-1); color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: .8rem .9rem; font: inherit; font-size: var(--step--1); line-height: 1.8;
+  }
+</style>
+
+<script>
+  import { read, progress, exportNotes, exportAll, clearAll, importJSON, rawJSON, noteComplete, REQUIRED_PICKS } from '../scripts/study';
+
+  const root = document.querySelector<HTMLElement>('[data-study-page]');
+  if (root) {
+    type Row = { id: string; name: string; title: string; href: string; cat: string };
+    const index: Row[] = JSON.parse(root.dataset.index ?? '[]');
+    const byId = new Map(index.map((r) => [r.id, r]));
+    const titleFor = (id: string) => {
+      const r = byId.get(id);
+      return r ? `${r.name} — ${r.title}` : id;
+    };
+
+    const $ = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+    const out = $<HTMLTextAreaElement>('[data-out]');
+    const msg = $<HTMLElement>('[data-msg]');
+    const list = $<HTMLElement>('[data-picks]');
+    const empty = $<HTMLElement>('[data-empty]');
+
+    function say(text: string) {
+      msg.textContent = text;
+      setTimeout(() => (msg.textContent = ''), 2200);
+    }
+
+    function paint() {
+      const s = read();
+      const p = progress();
+      $('[data-stat="picked"]').textContent = `${p.picked}/${p.required}`;
+      $('[data-stat="both"]').textContent = String(p.bothWatched);
+      $('[data-stat="notes"]').textContent = String(p.notesDone);
+      $('[data-stat="questions"]').textContent = String(p.questions);
+      $<HTMLElement>('[data-bar]').style.inlineSize =
+        `${Math.min(100, (p.notesDone / REQUIRED_PICKS) * 100)}%`;
+
+      const picked = Object.entries(s).filter(([, e]) => e.picked);
+      list.replaceChildren();
+      for (const [id, e] of picked) {
+        const r = byId.get(id);
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = r?.href ?? '#';
+        a.textContent = r ? `${r.name}` : id;
+        li.append(a);
+        const tags = document.createElement('span');
+        tags.className = 'tags';
+        const mk = (label: string, on: boolean) => {
+          const t2 = document.createElement('span');
+          t2.className = 'tag';
+          t2.textContent = label;
+          if (on) t2.setAttribute('data-on', '');
+          return t2;
+        };
+        tags.append(
+          mk(list.dataset.tw!, !!e.watchedTaiwan),
+          mk(list.dataset.nobel!, !!e.watchedNobel),
+          mk(list.dataset.note!, noteComplete(e)),
+        );
+        li.append(tags);
+        list.append(li);
+      }
+      empty.hidden = picked.length > 0;
+    }
+
+    $('[data-export-notes]').addEventListener('click', () => { out.value = exportNotes(titleFor); out.select(); });
+    $('[data-export-all]').addEventListener('click', () => { out.value = exportAll(titleFor); out.select(); });
+    $('[data-download]').addEventListener('click', () => {
+      const blob = new Blob([exportAll(titleFor)], { type: 'text/plain;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '走進諾貝爾-學習紀錄.txt';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    $('[data-backup]').addEventListener('click', () => {
+      const blob = new Blob([rawJSON()], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'nobel-study-backup.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+    $<HTMLInputElement>('[data-restore]').addEventListener('change', async (ev) => {
+      const f = (ev.target as HTMLInputElement).files?.[0];
+      if (!f) return;
+      say(importJSON(await f.text()) ? root.dataset.okRestore! : root.dataset.badRestore!);
+      paint();
+    });
+    $('[data-clear]').addEventListener('click', () => {
+      if (confirm(root.dataset.confirmClear!)) { clearAll(); paint(); out.value = ''; }
+    });
+
+    addEventListener('study:changed', paint);
+    paint();
+  }
+</script>

@@ -1,0 +1,274 @@
+---
+/**
+ * StudyPanel.astro — the coursework scaffold on a lecture page.
+ *
+ * Mirrors what 走進諾貝爾 actually asks for: choose this as one of your six,
+ * watch both versions (Taiwan and the original Nobel Lecture), then write the
+ * three parts the syllabus requires. Everything stays in the browser.
+ *
+ * Rendered for every visitor but only unfolded on request, so a casual viewer
+ * is never confronted with coursework.
+ */
+import { useT, type Lang } from '../i18n/ui';
+import { type Lecture } from '../data/catalog';
+import { path } from '../i18n/routing';
+
+interface Props { lang: Lang; rec: Lecture }
+const { lang, rec } = Astro.props;
+const t = useT(lang);
+---
+
+<section class="sp" data-study={rec.id} aria-labelledby="sp-h">
+  <header class="sp__head">
+    <h3 id="sp-h" class="sp__title">{t('study.panelTitle')}</h3>
+    <a class="sp__course" href={path(lang, 'course')}>{t('study.forCourse')} →</a>
+  </header>
+
+  <div class="sp__steps">
+    <label class="sp__pick">
+      <input type="checkbox" data-pick />
+      <span class="sp__pick-box" aria-hidden="true"></span>
+      <span class="sp__pick-txt">
+        <b>{t('study.pick')}</b>
+        <em data-pick-count data-tmpl={t('study.pickCount')}></em>
+      </span>
+    </label>
+
+    <div class="sp__watch">
+      <label><input type="checkbox" data-watch="tw" /> <span>{t('study.watchedTw')}</span></label>
+      <label><input type="checkbox" data-watch="nobel" /> <span>{t('study.watchedNobel')}</span></label>
+    </div>
+  </div>
+
+  <details class="sp__note">
+    <summary>
+      <span>{t('study.noteTitle')}</span>
+      <span class="sp__status" data-status data-done={t('study.noteDone')} data-todo={t('study.noteTodo')}></span>
+    </summary>
+
+    <p class="sp__hint">{t('study.noteHint')}</p>
+
+    <label class="sp__field">
+      <span class="sp__label">1. {t('study.fSummary')}</span>
+      <span class="sp__aid">{t('study.fSummaryAid')}</span>
+      <textarea data-field="summary" rows="4" placeholder={t('study.fSummaryPh')}></textarea>
+      <span class="sp__count" data-count="summary" data-tmpl={t('study.chars')}></span>
+    </label>
+
+    <label class="sp__field">
+      <span class="sp__label">2. {t('study.fReflection')}</span>
+      <span class="sp__aid">{t('study.fReflectionAid')}</span>
+      <textarea data-field="reflection" rows="4" placeholder={t('study.fReflectionPh')}></textarea>
+      <span class="sp__count" data-count="reflection" data-tmpl={t('study.chars')}></span>
+    </label>
+
+    <label class="sp__field">
+      <span class="sp__label">3. {t('study.fQuestion')}</span>
+      <span class="sp__aid">{t('study.fQuestionAid')}</span>
+      <textarea data-field="question" rows="3" placeholder={t('study.fQuestionPh')}></textarea>
+      <span class="sp__count" data-count="question" data-tmpl={t('study.chars')}></span>
+    </label>
+
+    <div class="sp__actions">
+      <button type="button" data-copy-note data-label={t('study.copyNote')} data-ok={t('study.copied')} data-fail={t('study.copyFail')}>{t('study.copyNote')}</button>
+      <span class="sp__saved" data-saved data-msg={t('study.saved')}></span>
+    </div>
+  </details>
+
+  <details class="sp__note">
+    <summary><span>{t('study.askTitle')}</span></summary>
+    <p class="sp__hint">{t('study.askHint')}</p>
+    <ul class="sp__crit">
+      <li>{t('study.askC1')}</li>
+      <li>{t('study.askC2')}</li>
+      <li>{t('study.askC3')}</li>
+    </ul>
+    <label class="sp__field">
+      <textarea data-field="askQuestion" rows="4" placeholder={t('study.askPh')}></textarea>
+      <span class="sp__count" data-count="askQuestion" data-tmpl={t('study.chars')}></span>
+    </label>
+    <div class="sp__actions">
+      <button type="button" data-copy-ask data-label={t('study.copyAsk')} data-ok={t('study.copied')} data-fail={t('study.copyFail')}>{t('study.copyAsk')}</button>
+    </div>
+  </details>
+
+  <p class="sp__privacy">{t('study.privacy')}</p>
+</section>
+
+<style>
+  .sp {
+    border: 1px solid color-mix(in srgb, var(--accent) 32%, var(--line));
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+    padding: 1.1rem 1.2rem 1rem;
+    display: grid; gap: .85rem;
+  }
+  .sp__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+  .sp__title { font-size: var(--step-1); color: var(--cream); }
+  .sp__course { font-size: var(--step--1); color: var(--gold); text-decoration: none; }
+  .sp__course:hover { color: var(--gold-bright); }
+
+  .sp__steps { display: grid; gap: .6rem; }
+  .sp__pick { display: flex; align-items: flex-start; gap: .6rem; cursor: pointer; }
+  .sp__pick input { position: absolute; opacity: 0; inline-size: 0; }
+  .sp__pick-box {
+    flex: none; inline-size: 20px; block-size: 20px; margin-block-start: 2px;
+    border: 1px solid var(--line-hi); border-radius: 4px; display: grid; place-items: center;
+    transition: background .2s, border-color .2s;
+  }
+  .sp__pick input:checked + .sp__pick-box {
+    background: var(--accent-block); border-color: var(--accent-block);
+  }
+  .sp__pick input:checked + .sp__pick-box::after { content: '✓'; color: #150d05; font-size: 13px; line-height: 1; }
+  .sp__pick input:focus-visible + .sp__pick-box { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
+  .sp__pick-txt { display: grid; gap: .1rem; }
+  .sp__pick-txt b { font-weight: 500; color: var(--cream); font-size: var(--step-0); }
+  .sp__pick-txt em { font-style: normal; font-size: var(--step--1); color: var(--muted); }
+
+  .sp__watch { display: flex; flex-wrap: wrap; gap: .5rem 1.3rem; padding-inline-start: 1.8rem; }
+  .sp__watch label { display: inline-flex; align-items: center; gap: .45rem; font-size: var(--step--1); color: var(--muted); cursor: pointer; }
+  .sp__watch input { accent-color: var(--accent-block); inline-size: 15px; block-size: 15px; }
+  .sp__watch input:checked + span { color: var(--text); }
+
+  .sp__note { border-block-start: 1px solid var(--line); padding-block-start: .75rem; }
+  .sp__note summary {
+    cursor: pointer; font-size: var(--step-0); color: var(--cream);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    list-style: none;
+  }
+  .sp__note summary::-webkit-details-marker { display: none; }
+  .sp__note summary::before { content: '▸'; color: var(--accent); margin-inline-end: .5rem; transition: rotate .2s; }
+  .sp__note[open] summary::before { rotate: 90deg; }
+  .sp__note summary > span:first-of-type { flex: 1; }
+  .sp__status { font-size: var(--step--1); color: var(--muted-dim); }
+  .sp__status.is-done { color: #8fd39a; }
+
+  .sp__hint { font-size: var(--step--1); color: var(--muted); margin-block: .7rem .5rem; max-inline-size: none; }
+  .sp__crit { margin: 0 0 .7rem; padding-inline-start: 1.1rem; display: grid; gap: .25rem; }
+  .sp__crit li { font-size: var(--step--1); color: var(--muted); }
+
+  .sp__field { display: grid; gap: .2rem; margin-block-end: .8rem; }
+  .sp__label { font-size: var(--step--1); color: var(--cream); }
+  .sp__aid { font-size: 0.68rem; color: var(--muted-dim); line-height: 1.5; }
+  .sp textarea {
+    inline-size: 100%; resize: vertical;
+    background: var(--bg-1); color: var(--text);
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: .55rem .7rem; font: inherit; font-size: var(--step--1); line-height: 1.75;
+    margin-block-start: .25rem;
+  }
+  .sp textarea:focus-visible { outline: 2px solid var(--gold-bright); outline-offset: 1px; border-color: transparent; }
+  .sp__count { font-size: 0.66rem; color: var(--muted-dim); justify-self: end; }
+
+  .sp__actions { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
+  .sp button {
+    font-size: var(--step--1); color: #150d05; background: var(--accent-block);
+    border: 0; border-radius: 999px; padding: .38rem 1rem; cursor: pointer;
+    transition: filter .2s;
+  }
+  .sp button:hover { filter: brightness(1.1); }
+  .sp__saved { font-size: var(--step--1); color: var(--muted-dim); }
+  .sp__privacy { font-size: 0.66rem; color: var(--muted-dim); border-block-start: 1px solid var(--line); padding-block-start: .6rem; }
+</style>
+
+<script>
+  import { entry, update, setNote, picks, noteComplete, REQUIRED_PICKS } from '../scripts/study';
+
+  const root = document.querySelector<HTMLElement>('[data-study]');
+  if (root) {
+    const id = root.dataset.study!;
+    const $ = <T extends Element>(s: string) => root.querySelector<T>(s);
+
+    const pick = $<HTMLInputElement>('[data-pick]')!;
+    const pickCount = $<HTMLElement>('[data-pick-count]')!;
+    const status = $<HTMLElement>('[data-status]')!;
+    const saved = $<HTMLElement>('[data-saved]')!;
+    const fields = [...root.querySelectorAll<HTMLTextAreaElement>('textarea[data-field]')];
+    const watches = [...root.querySelectorAll<HTMLInputElement>('[data-watch]')];
+
+    /** stats and toggles only — never the textareas, see hydrate() */
+    function paint() {
+      const e = entry(id);
+      pick.checked = !!e.picked;
+      for (const w of watches) {
+        w.checked = w.dataset.watch === 'tw' ? !!e.watchedTaiwan : !!e.watchedNobel;
+      }
+      const n = picks().length;
+      pickCount.textContent = pickCount.dataset.tmpl!.replace('{n}', String(n)).replace('{r}', String(REQUIRED_PICKS));
+      markStatus();
+    }
+
+    function markStatus() {
+      const done = noteComplete(entry(id));
+      status.textContent = done ? status.dataset.done! : status.dataset.todo!;
+      status.classList.toggle('is-done', done);
+    }
+
+    /** fill the textareas from storage exactly once, on load */
+    function hydrate() {
+      const e = entry(id);
+      for (const f of fields) {
+        const k = f.dataset.field as 'summary' | 'reflection' | 'question' | 'askQuestion';
+        f.value = k === 'askQuestion' ? (e.askQuestion ?? '') : (e.note?.[k] ?? '');
+        countOf(f);
+      }
+    }
+
+    function countOf(f: HTMLTextAreaElement) {
+      const el = root!.querySelector<HTMLElement>(`[data-count="${f.dataset.field}"]`);
+      if (el) el.textContent = el.dataset.tmpl!.replace('{n}', String(f.value.trim().length));
+    }
+
+    let saveTimer = 0;
+    function flash() {
+      saved.textContent = saved.dataset.msg!;
+      clearTimeout(saveTimer);
+      saveTimer = window.setTimeout(() => (saved.textContent = ''), 1600);
+    }
+
+    pick.addEventListener('change', () => { update(id, { picked: pick.checked }); paint(); });
+    for (const w of watches) {
+      w.addEventListener('change', () =>
+        update(id, w.dataset.watch === 'tw' ? { watchedTaiwan: w.checked } : { watchedNobel: w.checked }));
+    }
+
+    for (const f of fields) {
+      let t = 0;
+      f.addEventListener('input', () => {
+        countOf(f);
+        clearTimeout(t);
+        t = window.setTimeout(() => {
+          const k = f.dataset.field!;
+          if (k === 'askQuestion') update(id, { askQuestion: f.value });
+          else setNote(id, { [k]: f.value } as any);
+          flash();
+          markStatus();
+        }, 450);
+      });
+    }
+
+    async function copy(text: string, btn: HTMLElement) {
+      try { await navigator.clipboard.writeText(text); btn.textContent = btn.dataset.ok!; }
+      catch { btn.textContent = btn.dataset.fail!; }
+      setTimeout(() => (btn.textContent = btn.dataset.label!), 1800);
+    }
+
+    $<HTMLButtonElement>('[data-copy-note]')?.addEventListener('click', (ev) => {
+      const e = entry(id);
+      const n = e.note ?? { summary: '', reflection: '', question: '' };
+      const title = document.querySelector('h1')?.textContent?.trim() ?? id;
+      copy(
+        `── ${title}\n【核心論點摘要】\n${n.summary}\n\n【個人反思】\n${n.reflection}\n\n【延伸問題】\n${n.question}`,
+        ev.currentTarget as HTMLElement,
+      );
+    });
+    $<HTMLButtonElement>('[data-copy-ask]')?.addEventListener('click', (ev) => {
+      const title = document.querySelector('h1')?.textContent?.trim() ?? id;
+      copy(`── ${title}\n${entry(id).askQuestion ?? ''}`, ev.currentTarget as HTMLElement);
+    });
+
+    addEventListener('study:changed', paint);
+    hydrate();
+    paint();
+  }
+</script>

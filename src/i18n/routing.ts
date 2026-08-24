@@ -18,6 +18,8 @@ export const gallery = (l: Lang, cat: string) => path(l, 'gallery', cat);
 export const lecture = (l: Lang, id: string) => path(l, 'lecture', id);
 export const browse = (l: Lang) => path(l, 'lectures');
 export const about = (l: Lang) => path(l, 'about');
+export const course = (l: Lang) => path(l, 'course');
+export const study = (l: Lang) => path(l, 'study');
 export const asset = (p: string) => `${BASE}${p.replace(/^\//, '')}`;
 
 /** The same page in the other language. */

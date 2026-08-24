@@ -4,6 +4,7 @@ import VideoFacade from './VideoFacade.astro';
 import LectureCard from './LectureCard.astro';
 import Sculpture, { type CategoryKey } from './Sculpture.astro';
 import ExtLink from './ExtLink.astro';
+import StudyPanel from './StudyPanel.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery } from '../i18n/routing';
 import { catName, tagName, relatedTo, localDate, type Lecture } from '../data/catalog';
@@ -115,12 +116,17 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
             </div>
           </section>
         )}
+        <StudyPanel lang={lang} rec={rec} />
       </div>
 
       {/* 5. go deeper */}
       <aside class="lec__aside" aria-labelledby="h-deep">
         <h3 id="h-deep" class="lec__h">{t('lec.deeper')}</h3>
         <ul class="links" role="list">
+          <li class="links__key">
+            <ExtLink lang={lang} href={rec.links.nobel_lecture}>{t('lec.nobelLecture')}</ExtLink>
+            <span>{t('lec.nobelLectureNote')}</span>
+          </li>
           <li>
             <ExtLink lang={lang} href={rec.links.nobel_facts}>{t('lec.nobelFacts')}</ExtLink>
             <span>{t('lec.nobelFactsNote')}</span>
@@ -217,6 +223,15 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
   .links { display: grid; gap: 1rem; padding: 0; margin: 0; }
   .links li { display: grid; gap: 0.15rem; }
   .links a { font-size: var(--step-0); text-decoration: none; border-block-end: 1px solid var(--line-hi); justify-self: start; }
+  /* the original Nobel Lecture is required reading for the course, so it
+     leads the list rather than sitting among the general references */
+  .links__key {
+    padding: .7rem .85rem; margin-block-end: .3rem;
+    border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--accent) 9%, transparent);
+  }
+  .links__key a { color: var(--cream); border-block-end-color: color-mix(in srgb, var(--accent) 60%, transparent); }
   .links a:hover { border-block-end-color: currentColor; }
   .links span { font-size: var(--step--1); color: var(--muted-dim); line-height: 1.55; }
 

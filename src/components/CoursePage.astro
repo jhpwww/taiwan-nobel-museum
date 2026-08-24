@@ -1,0 +1,202 @@
+---
+/**
+ * CoursePage.astro — the course area for 走進諾貝爾 (LibEdu1140).
+ *
+ * The syllabus is the source of truth; this page exists so a student can see
+ * the whole shape of the course in one screen and jump straight to the work.
+ * Facts here are transcribed from the official course outline — if the
+ * outline changes, change them here and nowhere else.
+ */
+import Base from '../layouts/Base.astro';
+import ExtLink from './ExtLink.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { path, browse } from '../i18n/routing';
+import { lectures } from '../data/catalog';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+const zh = lang === 'zh';
+
+const SYLLABUS = 'https://nol.ntu.edu.tw/nol/coursesearch/print_table.php?course_id=H01%2014500&class=&dpt_code=0000&ser_no=57608&semester=115-1&lang=CH';
+const ADD_FORM = 'https://forms.gle/hfiaP1MbtQXmryir6';
+const NOBEL = 'https://www.nobelprize.org/';
+const CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
+
+const facts = [
+  [zh ? '課號' : 'Course code', 'LibEdu1140 · H01 14500'],
+  [zh ? '學期' : 'Semester', zh ? '115-1（2 學分）' : '115-1 (2 credits)'],
+  [zh ? '時間' : 'Time', zh ? '星期四 9,10 節（16:30–18:20）' : 'Thu periods 9–10 (16:30–18:20)'],
+  [zh ? '地點' : 'Room', zh ? '博雅 201' : 'Boya 201'],
+  [zh ? '授課教師' : 'Teachers', zh ? '吳俊輝、洪貞玲' : 'Jiun-Huei Proty Wu, Chen-Ling Hung'],
+];
+
+const marks = [
+  { pct: 50, zh: '出席', en: 'Attendance',
+    zhN: '兩場校內演講必到，缺席任一場即不及格；其他課堂每缺一堂扣 10 分。校外場次每場加 5 分，最多加 10 分。',
+    enN: 'Both campus lectures are compulsory — miss either and you fail. Other sessions cost 10 points each. Outside sessions add 5 points each, up to 10.' },
+  { pct: 20, zh: '小組報告', en: 'Group report',
+    zhN: '演講前後的口頭報告。', enN: 'Oral reports before and after each lecture.' },
+  { pct: 10, zh: '提問競賽', en: 'Question competition',
+    zhN: '演講前提出有深度、有邏輯、有原創性的問題，由專家評分。遲交第一天扣 3 分、第二天 6 分、第三天 9 分。',
+    enN: 'Submit a deep, logical, original question before the lecture; judged by experts. Late: −3, −6, −9 on days one to three.' },
+  { pct: 10, zh: '影音觀後個人筆記', en: 'Viewing notes',
+    zhN: '自選 6 場臺灣橋樑計畫影音，連同其原版 Nobel Lecture 一併觀看，每場繳交筆記（摘要／反思／延伸問題）。遲交扣分同上。',
+    enN: 'Choose 6 Taiwan Bridges videos, watch each with its original Nobel Lecture, and submit a note for each (summary / reflection / question). Same late penalty.' },
+  { pct: 10, zh: '期末個人報告', en: 'Final report',
+    zhN: '第 17 週週一 09:00 前以 Google 表單繳交，逾時零分。',
+    enN: 'Due 09:00 Monday of week 17 via Google Form. Late means zero.' },
+];
+
+const cycle = [
+  { k: '準備', e: 'Prepare',
+    zh: '看導讀影片與原版 Nobel Lecture，讀官網得獎理由，寫下你的問題。',
+    en: 'Watch the guide video and the original Nobel Lecture, read the official citation, draft your question.' },
+  { k: '參與', e: 'Attend',
+    zh: '到場聽講、提問、參與小組討論。',
+    en: 'Attend, ask, and take part in the group discussion.' },
+  { k: '反思', e: 'Reflect',
+    zh: '寫下核心論點摘要、個人反思，以及至少一個延伸問題。',
+    en: 'Write the core argument, your reflection, and at least one extension question.' },
+];
+---
+
+<Base lang={lang} title={t('course.title')} description={t('course.blurb')} segments={['course']}>
+  <div class="wrap course">
+    <header class="course__head">
+      <p class="eyebrow">{t('course.eyebrow')}</p>
+      <h1>{zh ? '走進諾貝爾：跨域思辨與時代對話' : 'Into the Nobel'}</h1>
+      {zh && <p class="gloss">Into the Nobel: Interdisciplinary Thinking and Dialogue of Our Time</p>}
+      <p class="course__blurb">{t('course.blurb')}</p>
+      <dl class="course__facts">
+        {facts.map(([k, v]) => (<div><dt>{k}</dt><dd>{v}</dd></div>))}
+      </dl>
+      <p class="course__links">
+        <ExtLink lang={lang} href={SYLLABUS}>{t('course.syllabus')}</ExtLink>
+        <ExtLink lang={lang} href={ADD_FORM}>{t('course.addCode')}</ExtLink>
+      </p>
+    </header>
+
+    <section class="course__sec" aria-labelledby="cy">
+      <h2 id="cy">{t('course.cycleTitle')}</h2>
+      <ol class="cycle" role="list">
+        {cycle.map((c, i) => (
+          <li>
+            <span class="cycle__n">{i + 1}</span>
+            <span class="cycle__k">{zh ? c.k : c.e}</span>
+            <span class="cycle__t">{zh ? c.zh : c.en}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="course__sec" aria-labelledby="tools">
+      <h2 id="tools">{t('course.toolsTitle')}</h2>
+      <p class="course__note">{t('course.toolsNote')}</p>
+      <div class="tools">
+        <a class="tool" href={path(lang, 'study')}>
+          <span class="tool__t">{t('course.toolProgress')}</span>
+          <span class="tool__d">{t('course.toolProgressD')}</span>
+        </a>
+        <a class="tool" href={browse(lang) + '?kind=guide'}>
+          <span class="tool__t">{t('course.toolGuides')}</span>
+          <span class="tool__d">{t('course.toolGuidesD')}</span>
+        </a>
+        <a class="tool" href={browse(lang)}>
+          <span class="tool__t">{t('course.toolAll')}</span>
+          <span class="tool__d">{t('course.toolAllD', { n: lectures.length })}</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="course__sec" aria-labelledby="mk">
+      <h2 id="mk">{t('course.marksTitle')}</h2>
+      <ul class="marks" role="list">
+        {marks.map((m) => (
+          <li>
+            <span class="marks__pct">{m.pct}%</span>
+            <span class="marks__body">
+              <b>{zh ? m.zh : m.en}</b>
+              <span>{zh ? m.zhN : m.enN}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      <p class="course__note">{t('course.marksNote')}</p>
+    </section>
+
+    <section class="course__sec" aria-labelledby="rd">
+      <h2 id="rd">{t('course.readTitle')}</h2>
+      <ul class="links" role="list">
+        <li>
+          <ExtLink lang={lang} href={NOBEL}>nobelprize.org</ExtLink>
+          <span>{t('course.readNobel')}</span>
+        </li>
+        <li>
+          <ExtLink lang={lang} href={CGE}>{t('lec.ntuCge')}</ExtLink>
+          <span>{t('lec.ntuCgeNote')}</span>
+        </li>
+      </ul>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .course { padding-block: clamp(2rem, 5vw, 3.5rem); max-inline-size: 62rem; }
+  .course__head h1 { font-size: var(--step-3); color: var(--cream); margin-block-start: .3rem; }
+  .course__blurb { font-size: var(--step-1); line-height: 1.9; color: var(--text); margin-block-start: 1rem; max-inline-size: 54ch; }
+  .course__facts { display: flex; flex-wrap: wrap; gap: 0 2.4rem; margin-block-start: 1.4rem; }
+  .course__facts dt { font-size: .66rem; letter-spacing: .14em; text-transform: uppercase; color: var(--muted-dim); }
+  .course__facts dd { margin: .1rem 0 .7rem; font-size: var(--step--1); color: var(--text); }
+  .course__links { display: flex; gap: 1.4rem; flex-wrap: wrap; margin-block-start: .4rem; }
+
+  .course__sec { margin-block-start: clamp(2.2rem, 5vw, 3.2rem); }
+  .course__sec h2 {
+    font-size: var(--step-2); color: var(--cream);
+    padding-block-start: 1.4rem; border-block-start: 1px solid var(--line);
+  }
+  .course__note { font-size: var(--step--1); color: var(--muted); margin-block-start: .8rem; }
+
+  .cycle { display: grid; gap: .8rem; padding: 0; margin-block-start: 1.2rem; }
+  @media (min-width: 52rem) { .cycle { grid-template-columns: repeat(3, 1fr); } }
+  .cycle li {
+    display: grid; gap: .3rem; align-content: start;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: 1rem 1.1rem;
+  }
+  .cycle__n {
+    inline-size: 26px; block-size: 26px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--gold); color: var(--bg-0); font-size: .8rem;
+  }
+  .cycle__k { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); }
+  .cycle__t { font-size: var(--step--1); color: var(--muted); line-height: 1.7; }
+
+  .tools { display: grid; gap: .9rem; margin-block-start: 1.2rem;
+           grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
+  .tool {
+    display: grid; gap: .25rem; text-decoration: none; block-size: 100%;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--surface); padding: 1rem 1.15rem;
+    transition: border-color .3s, background .3s, transform .3s;
+  }
+  .tool:hover { border-color: var(--line-hi); background: var(--surface-hi); transform: translateY(-2px); }
+  .tool__t { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); }
+  .tool__d { font-size: var(--step--1); color: var(--muted); line-height: 1.6; }
+
+  .marks { display: grid; gap: .7rem; padding: 0; margin-block-start: 1.2rem; }
+  .marks li { display: flex; gap: 1rem; align-items: baseline; }
+  .marks__pct {
+    flex: none; inline-size: 3.2rem; text-align: end;
+    font-family: var(--font-display); font-size: var(--step-2); color: var(--gold);
+    font-variant-numeric: lining-nums tabular-nums;
+  }
+  .marks__body { display: grid; gap: .15rem; }
+  .marks__body b { font-weight: 500; color: var(--cream); font-size: var(--step-0); }
+  .marks__body span { font-size: var(--step--1); color: var(--muted); line-height: 1.7; }
+
+  .links { display: grid; gap: 1rem; padding: 0; margin-block-start: 1.2rem; }
+  .links li { display: grid; gap: .15rem; }
+  .links :global(a) { font-size: var(--step-0); text-decoration: none; border-block-end: 1px solid var(--line-hi); justify-self: start; }
+  .links span { font-size: var(--step--1); color: var(--muted-dim); line-height: 1.6; }
+</style>
