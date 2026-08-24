@@ -38,6 +38,9 @@ src/
 - Do not put pronunciation glosses (e.g. `Sudhof (酥豆腐)`) anywhere near a page.
 
 **Language**
+- In Chinese copy, gloss every proper noun and technical term with its original on first use:
+  人名（Ragnar Frisch）, 機構（Sveriges Riksbank）, 學術用語（click chemistry）. The audience is
+  students who will meet these terms in English everywhere else.
 - zh-TW is primary, en is secondary, with a switch in the header. Taiwanese usage throughout
   — 軟體, 資訊, 程式. Never mainland variants.
 - English lecture titles stay as delivered; the Chinese rendering sits under them in `.gloss`.
@@ -83,6 +86,9 @@ src/
 - Any action that waits on the render loop needs a timeout backstop that runs regardless.
 - The adaptive quality ladder in `degrade()` must always draw a frame before it stops; resizing
   clears the buffer, so stopping straight after a resize leaves a black canvas.
+- The footer copyright must never wrap. It is `white-space: nowrap` with a viewport-scaled font,
+  and it needs `max-width: none` because the global `p { max-width: 62ch }` otherwise forces a
+  break. Verified from 320px up.
 - `scripts/make-ambient.py` regenerates the background loop. Every motion period must divide the
   clip length exactly — that is what makes it seamless without a crossfade. Keep it dark; it sits
   behind text.

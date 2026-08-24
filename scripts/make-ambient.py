@@ -25,11 +25,11 @@ out = root / "public" / "media"
 out.mkdir(parents=True, exist_ok=True)
 
 rng = np.random.default_rng(7)
-EMBERS = 150
+EMBERS = 340
 e_x = rng.random(EMBERS)
 e_phase = rng.random(EMBERS)
-e_speed = 0.5 + rng.random(EMBERS) * 0.9
-e_size = 0.9 + rng.random(EMBERS) * 2.4
+e_speed = 0.9 + rng.random(EMBERS) * 1.5
+e_size = 1.1 + rng.random(EMBERS) * 3.0
 e_sway = 0.004 + rng.random(EMBERS) * 0.016
 
 yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
@@ -46,7 +46,7 @@ top = np.exp(-(((nx - 0.5) / 0.5) ** 2 + ((ny - 0.02) / 0.3) ** 2))
 base[..., 0] += top * 0.075
 base[..., 1] += top * 0.046
 base[..., 2] += top * 0.020
-base += 0.004
+base += 0.007
 
 vig = 1.0 - 0.97 * np.clip(((nx - 0.5) ** 2 * 2.4 + (ny - 0.5) ** 2 * 2.7), 0, 1) ** 1.1
 
@@ -58,7 +58,7 @@ try:
 
         # two light shafts sweeping through, periods that divide the loop
         for k, (cx0, amp, wide, gain, cycles) in enumerate(
-            [(0.34, 0.05, 0.115, 0.085, 1), (0.68, 0.04, 0.085, 0.058, 2)]
+            [(0.30, 0.30, 0.135, 0.20, 1), (0.72, 0.24, 0.095, 0.14, 2), (0.50, 0.40, 0.075, 0.10, 1)]
         ):
             cx = cx0 + amp * math.sin(TAU := 2 * math.pi * cycles * t)
             d = (nx - cx) - (ny - 0.5) * 0.30
@@ -67,6 +67,14 @@ try:
             img[..., 0] += shaft * g
             img[..., 1] += shaft * g * 0.66
             img[..., 2] += shaft * g * 0.30
+
+        # a broad haze drifting across, so the motion reads even on a still glance
+        hx = (t * 1.0) % 1.0
+        for lobe in (hx - 1.0, hx, hx + 1.0):
+            haze = np.exp(-(((nx - lobe) / 0.30) ** 2 + ((ny - 0.55) / 0.42) ** 2)) * 0.085
+            img[..., 0] += haze
+            img[..., 1] += haze * 0.6
+            img[..., 2] += haze * 0.26
 
         # embers drifting upward; each wraps within the loop
         for i in range(EMBERS):
@@ -84,13 +92,13 @@ try:
                 continue
             gx = np.arange(x0, x1) - px
             gy = (np.arange(y0, y1) - py)[:, None]
-            blob = np.exp(-((gx ** 2 + gy ** 2) / (2 * (e_size[i] * 1.35) ** 2))) * fade * 0.34
+            blob = np.exp(-((gx ** 2 + gy ** 2) / (2 * (e_size[i] * 1.35) ** 2))) * fade * 0.85
             img[y0:y1, x0:x1, 0] += blob
             img[y0:y1, x0:x1, 1] += blob * 0.68
             img[y0:y1, x0:x1, 2] += blob * 0.30
 
         img *= vig[..., None]
-        frame = np.clip(img, 0, 1) ** (1 / 1.25)
+        frame = np.clip(img, 0, 1) ** (1 / 1.35)
         Image.fromarray((frame * 255).astype(np.uint8)).save(tmp / f"f{f:04d}.png")
 
     ff = __import__("imageio_ffmpeg").get_ffmpeg_exe()
