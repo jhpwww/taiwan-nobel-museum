@@ -19,7 +19,7 @@
  */
 import {
   ACESFilmicToneMapping, AdditiveBlending, BackSide, BoxGeometry, BufferGeometry,
-  CanvasTexture, Color, CylinderGeometry, DoubleSide, Float32BufferAttribute, Group,
+  CanvasTexture, Color, CylinderGeometry, Float32BufferAttribute, Group,
   IcosahedronGeometry, LatheGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial,
   PerspectiveCamera, PlaneGeometry, PointLight, Points, PointsMaterial, Scene,
   SphereGeometry, SRGBColorSpace, TorusGeometry, Vector2, Vector3, WebGLRenderer, Fog,
@@ -39,7 +39,6 @@ export interface RotundaOptions {
 
 const TAU = Math.PI * 2;
 const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
-const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
 
 export function createRotunda(opts: RotundaOptions) {
   const { canvas, cats, stills } = opts;

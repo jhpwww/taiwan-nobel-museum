@@ -93,6 +93,12 @@ src/
   clip length exactly — that is what makes it seamless without a crossfade. Keep it dark; it sits
   behind text.
 
+**Outbound links**
+- Run `python3 scripts/check-links.py dist` after any change touching external URLs. A HEAD
+  request is NOT enough — it misses dead DNS and soft 404s. `educational.nobelprize.org` was
+  shipped broken because only the per-category URLs were verified and the shared ones were not.
+- Verify every link that gets added, not a sample of them.
+
 **Media and rights**
 - The hall backdrop is real lecture footage via `LectureScreen.astro`, not a stock loop. A
   cross-origin YouTube iframe CANNOT be read into a WebGL texture — that is why the rotunda

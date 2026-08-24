@@ -5,7 +5,7 @@ import LectureScreen from './LectureScreen.astro';
 import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
-import { gallery, asset } from '../i18n/routing';
+import { gallery } from '../i18n/routing';
 import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
 
 interface Props { lang: Lang }
@@ -76,8 +76,6 @@ const cats = ORDER.map((key, i) => ({
   <div class="veil" data-veil aria-hidden="true"></div>
 
   <div class="hall__masthead">
-    <img class="hall__crest" src={asset('ntu-logo.png')} alt="" width="96" height="96" />
-    <p class="hall__uni">{t('site.university')}</p>
     <h1 id="hall-title" class="hall__title">{t('site.tagline')}</h1>
     <p class="hall__hint">{t('hall.hint')}</p>
   </div>
@@ -204,20 +202,7 @@ const cats = ORDER.map((key, i) => ({
   }
 
   /* ---------- masthead ---------- */
-  .hall__masthead { text-align: center; display: grid; justify-items: center; gap: 0.35rem; padding-inline: 1rem; }
-  .hall__crest {
-    inline-size: clamp(56px, 8vw, 92px);
-    block-size: auto;
-    filter: drop-shadow(0 4px 22px rgba(255, 190, 100, 0.32));
-  }
-  .hall__uni {
-    font-size: var(--step--1);
-    letter-spacing: 0.3em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-block-start: 0.5rem;
-  }
-  :global(:lang(zh)) .hall__uni { letter-spacing: 0.42em; text-indent: 0.42em; }
+  .hall__masthead { text-align: center; display: grid; justify-items: center; gap: 0.45rem; padding-inline: 1rem; }
   .hall__title {
     font-size: var(--step-4);
     color: var(--cream);
@@ -356,7 +341,6 @@ const cats = ORDER.map((key, i) => ({
 
   // Pointer parallax. Cheap: one rAF, transform only, disabled for reduced motion.
   const scene = document.querySelector<HTMLElement>('[data-parallax]');
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
   if (scene && motionOn() && window.matchMedia('(pointer: fine)').matches) {
     const layers = [...scene.querySelectorAll<HTMLElement>('.layer[data-depth]')];
     let tx = 0, ty = 0, cx = 0, cy = 0, raf = 0;

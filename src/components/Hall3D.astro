@@ -15,7 +15,7 @@ import LectureScreen from './LectureScreen.astro';
 import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
-import { gallery, asset } from '../i18n/routing';
+import { gallery } from '../i18n/routing';
 import { lectures, catName, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
 
 interface Props { lang: Lang }
@@ -99,8 +99,6 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
   </div>
 
   <div class="masthead">
-    <img class="crest" src={asset('ntu-logo.png')} alt="" width="96" height="96" />
-    <p class="uni">{t('site.university')}</p>
     <h1 id="hall-title" class="title">{t('site.tagline')}</h1>
     <p class="hint">{t('hall.hint')}</p>
   </div>
@@ -317,10 +315,7 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
   .hall3d[data-walking] .masthead, .hall3d[data-walking] .intro { opacity: 0; }
 
   /* ---------- masthead ---------- */
-  .masthead { text-align: center; display: grid; justify-items: center; gap: .3rem; padding-inline: 1rem; }
-  .crest { inline-size: clamp(54px, 7.5vw, 88px); block-size: auto; filter: drop-shadow(0 4px 26px rgba(255,190,100,.36)); }
-  .uni { font-size: var(--step--1); letter-spacing: .3em; color: var(--gold); text-transform: uppercase; margin-block-start: .45rem; }
-  :global(:lang(zh)) .uni { letter-spacing: .42em; text-indent: .42em; }
+  .masthead { text-align: center; display: grid; justify-items: center; gap: .45rem; padding-inline: 1rem; }
   .title {
     font-size: var(--step-4); color: var(--cream); max-inline-size: 22ch;
     text-shadow: 0 2px 46px rgba(255,190,100,.3);

@@ -50,7 +50,7 @@ GALLERIES = {
 
 # Shown in every gallery, after the category's own official links.
 SHARED_LINKS = [
-    dict(url="https://educational.nobelprize.org/",
+    dict(url="https://www.nobelprize.org/educational/",
          zh="諾貝爾獎教育資源", en="Nobel Prize Education",
          dzh="官方為學生設計的互動教材、遊戲與課程", den="Games, teaching material and lessons made for students"),
     dict(url="https://www.nobelprize.org/prizes/facts/nobel-prize-facts/",

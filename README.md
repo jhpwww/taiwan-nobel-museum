@@ -141,6 +141,15 @@ Everything in `data/catalog.json` is traceable. See the header of `scripts/seed-
 Two dates that the programme book left ambiguous were settled from the video titles:
 **Wüthrich 2026-04-07** and **Semenza 2026-04-14**.
 
+## Checking links
+
+```bash
+python3 scripts/check-links.py dist
+```
+
+Does a real GET on every external URL in the built site, follows redirects, and prints the final
+URL and page title, so a wrong-but-200 destination is visible. 165 links, currently all good.
+
 ## Editorial copy
 
 `scripts/copy-zh-en.py` holds the hook and summary for every lecture in both languages.
