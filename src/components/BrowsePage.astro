@@ -28,6 +28,15 @@ const KINDS = [
     <h1 class="browse__h">{t('browse.title')}</h1>
 
     <form class="filters" id="filters" aria-label={t('browse.title')}>
+      <label class="search">
+        <span class="visually-hidden">{t('browse.search')}</span>
+        <svg class="search__icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input type="search" name="q" placeholder={t('browse.searchPh')} autocomplete="off" />
+      </label>
+
       <fieldset>
         <legend>{t('browse.filterKind')}</legend>
         <div class="chips">
@@ -67,7 +76,20 @@ const KINDS = [
 
     <ul class="grid" id="results" role="list">
       {videos.map((v) => (
-        <li data-kind={v.kind} data-cat={v.category ?? ''} data-tags={v.topics.join(' ')}>
+        <li
+          data-kind={v.kind}
+          data-cat={v.category ?? ''}
+          data-tags={v.topics.join(' ')}
+          data-find={[
+            v.personEn, v.personZh,
+            v.lecture?.title.en, v.lecture?.title.zh,
+            v.lecture?.hook.zh, v.lecture?.hook.en,
+            v.lecture?.description.zh, v.lecture?.description.en,
+            v.lecture?.affiliation.institution, v.lecture?.affiliation.country,
+            v.lecture?.event.host_zh, v.lecture?.event.host_en,
+            v.sourceZh, v.sourceEn,
+            v.lecture?.prize.year,
+          ].filter(Boolean).join(' ').toLowerCase()}>
           <VideoCard lang={lang} v={v} />
         </li>
       ))}
@@ -80,6 +102,21 @@ const KINDS = [
   .browse__h { font-size: var(--step-3); color: var(--cream); }
 
   .filters { display: grid; gap: 1.1rem; margin-block: 1.8rem 1.4rem; }
+  .search {
+    position: relative; display: flex; align-items: center;
+    border: 1px solid var(--line); border-radius: 999px;
+    background: var(--surface); padding-inline: .95rem;
+    max-inline-size: 30rem;
+    transition: border-color .25s var(--ease), background .25s var(--ease);
+  }
+  .search:focus-within { border-color: var(--line-hi); background: var(--surface-hi); }
+  .search__icon { flex: none; color: var(--muted-dim); }
+  .search input {
+    flex: 1; background: none; border: 0; outline: none;
+    padding: .55rem .7rem; font: inherit; font-size: var(--step-0); color: var(--text);
+  }
+  .search input::placeholder { color: var(--muted-dim); }
+  .search input::-webkit-search-cancel-button { filter: invert(.6) sepia(1) hue-rotate(340deg); }
   fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 0.55rem; }
   legend { font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted-dim); padding: 0; }
   .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
@@ -122,6 +159,7 @@ const KINDS = [
 
     const apply = () => {
       const fd = new FormData(form);
+      const q = String(fd.get('q') ?? '').trim().toLowerCase();
       const kind = String(fd.get('kind') ?? '');
       const cat = String(fd.get('cat') ?? '');
       const tag = String(fd.get('tag') ?? '');
@@ -130,14 +168,15 @@ const KINDS = [
         const ok =
           (!kind || li.dataset.kind === kind) &&
           (!cat || li.dataset.cat === cat) &&
-          (!tag || (li.dataset.tags ?? '').split(' ').includes(tag));
+          (!tag || (li.dataset.tags ?? '').split(' ').includes(tag)) &&
+          (!q || (li.dataset.find ?? '').includes(q));
         li.hidden = !ok;
         if (ok) n++;
       }
       count.textContent = numFmt.replace('{n}', String(n));
       empty.hidden = n > 0;
       const url = new URL(location.href);
-      for (const [k, v] of [['kind', kind], ['cat', cat], ['tag', tag]] as const) {
+      for (const [k, v] of [['q', q], ['kind', kind], ['cat', cat], ['tag', tag]] as const) {
         v ? url.searchParams.set(k, v) : url.searchParams.delete(k);
       }
       history.replaceState(null, '', url);
@@ -151,6 +190,11 @@ const KINDS = [
         if (el) el.checked = true;
       }
     }
+    const qEl = form.querySelector<HTMLInputElement>('input[name="q"]');
+    const fromUrl = new URLSearchParams(location.search).get('q');
+    if (qEl && fromUrl) qEl.value = fromUrl;
+    let qt = 0;
+    qEl?.addEventListener('input', () => { clearTimeout(qt); qt = window.setTimeout(apply, 160); });
     form.addEventListener('change', apply);
     apply();
   }

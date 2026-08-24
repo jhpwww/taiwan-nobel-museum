@@ -9,13 +9,16 @@
 import Base from '../layouts/Base.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { path } from '../i18n/routing';
-import { lectures } from '../data/catalog';
+import { lectures, categories } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = useT(lang);
 
 /** the script needs id → title and id → url without refetching the catalogue */
+const catNames = Object.fromEntries(
+  (Object.keys(categories) as (keyof typeof categories)[]).map((k) => [k, categories[k][lang]]),
+);
 const index = lectures.map((l) => ({
   id: l.id,
   name: lang === 'zh' ? `${l.laureate.en}（${l.laureate.zh}）` : l.laureate.en,
@@ -28,7 +31,9 @@ const index = lectures.map((l) => ({
 <Base lang={lang} title={t('study.pageTitle')} segments={['study']}>
   <div class="wrap study" data-study-page data-index={JSON.stringify(index)}
        data-ok-restore={t('study.restoreOk')} data-bad-restore={t('study.restoreBad')}
-       data-confirm-clear={t('study.clearConfirm')}>
+       data-confirm-clear={t('study.clearConfirm')}
+       data-cat-names={JSON.stringify(catNames)}
+       data-nudge-tmpl={t('study.nudgeTmpl')}>
     <header class="study__head">
       <p class="eyebrow"><a href={path(lang, 'learn')}>{t('study.forCourse')}</a></p>
       <h1>{t('study.pageTitle')}</h1>
@@ -43,6 +48,13 @@ const index = lectures.map((l) => ({
     </section>
 
     <p class="study__bar" aria-hidden="true"><span data-bar></span></p>
+
+    <section class="study__sec">
+      <h2>{t('study.spreadTitle')}</h2>
+      <p class="study__note">{t('study.spreadNote')}</p>
+      <ul class="spread" data-spread role="list"></ul>
+      <p class="study__nudge" data-nudge hidden></p>
+    </section>
 
     <section class="study__sec">
       <h2>{t('study.myPicks')}</h2>
@@ -110,6 +122,21 @@ const index = lectures.map((l) => ({
     padding-block-start: 1.4rem; border-block-start: 1px solid var(--line);
   }
   .study__note, .study__empty { font-size: var(--step--1); color: var(--muted); margin-block-start: .8rem; }
+
+  .spread { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; margin-block-start: 1rem; }
+  .spread li {
+    display: inline-flex; align-items: baseline; gap: .4rem;
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: .3rem .9rem; font-size: var(--step--1); color: var(--muted);
+  }
+  .spread li[data-has] { color: var(--cream); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+  .spread b { font-family: var(--font-display); font-size: var(--step-0); color: var(--gold);
+              font-variant-numeric: lining-nums; font-weight: 500; }
+  .study__nudge {
+    font-size: var(--step--1); color: var(--text); margin-block-start: .9rem;
+    padding: .6rem .85rem; border-inline-start: 2px solid var(--gold);
+    background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0;
+  }
 
   .picks { display: grid; gap: .55rem; padding: 0; margin-block-start: 1.1rem; }
   .picks li {
@@ -206,6 +233,33 @@ const index = lectures.map((l) => ({
         list.append(li);
       }
       empty.hidden = picked.length > 0;
+      paintSpread(picked.map(([id]) => byId.get(id)?.cat).filter(Boolean) as string[]);
+    }
+
+    /* The collection covers five prize categories. Showing the spread nudges
+       toward breadth, which is the whole argument for a museum like this. */
+    function paintSpread(cats: string[]) {
+      const names: Record<string, string> = JSON.parse(root!.dataset.catNames ?? '{}');
+      const spread = root!.querySelector<HTMLElement>('[data-spread]')!;
+      const nudge = root!.querySelector<HTMLElement>('[data-nudge]')!;
+      const tally = new Map<string, number>();
+      for (const c of cats) tally.set(c, (tally.get(c) ?? 0) + 1);
+
+      spread.replaceChildren();
+      const missing: string[] = [];
+      for (const [key, name] of Object.entries(names)) {
+        if (key === 'nobel') continue;
+        const n = tally.get(key) ?? 0;
+        if (n === 0 && index.some((r) => r.cat === key)) missing.push(name);
+        const li = document.createElement('li');
+        if (n > 0) li.setAttribute('data-has', '');
+        const b = document.createElement('b'); b.textContent = String(n);
+        li.append(document.createTextNode(name), b);
+        spread.append(li);
+      }
+      const show = cats.length >= 2 && missing.length > 0;
+      nudge.hidden = !show;
+      if (show) nudge.textContent = root!.dataset.nudgeTmpl!.replace('{cats}', missing.join('、'));
     }
 
     $('[data-export-notes]').addEventListener('click', () => { out.value = exportNotes(titleFor); out.select(); });
