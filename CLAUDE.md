@@ -214,3 +214,21 @@ Every descriptive string on the site is a museum wall label, not a lesson.
 - Chinese: 破折號 (——) sparingly, and never in a hook. Official lecture
   titles keep whatever punctuation they were delivered with.
 - Every proper noun carries its original in parentheses on first use.
+
+## PageNav (the two standing controls, lower right)
+
+`src/components/PageNav.astro`, mounted once in `Base.astro`, so every page
+has it.
+
+- "Back to top" appears only past `max(320px, 60vh)` of scroll. Clicking it
+  also moves focus to `#main` (which carries `tabindex="-1"`), or a keyboard
+  visitor is returned to the top visually while their focus stays deep in the
+  page.
+- "Previous page" is shown only when `document.referrer` is same-origin.
+  `history.length` is useless for this — a fresh tab already reports 2 — and
+  without the check the control would dead-end on a search engine.
+- z-index is 35: above page content, below the walk-in overlay (40) so the
+  transition covers it, and clear of the switcher (60) and toggle (61).
+- The button keeps its slot when hidden (`visibility`), so nothing shifts as
+  it fades in. Only the referrer check uses `hidden`, and it is decided once
+  at load.

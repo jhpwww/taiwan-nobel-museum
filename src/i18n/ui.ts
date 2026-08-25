@@ -18,6 +18,8 @@ export const ui = {
     'nav.all': '所有講座',
     'nav.about': '關於本站',
     'nav.skip': '跳到主要內容',
+    'nav.toTop': '回到最上方',
+    'nav.back': '回到前一頁',
     'a11y.newTab': '（另開新視窗）',
 
     'hall.enter': '選擇一個展廳',
@@ -198,6 +200,8 @@ export const ui = {
     'nav.all': 'All lectures',
     'nav.about': 'About',
     'nav.skip': 'Skip to main content',
+    'nav.toTop': 'Back to top',
+    'nav.back': 'Previous page',
     'a11y.newTab': '(opens in a new tab)',
 
     'hall.enter': 'Choose a gallery',

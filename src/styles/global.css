@@ -124,6 +124,9 @@ a:hover { color: var(--gold-bright); text-decoration-color: currentColor; }
   transition: inset-block-start 0.2s var(--ease);
 }
 .skip-link:focus { inset-block-start: 1rem; }
+/* the skip link and the back-to-top control both move focus here; it is a
+   landmark rather than a control, so it takes focus without drawing a ring */
+#main:focus { outline: none; }
 
 .eyebrow {
   font-family: var(--font-body);

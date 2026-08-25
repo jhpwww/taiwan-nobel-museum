@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import PageNav from '../components/PageNav.astro';
 import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
 import { home, browse, about, learn, asset, otherLang } from '../i18n/routing';
 
@@ -101,7 +102,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       </header>
     )}
 
-    <main id="main">
+    <main id="main" tabindex="-1">
       <slot />
     </main>
 
@@ -114,6 +115,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         </div>
       </div>
     </footer>
+
+    <PageNav lang={lang} />
 
     <style>
       .topbar {
