@@ -13,11 +13,14 @@
  * on a 2G-class connection, never when motion is off, and never before the
  * still has already given the page something to show.
  *
- * Phones do get it. They used not to, which left a static frame where the
- * museum promised moving footage. What they do not get is the 42-second
- * cycle: one player is mounted and left alone, because it is tearing an
- * iframe down and building another every 42 seconds that grows memory on a
- * device that has little to spare. Desktop keeps the rotation.
+ * Phones do not get the player. Not a judgement about their power — iOS will
+ * not autoplay a cross-origin iframe without a gesture, and YouTube's own
+ * player declines on mobile besides. Mounting it there bought a megabyte of
+ * script and a pause glyph sitting over the hall.
+ *
+ * They get motion a way that needs no permission: the same lecture frames the
+ * poster uses, cross-fading. Two <img> layers, no third-party script, a few
+ * tens of KB each. Not footage, but the lectures, and moving.
  */
 import { lectures } from '../data/catalog';
 interface Props { opacity?: number; count?: number }
@@ -36,11 +39,13 @@ const first = picks[0];
 
 <div class="ls" style={`--ls-o:${opacity}`} aria-hidden="true">
   <img
-    class="ls__still"
+    class="ls__still" data-still="a"
     src={`https://i.ytimg.com/vi/${first.id}/maxresdefault.jpg`}
     alt=""
     width="1280" height="720" loading="eager" decoding="async"
   />
+  <img class="ls__still ls__still--b" data-still="b" alt="" width="1280" height="720"
+       decoding="async" />
   <div class="ls__stage" data-lecture-screen data-picks={JSON.stringify(picks)}></div>
   <div class="ls__grade"></div>
 </div>
@@ -62,8 +67,11 @@ const first = picks[0];
   }
   .ls__stage { opacity: 0; transition: opacity 1.8s ease; }
   .ls__stage[data-on] { opacity: var(--ls-o); }
-  .ls__stage[data-on] ~ .ls__grade + .ls__still,
   .ls:has(.ls__stage[data-on]) .ls__still { opacity: 0; }
+  /* the incoming frame of the phone slideshow, faded up over the outgoing one */
+  .ls__still--b { opacity: 0; }
+  .ls__still--b[data-on] { opacity: var(--ls-o); }
+  .ls__still--b[data-on] ~ [data-still='a'] { opacity: 0; }
 
   /* An iframe cannot be object-fit, and a 16:9 player dropped into a tall box
      letterboxes itself — black bands where the hall wanted footage. So it is
@@ -142,15 +150,39 @@ const first = picks[0];
       timer = window.setTimeout(cycle, 42000);
     }
 
+    /* Phones: cross-fade the stills. Two layers, alternating, so the outgoing
+       frame is still painted while the incoming one arrives. */
+    function startStills() {
+      const wrap = stage.closest('.ls')!;
+      const a = wrap.querySelector<HTMLImageElement>('[data-still="a"]')!;
+      const bImg = wrap.querySelector<HTMLImageElement>('[data-still="b"]')!;
+      if (picks.length < 2) return;
+      let n = 0, showingB = false;
+      timer = window.setInterval(() => {
+        if (document.hidden || !motionOn()) return;
+        n = (n + 1) % picks.length;
+        const next = showingB ? a : bImg;
+        const img = new Image();
+        img.onload = () => {
+          next.src = img.src;
+          showingB = !showingB;
+          bImg.toggleAttribute('data-on', showingB);
+        };
+        img.src = `https://i.ytimg.com/vi/${picks[n].id}/maxresdefault.jpg`;
+      }, 9000);
+    }
+
     function startScreen() {
       if (saveData || crawling || !motionOn() || stage.dataset.live) return;
       stage.dataset.live = '1';
+      if (small) { startStills(); return; }
       mount();
-      if (!small) timer = window.setTimeout(cycle, 42000);
+      timer = window.setTimeout(cycle, 42000);
     }
 
     function stopScreen() {
       clearTimeout(timer);
+      clearInterval(timer);
       stage.replaceChildren();
       stage.removeAttribute('data-on');
       delete stage.dataset.live;
