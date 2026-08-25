@@ -263,10 +263,23 @@ panel used to lose text.
 The fourth hall shows real glTF models instead of drawn ones. Three scripts
 own the pipeline and are meant to be re-run in order:
 
-1. `scripts/fetch-models.py` — downloads each GLB from Poly Pizza and writes
-   `data/model-credits.json`. Provenance is re-read from the model page at
-   fetch time rather than typed in, so the credit cannot drift from the file.
-   Swapping a model is a one-line change to `PICKS`.
+1. `scripts/fetch-models.py` — downloads the four borrowed GLBs from Poly
+   Pizza. Provenance is re-read from the model page at fetch time rather than
+   typed in, so the credit cannot drift from the file. Swapping one is a
+   one-line change to `PICKS`.
+1b. `scripts/build-models.mjs` — the atom and the balance, built here: Poly
+   Pizza has no balance worth using and nothing that reads as an atom, and a
+   telescope narrowed physics to astronomy. Flat-shaded low-poly on purpose,
+   to sit beside the borrowed four.
+
+   Both scripts write `data/model-credits.json` and **merge** rather than
+   overwrite — each owns part of the six, and running either alone must leave
+   a complete set. `source: 'original'` suppresses the outbound credit link.
+
+   Matrix order in build-models.mjs is column-major: in `chain(a, b)` it is
+   `b` that reaches the point first. Getting this backwards silently collapses
+   the atom's three shells into one plane and swings the balance beam off its
+   column — both looked plausible until rendered.
 2. `scripts/normalise-models.mjs` — six authors means six scales (the flask
    arrives 19 units tall, the coin 0.03) and six pivots. Each is re-centred on
    its own bounding box and scaled so its longest axis is 1, after which every

@@ -1,13 +1,11 @@
 {
   "physics": {
-    "id": "RjyTCQvA8b",
-    "title": "Telescope",
-    "author": "CreativeTrio",
+    "id": "built:physics",
+    "title": "Atom",
+    "author": "Nobel Lecture Museum",
     "licence": "CC0",
-    "glb": "https://static.poly.pizza/2c0070d8-e239-4a8f-939f-be5b2007ce93.glb",
-    "page": "https://poly.pizza/m/RjyTCQvA8b",
-    "tris": "734",
-    "bytes": 62720
+    "page": "",
+    "source": "original"
   },
   "chemistry": {
     "id": "eqIGxcsBe1V",
@@ -17,7 +15,8 @@
     "glb": "https://static.poly.pizza/0ec46b5b-d7ee-48f5-a06d-4274db0dfb1e.glb",
     "page": "https://poly.pizza/m/eqIGxcsBe1V",
     "tris": "712",
-    "bytes": 44616
+    "bytes": 44616,
+    "source": "poly"
   },
   "medicine": {
     "id": "0e5xgkdcuEW",
@@ -27,7 +26,8 @@
     "glb": "https://static.poly.pizza/3bd92894-a0a4-4cc5-ad02-29d29341944f.glb",
     "page": "https://poly.pizza/m/0e5xgkdcuEW",
     "tris": "1.1k",
-    "bytes": 158960
+    "bytes": 158960,
+    "source": "poly"
   },
   "peace": {
     "id": "2jmH3trzPFf",
@@ -37,17 +37,16 @@
     "glb": "https://static.poly.pizza/7ef274a4-4d73-4eee-96e4-209ba68a3146.glb",
     "page": "https://poly.pizza/m/2jmH3trzPFf",
     "tris": "690",
-    "bytes": 47524
+    "bytes": 47524,
+    "source": "poly"
   },
   "economics": {
-    "id": "5dwGkhjKXIW",
-    "title": "Coin",
-    "author": "Poly by Google",
-    "licence": "CC-BY",
-    "glb": "https://static.poly.pizza/2dd21fd6-c92d-4f44-adfd-9ab2d6c9c586.glb",
-    "page": "https://poly.pizza/m/5dwGkhjKXIW",
-    "tris": "656",
-    "bytes": 32884
+    "id": "built:economics",
+    "title": "Balance scale",
+    "author": "Nobel Lecture Museum",
+    "licence": "CC0",
+    "page": "",
+    "source": "original"
   },
   "literature": {
     "id": "9RjoPxajS8Z",
@@ -57,6 +56,7 @@
     "glb": "https://static.poly.pizza/e530ed57-848a-41d6-b9da-46a77d49f33a.glb",
     "page": "https://poly.pizza/m/9RjoPxajS8Z",
     "tris": "766",
-    "bytes": 28276
+    "bytes": 28276,
+    "source": "poly"
   }
 }

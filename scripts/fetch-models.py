@@ -25,18 +25,21 @@ poly = import_module('poly-search')
 # size, and for matching what this collection's lectures are actually about:
 # the physics here is largely observational, the medicine largely molecular.
 PICKS = {
-    'physics':    'RjyTCQvA8b',   # Telescope
     'chemistry':  'eqIGxcsBe1V',  # Erlenmeyer flask
     'medicine':   '0e5xgkdcuEW',  # DNA
     'peace':      '2jmH3trzPFf',  # Dove
-    'economics':  '5dwGkhjKXIW',  # Coin
     'literature': '9RjoPxajS8Z',  # Quill and parchment
 }
+# physics and economics are not here: Poly Pizza has no balance worth using and
+# nothing that reads as an atom, so scripts/build-models.mjs makes those two.
 
 RAW = pathlib.Path('assets-src/models')
 RAW.mkdir(parents=True, exist_ok=True)
 
-out = {}
+# merge, never overwrite: build-models.mjs owns two of the six entries and
+# running either script alone must still leave a complete set
+CREDITS = pathlib.Path('data/model-credits.json')
+out = json.loads(CREDITS.read_text(encoding='utf-8')) if CREDITS.exists() else {}
 for cat, mid in PICKS.items():
     meta = poly.model(mid)
     if not meta:
@@ -45,10 +48,10 @@ for cat, mid in PICKS.items():
     subprocess.run(['curl', '-sL', '--max-time', '60', '-A', poly.UA,
                     meta['glb'], '-o', str(dest)], check=True)
     meta['bytes'] = dest.stat().st_size
+    meta['source'] = 'poly'
     out[cat] = meta
     print(f'{cat:<11} {meta["bytes"]/1024:7.0f}KB  {meta["licence"]:<6} '
           f'{meta["title"]:<22} — {meta["author"]}')
 
-pathlib.Path('data/model-credits.json').write_text(
-    json.dumps(out, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
-print('\n→ data/model-credits.json')
+CREDITS.write_text(json.dumps(out, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+print(f'\n→ {CREDITS}')

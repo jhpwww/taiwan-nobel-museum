@@ -42,7 +42,7 @@ const counts = lectures.reduce<Record<string, number>>((a, l) => {
 
 const [introA, introConj, introB] = introParts(lang);
 
-type Credit = { title: string; author: string; licence: string; page: string };
+type Credit = { title: string; author: string; licence: string; page: string; source?: string };
 const credited = credits as Record<string, Credit>;
 
 const cats = categoryList()
@@ -67,7 +67,7 @@ const CAMERA = '35deg 70deg 2.2m';
  * find out where a model came from should find the answer next to it.
  */
 const creditComment = (c: Credit) =>
-  `<!-- model: ${[c.title, c.author, c.licence, c.page]
+  `<!-- model: ${[c.title, c.author, c.licence, c.page || 'original work']
     .map((v) => String(v).replace(/[<>]/g, '').replace(/--+/g, '-'))
     .join(' · ')} -->`;
 ---
@@ -141,8 +141,14 @@ const creditComment = (c: Credit) =>
     <ul role="list">
       {cats.map((c) => (
         <li>
-          <a href={c.credit.page} target="_blank" rel="noopener noreferrer">{c.credit.title}</a>
-          <span>{t('models.by', { who: c.credit.author, lic: c.credit.licence })}</span>
+          {c.credit.page
+            ? <a href={c.credit.page} target="_blank" rel="noopener noreferrer">{c.credit.title}</a>
+            : <b>{c.credit.title}</b>}
+          <span>
+            {c.credit.source === 'original'
+              ? t('models.self', { lic: c.credit.licence })
+              : t('models.by', { who: c.credit.author, lic: c.credit.licence })}
+          </span>
         </li>
       ))}
     </ul>
@@ -304,13 +310,14 @@ const creditComment = (c: Credit) =>
   }
   .mh__credit p { font-size: var(--step--1); color: var(--muted-dim); margin-block: 0.35rem 0.6rem; max-inline-size: 70ch; }
   .mh__credit ul {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
     gap: 0.2rem 1.4rem; padding: 0; margin: 0;
     list-style: none;
   }
   .mh__credit li { font-size: var(--step--2); color: var(--muted-dim); }
   .mh__credit a { color: var(--muted); text-decoration: none; }
   .mh__credit a:hover { color: var(--gold); text-decoration: underline; }
+  .mh__credit b { color: var(--muted); font-weight: 400; }
   .mh__credit span { margin-inline-start: 0.4em; }
 
   @media (max-width: 40rem) {
