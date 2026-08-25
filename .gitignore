@@ -9,3 +9,5 @@ shots/
 __pycache__/
 .venv-fonts/
 assets-src/fonts/*.ttf
+.tools/
+assets-src/backdrop/

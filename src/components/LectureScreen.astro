@@ -1,28 +1,35 @@
 ---
 /**
- * LectureScreen.astro — actual lecture footage running behind the hall.
+ * LectureScreen.astro — lecture footage running behind the hall.
  *
  * This is the "video museum" cue: not an abstract loop, but the lectures
- * themselves, muted and dimmed, cycling one after another behind the
- * sculptures.
+ * themselves, muted and dimmed, behind the sculptures.
  *
- * Nothing is downloaded or re-hosted — it is the same youtube-nocookie embed
- * used everywhere else on the site, with the chrome turned off.
+ * It used to be a live youtube-nocookie embed. Measured on the deployed site,
+ * that streamed 0.27–0.30 MB/s and never stopped: ten seconds of looking cost
+ * 7 MB, a minute cost 21 MB, and it went on for as long as the tab was open.
+ * For decoration at 38–50% opacity under a grading layer, that is indefensible.
+ * It also could not work on a phone at all — iOS will not autoplay a
+ * cross-origin iframe without a gesture, so the player mounted, sat paused,
+ * and put a pause glyph over the hall.
  *
- * It costs a real network stream, so it is gated: never under Save-Data, never
- * on a 2G-class connection, never when motion is off, and never before the
- * still has already given the page something to show.
+ * So the footage is now short self-hosted cuts that loop. A visitor downloads
+ * a few hundred KB once and the traffic goes to nothing however long they
+ * stay, and a muted playsinline <video> autoplays on iOS where the iframe
+ * never could — desktop and phone finally show the same thing.
  *
- * Phones do not get the player. Not a judgement about their power — iOS will
- * not autoplay a cross-origin iframe without a gesture, and YouTube's own
- * player declines on mobile besides. Mounting it there bought a megabyte of
- * script and a pause glyph sitting over the hall.
+ * Until the cuts exist, src/data/backdrop.json is empty and this falls back to
+ * cross-fading the lecture stills: the same frames, moving, at almost no cost.
+ * Both paths are gated on Save-Data, on 2G-class connections, and on the
+ * site's motion switch, and neither loads anything before the still has given
+ * the page something to show.
  *
- * They get motion a way that needs no permission: the same lecture frames the
- * poster uses, cross-fading. Two <img> layers, no third-party script, a few
- * tens of KB each. Not footage, but the lectures, and moving.
+ * Generate the cuts with: python3 scripts/make-backdrop-clips.py
  */
 import { lectures } from '../data/catalog';
+import { asset } from '../i18n/routing';
+import clips from '../data/backdrop.json';
+
 interface Props { opacity?: number; count?: number }
 const { opacity = 0.5, count = 6 } = Astro.props;
 
@@ -30,11 +37,14 @@ const { opacity = 0.5, count = 6 } = Astro.props;
 const picks = lectures
   .filter((l) => l.video.lecture || l.video.guide)
   .slice(0, count)
-  .map((l) => ({
-    id: (l.video.guide ?? l.video.lecture)!,
-    start: l.video.guide ? 8 : 120,      // skip titles; land inside the talk
-  }));
+  .map((l) => ({ id: (l.video.guide ?? l.video.lecture)! }));
 const first = picks[0];
+
+type Clip = { id: string; webm: string; mp4: string };
+const reel = (clips as Clip[]).map((c) => ({
+  webm: asset(c.webm),
+  mp4: asset(c.mp4),
+}));
 ---
 
 <div class="ls" style={`--ls-o:${opacity}`} aria-hidden="true">
@@ -46,59 +56,57 @@ const first = picks[0];
   />
   <img class="ls__still ls__still--b" data-still="b" alt="" width="1280" height="720"
        decoding="async" />
+
+  {reel.length > 0 && (
+    <video
+      class="ls__vid"
+      data-lecture-video
+      data-reel={JSON.stringify(reel)}
+      muted loop playsinline preload="none"
+      width="854" height="480"
+    ></video>
+  )}
+
   <div class="ls__stage" data-lecture-screen data-picks={JSON.stringify(picks)}></div>
   <div class="ls__grade"></div>
 </div>
 
 <style>
   .ls { position: absolute; inset: 0; z-index: -4; overflow: hidden; pointer-events: none; }
-  .ls__still, .ls__stage {
+  .ls__still, .ls__stage, .ls__vid {
     position: absolute;
-    /* overscan: the player's own letterboxing must never show an edge */
+    /* overscan: an encoder's edge must never show */
     inset: -8%;
     inline-size: 116%;
     block-size: 116%;
   }
+  .ls__still, .ls__vid { object-fit: cover; }
   .ls__still {
-    object-fit: cover;
     opacity: var(--ls-o);
     filter: saturate(0.45) brightness(0.5) contrast(1.05);
     transition: opacity 1.6s ease;
   }
-  .ls__stage { opacity: 0; transition: opacity 1.8s ease; }
-  .ls__stage[data-on] { opacity: var(--ls-o); }
-  .ls:has(.ls__stage[data-on]) .ls__still { opacity: 0; }
-  /* the incoming frame of the phone slideshow, faded up over the outgoing one */
+  .ls__vid {
+    opacity: 0;
+    filter: saturate(0.42) brightness(0.46) contrast(1.06);
+    transition: opacity 1.8s ease;
+  }
+  .ls__vid[data-on] { opacity: var(--ls-o); }
+  .ls:has(.ls__vid[data-on]) .ls__still { opacity: 0; }
+
+  /* the incoming frame of the stills fallback, faded up over the outgoing one */
   .ls__still--b { opacity: 0; }
   .ls__still--b[data-on] { opacity: var(--ls-o); }
   .ls__still--b[data-on] ~ [data-still='a'] { opacity: 0; }
 
-  /* An iframe cannot be object-fit, and a 16:9 player dropped into a tall box
-     letterboxes itself — black bands where the hall wanted footage. So it is
-     sized to cover: whichever of width-driven or height-driven is larger wins,
-     and the overflow is clipped by .ls. */
-  .ls__stage :global(iframe) {
-    position: absolute;
-    inset-block-start: 50%;
-    inset-inline-start: 50%;
-    translate: -50% -50%;
-    inline-size: max(100%, 177.8svh);
-    block-size: max(100%, 56.25vw);
-    border: 0;
-    display: block;
-    filter: saturate(0.42) brightness(0.46) contrast(1.06);
-    pointer-events: none;
-  }
+  .ls__stage { display: none; }
 
-  /* On a phone the hall runs well past the fold — six pieces stacked two to a
-     row — and a backdrop spanning all of it centres the footage somewhere the
+  /* On a phone the hall runs well past the fold — pieces stacked two to a row
+     — and a backdrop spanning all of it centres the footage somewhere the
      visitor never looks. Holding it to one screen puts it behind the masthead
      and the first pieces, which is where it is actually seen. */
   @media (max-width: 48rem) {
-    .ls {
-      block-size: 100svh;
-      inset-block-end: auto;
-    }
+    .ls { block-size: 100svh; inset-block-end: auto; }
   }
 
   /* keeps the footage as a backdrop rather than a distraction */
@@ -113,90 +121,96 @@ const first = picks[0];
 <script>
   import { motionOn } from '../scripts/motion';
 
-  const el = document.querySelector<HTMLElement>('[data-lecture-screen]');
-  if (el) {
-    const stage = el;
-    const picks: { id: string; start: number }[] = JSON.parse(stage.dataset.picks ?? '[]');
+  const wrap = document.querySelector<HTMLElement>('.ls');
+  if (wrap) {
     const conn = (navigator as any).connection;
     const saveData = conn?.saveData === true;
     const crawling = /^(slow-)?2g$/.test(conn?.effectiveType ?? '');
-    /* Not a capability test — a courtesy one. A phone can play this perfectly
-       well; it just should not be handed a rolling series of new players. */
-    const small = matchMedia('(max-width: 48rem)').matches;
-    let i = 0, timer = 0;
+    const blocked = () => saveData || crawling || !motionOn();
 
-    const src = (p: { id: string; start: number }) =>
-      `https://www.youtube-nocookie.com/embed/${p.id}` +
-      `?autoplay=1&mute=1&controls=0&loop=1&playlist=${p.id}` +
-      `&start=${p.start}&playsinline=1&rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&fs=0`;
+    const video = wrap.querySelector<HTMLVideoElement>('[data-lecture-video]');
+    const stillA = wrap.querySelector<HTMLImageElement>('[data-still="a"]')!;
+    const stillB = wrap.querySelector<HTMLImageElement>('[data-still="b"]')!;
+    let timer = 0;
 
-    function mount() {
-      const p = picks[i % picks.length];
-      const f = document.createElement('iframe');
-      f.src = src(p);
-      f.title = '';
-      f.setAttribute('allow', 'autoplay; encrypted-media');
-      f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-      f.setAttribute('tabindex', '-1');
-      f.setAttribute('aria-hidden', 'true');
-      stage.replaceChildren(f);
-      // only reveal once it has had time to start, so we never flash a black box
-      setTimeout(() => stage.setAttribute('data-on', ''), 2600);
+    /* ── the cuts, when they exist ────────────────────────────────────────
+       Each is a few hundred KB and loops locally, so after the first play the
+       backdrop costs nothing at all. They are swapped occasionally for
+       variety, not continuously. */
+    function startVideo(v: HTMLVideoElement) {
+      const reel: { webm: string; mp4: string }[] = JSON.parse(v.dataset.reel ?? '[]');
+      if (!reel.length) return false;
+      let n = 0;
+
+      const load = () => {
+        const c = reel[n % reel.length];
+        v.replaceChildren();
+        const webm = document.createElement('source');
+        webm.src = c.webm; webm.type = 'video/webm';
+        const mp4 = document.createElement('source');
+        mp4.src = c.mp4; mp4.type = 'video/mp4';
+        v.append(webm, mp4);
+        v.load();
+        // autoplay can still be declined; the stills stay underneath either way
+        v.play().then(() => v.setAttribute('data-on', '')).catch(() => {});
+      };
+
+      load();
+      if (reel.length > 1) {
+        timer = window.setInterval(() => {
+          if (document.hidden || !motionOn()) return;
+          n++;
+          load();
+        }, 45_000);
+      }
+      return true;
     }
 
-    function cycle() {
-      i++;
-      mount();
-      timer = window.setTimeout(cycle, 42000);
-    }
-
-    /* Phones: cross-fade the stills. Two layers, alternating, so the outgoing
-       frame is still painted while the incoming one arrives. */
+    /* ── the fallback: the same lecture frames, cross-faded ───────────────
+       Two layers alternating, so the outgoing frame is still painted while
+       the incoming one arrives. No third-party script, tens of KB a frame. */
     function startStills() {
-      const wrap = stage.closest('.ls')!;
-      const a = wrap.querySelector<HTMLImageElement>('[data-still="a"]')!;
-      const bImg = wrap.querySelector<HTMLImageElement>('[data-still="b"]')!;
+      const picks: { id: string }[] =
+        JSON.parse(wrap!.querySelector<HTMLElement>('[data-lecture-screen]')?.dataset.picks ?? '[]');
       if (picks.length < 2) return;
       let n = 0, showingB = false;
       timer = window.setInterval(() => {
         if (document.hidden || !motionOn()) return;
         n = (n + 1) % picks.length;
-        const next = showingB ? a : bImg;
+        const next = showingB ? stillA : stillB;
         const img = new Image();
         img.onload = () => {
           next.src = img.src;
           showingB = !showingB;
-          bImg.toggleAttribute('data-on', showingB);
+          stillB.toggleAttribute('data-on', showingB);
         };
         img.src = `https://i.ytimg.com/vi/${picks[n].id}/maxresdefault.jpg`;
       }, 9000);
     }
 
-    function startScreen() {
-      if (saveData || crawling || !motionOn() || stage.dataset.live) return;
-      stage.dataset.live = '1';
-      if (small) { startStills(); return; }
-      mount();
-      timer = window.setTimeout(cycle, 42000);
+    function start() {
+      if (blocked() || wrap!.dataset.live) return;
+      wrap!.dataset.live = '1';
+      if (video && startVideo(video)) return;
+      startStills();
     }
 
-    function stopScreen() {
-      clearTimeout(timer);
+    function stop() {
       clearInterval(timer);
-      stage.replaceChildren();
-      stage.removeAttribute('data-on');
-      delete stage.dataset.live;
+      video?.pause();
+      video?.removeAttribute('data-on');
+      delete wrap!.dataset.live;
     }
 
     // wait for a quiet moment so the hall paints first
-    const kick = () => setTimeout(startScreen, 900);
+    const kick = () => setTimeout(start, 900);
     if (document.readyState === 'complete') kick();
     else addEventListener('load', kick, { once: true });
 
-    addEventListener('motionpref', () => (motionOn() ? startScreen() : stopScreen()));
+    addEventListener('motionpref', () => (motionOn() ? start() : stop()));
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) { clearTimeout(timer); }
-      else if (stage.dataset.live && !small) { timer = window.setTimeout(cycle, 42000); }
+      if (document.hidden) video?.pause();
+      else if (wrap.dataset.live) video?.play().catch(() => {});
     });
   }
 </script>
