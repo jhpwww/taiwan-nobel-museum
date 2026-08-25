@@ -302,3 +302,28 @@ or the poster jumps when the model takes over.
 - Credits are emitted with `<Fragment set:html>`. A JSX comment (`{/* … */}`)
   is stripped at build and never reaches the page.
 - Rotation follows `motionOn()`, never the media query alone.
+
+## Fonts are self-hosted and subset
+
+`scripts/subset-fonts.mjs` owns the three web fonts. Google Fonts was sending
+2.1–3.6 MB of CJK chunks per page — more than the difference between any two of
+the four hall designs — and put a third party in the request path of every
+visit, which the About page's privacy claim reads badly against.
+
+- The corpus is bucketed by **resolved** font, not by selector: the script
+  opens all 92 built pages and reads `getComputedStyle().fontFamily` on every
+  text node. The serif only draws headings, so it carries 350 ideographs where
+  the sans carries 993 — that split alone is worth 220 KB.
+- Two-pass, because the corpus comes from the rendered site:
+  `npm run build && node scripts/subset-fonts.mjs && npm run build`.
+- `src/styles/fonts.css` and `src/data/font-manifest.json` are **generated**.
+  The manifest exists so the preload in `Base.astro` names the identical
+  hashed URL the CSS asks for — name it differently and the font downloads
+  twice.
+- Font files are hashed for the same reason the models are: `public/` URLs are
+  stable across deploys and GitHub Pages serves them with `max-age`.
+- Upstream TTFs (29 MB) and `.venv-fonts/` are gitignored; the script fetches
+  the fonts if they are missing.
+- A glyph outside the corpus is not tofu — it falls back to PingFang TC /
+  Microsoft JhengHei. Visitors typing into the study notes are fine; only the
+  typeface shifts.

@@ -24,6 +24,7 @@
  */
 import Sculpture from './Sculpture.astro';
 import AmbientVideo from './AmbientVideo.astro';
+import LectureScreen from './LectureScreen.astro';
 import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
@@ -90,7 +91,12 @@ const creditComment = (c: Credit) =>
 <section class="mh" aria-labelledby="mh-title">
   <StyleSwitch lang={lang} current="models" />
   <MotionToggle lang={lang} />
-  <AmbientVideo opacity={0.12} />
+  {/* the lectures themselves behind the pieces, as in the flat and room halls.
+      LectureScreen gates itself hard — never on small screens, never under
+      Save-Data, never with motion off — so the phone profile is untouched.
+      Dimmer here than in the flat hall: six lit objects need a quieter ground. */}
+  <LectureScreen opacity={0.38} />
+  <AmbientVideo opacity={0.10} />
 
   <div class="mh__scene" aria-hidden="true">
     <div class="mh__glow"></div>
@@ -183,11 +189,13 @@ const creditComment = (c: Credit) =>
   }
 
   .mh__scene { position: absolute; inset: 0; z-index: -1; }
+  /* the footage has to read through this, so the centre stays open and only
+     the edges carry weight */
   .mh__glow {
     position: absolute; inset-inline: 0; inset-block-start: -18%;
     block-size: 78%;
     background: radial-gradient(ellipse 60% 70% at 50% 0%,
-      rgba(74, 49, 21, 0.95), rgba(42, 26, 13, 0.55) 45%, transparent 78%);
+      rgba(74, 49, 21, 0.72), rgba(42, 26, 13, 0.34) 45%, transparent 78%);
   }
   /* one horizon line: the pieces are lit objects in a dark room, and more
      scenery than that competes with them */

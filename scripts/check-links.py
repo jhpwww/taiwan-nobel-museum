@@ -76,6 +76,20 @@ def get(u):
             t = re.search(r"<title>(.*?)</title>", body, re.S)
             return r.status, r.geturl(), (html.unescape(t.group(1)).strip()[:64] if t else "")
     except urllib.error.HTTPError as e:
+        # A bot challenge is not a broken link: the page is there, the checker
+        # just is not a person. Cloudflare answers 403 with its own interstitial
+        # and a cf-mitigated header; a visitor passes it and reads the page.
+        body = ""
+        try:
+            body = e.read(4000).decode("utf-8", "replace")
+        except Exception:
+            pass
+        if e.code in (403, 503) and (
+            e.headers.get("cf-mitigated")
+            or "Just a moment" in body
+            or "cf-browser-verification" in body
+        ):
+            return "CHALLENGED", u, "bot challenge, not a dead link"
         return e.code, u, ""
     except Exception as e:
         return f"ERR {type(e).__name__}", u, str(e)[:70]
@@ -123,15 +137,20 @@ with cf.ThreadPoolExecutor(max_workers=6) as ex:
 print(f"   {len(ytids) - sum(1 for b in bad if b[0]=='youtube')} playable, "
       f"{sum(1 for b in bad if b[0]=='youtube')} unavailable")
 
+challenged = []
 print(f"\n── external ({len({u for u, _ in external})} urls)")
 ext = sorted({u for u, _ in external})
 with cf.ThreadPoolExecutor(max_workers=8) as ex:
     for u, (code, final, title) in zip(ext, ex.map(get, ext)):
         suspect = code == 200 and re.search(r"not found|404", title, re.I)
-        if code != 200 or suspect:
+        if code == "CHALLENGED":
+            challenged.append(u)
+            print(f"   note  {u}  — {title}")
+        elif code != 200 or suspect:
             bad.append(("external", u, f"{code} {title}"))
             print(f"   BAD {code}  {u}  {title}")
-print(f"   {len(ext) - sum(1 for b in bad if b[0]=='external')} OK, "
+print(f"   {len(ext) - sum(1 for b in bad if b[0]=='external') - len(challenged)} OK, "
+      f"{len(challenged)} bot-challenged, "
       f"{sum(1 for b in bad if b[0]=='external')} need attention")
 
 print(f"\n{'ALL REFERENCES GOOD' if not bad else str(len(bad)) + ' PROBLEM(S)'}")
