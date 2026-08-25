@@ -232,3 +232,28 @@ has it.
 - The button keeps its slot when hidden (`visibility`), so nothing shifts as
   it fades in. Only the referrer check uses `hidden`, and it is decided once
   at load.
+
+## The study store must never claim a save it did not make
+
+`localStorage.setItem` throws in a private window and wherever the browser is
+set to block site data. Swallowing that and printing 「已儲存」 is worse than
+any crash: the student writes six notes, trusts the confirmation, and loses
+all of it on reload.
+
+- `write()` in `src/scripts/study.ts` returns whether the value was kept.
+  `setNote()` and `updateKept()` pass it up; the UI shows 「未能儲存」 in the
+  warning colour, and holds it longer than the success message.
+- `storageAvailable()` probes once on load; both `StudyPanel` and `StudyPage`
+  show a standing banner when it fails, before anything has been typed.
+
+## Where a visitor can actually write
+
+Notes belong to a lecture, but requiring a trip to each lecture page made
+學習專區 a signpost with no writing surface anywhere behind it. `/study/` now
+carries the chooser (all 31 lectures), the watch toggles and the note fields,
+so the whole task can be done on one page. The lecture-page panel stays, and
+its notes open automatically once that lecture is chosen.
+
+Rebuild the editable blocks only when the *set* of chosen ids changes — never
+on input. Repainting a textarea from storage mid-sentence is exactly how the
+panel used to lose text.

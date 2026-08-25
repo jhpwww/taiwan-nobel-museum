@@ -24,6 +24,8 @@ const t = useT(lang);
     <a class="sp__course" href={path(lang, 'learn')}>{t('study.forCourse')} →</a>
   </header>
 
+  <p class="sp__blocked" data-blocked hidden>{t('study.blocked')}</p>
+
   <div class="sp__steps">
     <label class="sp__pick">
       <input type="checkbox" data-pick />
@@ -40,7 +42,7 @@ const t = useT(lang);
     </div>
   </div>
 
-  <details class="sp__note">
+  <details class="sp__note" data-note-details>
     <summary>
       <span>{t('study.noteTitle')}</span>
       <span class="sp__status" data-status data-done={t('study.noteDone')} data-todo={t('study.noteTodo')}></span>
@@ -71,7 +73,7 @@ const t = useT(lang);
 
     <div class="sp__actions">
       <button type="button" data-copy-note data-label={t('study.copyNote')} data-ok={t('study.copied')} data-fail={t('study.copyFail')}>{t('study.copyNote')}</button>
-      <span class="sp__saved" data-saved data-msg={t('study.saved')}></span>
+      <span class="sp__saved" data-saved data-msg={t('study.saved')} data-fail={t('study.saveFail')}></span>
     </div>
   </details>
 
@@ -168,11 +170,23 @@ const t = useT(lang);
   }
   .sp button:hover { filter: brightness(1.1); }
   .sp__saved { font-size: var(--step--1); color: var(--muted-dim); }
+  .sp__saved.is-fail { color: var(--c-medicine); }
+  .sp__blocked {
+    margin: 0;
+    padding: 0.6rem 0.8rem;
+    font-size: var(--step--1);
+    color: var(--cream);
+    border: 1px solid color-mix(in srgb, var(--c-medicine) 55%, transparent);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--c-medicine) 12%, transparent);
+  }
   .sp__privacy { font-size: 0.66rem; color: var(--muted-dim); border-block-start: 1px solid var(--line); padding-block-start: .6rem; }
 </style>
 
 <script>
-  import { entry, update, setNote, picks, noteComplete, REQUIRED_PICKS } from '../scripts/study';
+  import {
+    entry, update, updateKept, setNote, picks, noteComplete, storageAvailable, REQUIRED_PICKS,
+  } from '../scripts/study';
 
   const root = document.querySelector<HTMLElement>('[data-study]');
   if (root) {
@@ -185,6 +199,8 @@ const t = useT(lang);
     const saved = $<HTMLElement>('[data-saved]')!;
     const fields = [...root.querySelectorAll<HTMLTextAreaElement>('textarea[data-field]')];
     const watches = [...root.querySelectorAll<HTMLInputElement>('[data-watch]')];
+    const noteDetails = $<HTMLDetailsElement>('[data-note-details]');
+    const blocked = $<HTMLElement>('[data-blocked]');
 
     /** stats and toggles only — never the textareas, see hydrate() */
     function paint() {
@@ -220,13 +236,21 @@ const t = useT(lang);
     }
 
     let saveTimer = 0;
-    function flash() {
-      saved.textContent = saved.dataset.msg!;
+    /* never claim a save that did not happen: a blocked store is silent, and
+       a student who trusts "已儲存" loses the lot on reload */
+    function flash(kept: boolean) {
+      saved.textContent = kept ? saved.dataset.msg! : saved.dataset.fail!;
+      saved.classList.toggle('is-fail', !kept);
       clearTimeout(saveTimer);
-      saveTimer = window.setTimeout(() => (saved.textContent = ''), 1600);
+      saveTimer = window.setTimeout(() => (saved.textContent = ''), kept ? 1600 : 4000);
     }
 
-    pick.addEventListener('change', () => { update(id, { picked: pick.checked }); paint(); });
+    pick.addEventListener('change', () => {
+      update(id, { picked: pick.checked });
+      // choosing a lecture is the moment the fields become relevant
+      if (pick.checked && noteDetails) noteDetails.open = true;
+      paint();
+    });
     for (const w of watches) {
       w.addEventListener('change', () =>
         update(id, w.dataset.watch === 'tw' ? { watchedTaiwan: w.checked } : { watchedNobel: w.checked }));
@@ -239,9 +263,11 @@ const t = useT(lang);
         clearTimeout(t);
         t = window.setTimeout(() => {
           const k = f.dataset.field!;
-          if (k === 'askQuestion') update(id, { askQuestion: f.value });
-          else setNote(id, { [k]: f.value } as any);
-          flash();
+          const kept =
+            k === 'askQuestion'
+              ? updateKept(id, { askQuestion: f.value })
+              : setNote(id, { [k]: f.value } as any);
+          flash(kept);
           markStatus();
         }, 450);
       });
@@ -269,6 +295,14 @@ const t = useT(lang);
 
     addEventListener('study:changed', paint);
     hydrate();
+
+    // say up front when this browser will not keep anything, rather than
+    // letting the visitor find out after they have written six notes
+    if (blocked) blocked.hidden = storageAvailable();
+
+    // a lecture already chosen means the fields are wanted: do not make the
+    // visitor hunt for them behind a closed disclosure
+    if (noteDetails && entry(id).picked) noteDetails.open = true;
     paint();
   }
 </script>

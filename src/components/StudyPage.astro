@@ -56,12 +56,61 @@ const index = lectures.map((l) => ({
       <p class="study__nudge" data-nudge hidden></p>
     </section>
 
+    <p class="study__blocked" data-blocked hidden>{t('study.blocked')}</p>
+
     <section class="study__sec">
       <h2>{t('study.myPicks')}</h2>
-      <ul class="picks" data-picks role="list"
-          data-tw={t('study.tagTw')} data-nobel={t('study.tagNobel')} data-note={t('study.tagNote')}></ul>
+      <p class="study__note">{t('study.addNote')}</p>
+
+      <details class="chooser" data-chooser>
+        <summary>{t('study.addOpen').replace('{n}', String(lectures.length))}</summary>
+        <div class="chooser__grid" data-chooser-list></div>
+      </details>
+
       <p class="study__empty" data-empty>{t('study.emptyPicks')}</p>
+
+      {/* one editable block per chosen lecture: the reason this page exists is
+          to be the one place a student can sit and write all six */}
+      <div class="work" data-work></div>
     </section>
+
+    <template data-work-template>
+      <article class="work__item">
+        <header class="work__head">
+          <a class="work__name" data-work-name href="#"></a>
+          <a class="work__go" data-work-go href="#">{t('study.openLecture')} →</a>
+        </header>
+        <div class="work__watch">
+          <label><input type="checkbox" data-wwatch="tw" /> <span>{t('study.watchedTw')}</span></label>
+          <label><input type="checkbox" data-wwatch="nobel" /> <span>{t('study.watchedNobel')}</span></label>
+        </div>
+        <label class="work__field">
+          <span class="work__label">1. {t('study.fSummary')}</span>
+          <textarea data-wfield="summary" rows="3" placeholder={t('study.fSummaryPh')}></textarea>
+        </label>
+        <label class="work__field">
+          <span class="work__label">2. {t('study.fReflection')}</span>
+          <textarea data-wfield="reflection" rows="3" placeholder={t('study.fReflectionPh')}></textarea>
+        </label>
+        <label class="work__field">
+          <span class="work__label">3. {t('study.fQuestion')}</span>
+          <textarea data-wfield="question" rows="2" placeholder={t('study.fQuestionPh')}></textarea>
+        </label>
+        <label class="work__field">
+          <span class="work__label">{t('study.workAsk')}</span>
+          <textarea data-wfield="askQuestion" rows="2" placeholder={t('study.askPh')}></textarea>
+        </label>
+        <p class="work__saved" data-work-saved
+           data-msg={t('study.saved')} data-fail={t('study.saveFail')}></p>
+      </article>
+    </template>
+
+    <template data-choose-template>
+      <label class="chooser__row">
+        <input type="checkbox" data-choose />
+        <span class="chooser__name" data-choose-name></span>
+      </label>
+    </template>
 
     <section class="study__sec">
       <h2>{t('study.exportTitle')}</h2>
@@ -138,6 +187,85 @@ const index = lectures.map((l) => ({
     background: var(--surface); border-radius: 0 var(--radius) var(--radius) 0;
   }
 
+  .study__blocked {
+    margin: 0 0 1rem;
+    padding: 0.7rem 0.9rem;
+    font-size: var(--step--1);
+    color: var(--cream);
+    border: 1px solid color-mix(in srgb, var(--c-medicine) 55%, transparent);
+    border-radius: var(--radius);
+    background: color-mix(in srgb, var(--c-medicine) 12%, transparent);
+  }
+
+  .chooser {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    margin-block: 0.9rem;
+  }
+  .chooser > summary {
+    padding: 0.6rem 0.9rem;
+    cursor: pointer;
+    color: var(--gold);
+    font-size: var(--step--1);
+    letter-spacing: 0.04em;
+  }
+  .chooser > summary:hover { color: var(--gold-bright); }
+  .chooser__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: 0.15rem 1rem;
+    padding: 0.3rem 0.9rem 0.9rem;
+    border-block-start: 1px solid var(--line);
+  }
+  .chooser__row {
+    display: flex; align-items: center; gap: 0.55rem;
+    padding: 0.3rem 0;
+    cursor: pointer;
+    font-size: var(--step--1);
+    color: var(--muted);
+  }
+  .chooser__row:hover { color: var(--cream); }
+  .chooser__row input { accent-color: var(--gold); inline-size: 1rem; block-size: 1rem; flex: none; }
+
+  .work { display: grid; gap: 1rem; margin-block-start: 1.2rem; }
+  .work__item {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    padding: 0.9rem 1rem 0.8rem;
+    display: grid; gap: 0.7rem;
+  }
+  .work__head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1rem; flex-wrap: wrap;
+  }
+  .work__name { color: var(--cream); text-decoration: none; font-size: var(--step-0); }
+  .work__name:hover { color: var(--gold-bright); }
+  .work__go { color: var(--gold); text-decoration: none; font-size: var(--step--1); white-space: nowrap; }
+  .work__go:hover { color: var(--gold-bright); }
+  .work__watch {
+    display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem;
+    font-size: var(--step--1); color: var(--muted);
+  }
+  .work__watch label { display: inline-flex; align-items: center; gap: 0.45rem; cursor: pointer; }
+  .work__watch input { accent-color: var(--gold); inline-size: 1rem; block-size: 1rem; }
+  .work__field { display: grid; gap: 0.3rem; }
+  .work__label { font-size: var(--step--1); color: var(--muted); }
+  .work__field textarea {
+    inline-size: 100%;
+    font: inherit; font-size: var(--step--1);
+    color: var(--text);
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.65rem;
+    resize: vertical;
+  }
+  .work__field textarea:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .work__saved { margin: 0; min-block-size: 1.1em; font-size: var(--step--1); color: var(--muted-dim); }
+  .work__saved.is-fail { color: var(--c-medicine); }
+
   .picks { display: grid; gap: .55rem; padding: 0; margin-block-start: 1.1rem; }
   .picks li {
     display: flex; align-items: center; gap: .8rem; flex-wrap: wrap;
@@ -173,7 +301,10 @@ const index = lectures.map((l) => ({
 </style>
 
 <script>
-  import { read, progress, exportNotes, exportAll, clearAll, importJSON, rawJSON, noteComplete, REQUIRED_PICKS } from '../scripts/study';
+  import {
+    read, progress, exportNotes, exportAll, clearAll, importJSON, rawJSON,
+    entry, update, updateKept, setNote, storageAvailable, REQUIRED_PICKS,
+  } from '../scripts/study';
 
   const root = document.querySelector<HTMLElement>('[data-study-page]');
   if (root) {
@@ -188,12 +319,106 @@ const index = lectures.map((l) => ({
     const $ = <T extends Element>(s: string) => root.querySelector<T>(s)!;
     const out = $<HTMLTextAreaElement>('[data-out]');
     const msg = $<HTMLElement>('[data-msg]');
-    const list = $<HTMLElement>('[data-picks]');
     const empty = $<HTMLElement>('[data-empty]');
+    const work = $<HTMLElement>('[data-work]');
+    const workTpl = $<HTMLTemplateElement>('[data-work-template]');
+    const chooseTpl = $<HTMLTemplateElement>('[data-choose-template]');
+    const chooserList = $<HTMLElement>('[data-chooser-list]');
+    const blocked = $<HTMLElement>('[data-blocked]');
+
+    // a browser that refuses to keep anything should say so before six notes
+    // are written into it
+    blocked.hidden = storageAvailable();
+
+    /* ── the chooser ────────────────────────────────────────────────────────
+       Notes belong to a lecture, so writing one has to start by naming the
+       lecture. Requiring a trip to each lecture page for that made this page
+       read-only in practice, which is not what a page called 我的學習紀錄
+       should be. */
+    const boxes = new Map<string, HTMLInputElement>();
+    for (const r of index) {
+      const frag = chooseTpl.content.cloneNode(true) as DocumentFragment;
+      const row = frag.querySelector<HTMLElement>('.chooser__row')!;
+      const box = frag.querySelector<HTMLInputElement>('[data-choose]')!;
+      frag.querySelector<HTMLElement>('[data-choose-name]')!.textContent = r.name;
+      row.title = r.title;
+      box.addEventListener('change', () => {
+        update(r.id, { picked: box.checked });
+        paint();
+      });
+      boxes.set(r.id, box);
+      chooserList.append(frag);
+    }
+
+    /* ── the editable blocks ────────────────────────────────────────────────
+       Rebuilt only when the set of chosen lectures changes. Repainting them on
+       every keystroke would restore each textarea from storage mid-sentence,
+       which is exactly how the panel used to lose text. */
+    let rendered = '';
+
+    function paintWork(ids: string[]) {
+      const key = ids.join(',');
+      if (key === rendered) return;
+      rendered = key;
+      work.replaceChildren();
+
+      for (const id of ids) {
+        const r = byId.get(id);
+        const frag = workTpl.content.cloneNode(true) as DocumentFragment;
+        const name = frag.querySelector<HTMLAnchorElement>('[data-work-name]')!;
+        const go = frag.querySelector<HTMLAnchorElement>('[data-work-go]')!;
+        const savedEl = frag.querySelector<HTMLElement>('[data-work-saved]')!;
+        name.textContent = r ? r.name : id;
+        name.href = r?.href ?? '#';
+        go.href = r?.href ?? '#';
+
+        const e = entry(id);
+        for (const w of frag.querySelectorAll<HTMLInputElement>('[data-wwatch]')) {
+          const tw = w.dataset.wwatch === 'tw';
+          w.checked = tw ? !!e.watchedTaiwan : !!e.watchedNobel;
+          w.addEventListener('change', () => {
+            update(id, tw ? { watchedTaiwan: w.checked } : { watchedNobel: w.checked });
+            paintStats();
+          });
+        }
+
+        for (const f of frag.querySelectorAll<HTMLTextAreaElement>('[data-wfield]')) {
+          const k = f.dataset.wfield as 'summary' | 'reflection' | 'question' | 'askQuestion';
+          f.value = k === 'askQuestion' ? (e.askQuestion ?? '') : (e.note?.[k] ?? '');
+
+          let timer = 0;
+          f.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = window.setTimeout(() => {
+              const kept =
+                k === 'askQuestion'
+                  ? updateKept(id, { askQuestion: f.value })
+                  : setNote(id, { [k]: f.value } as any);
+              savedEl.textContent = kept ? savedEl.dataset.msg! : savedEl.dataset.fail!;
+              savedEl.classList.toggle('is-fail', !kept);
+              setTimeout(() => (savedEl.textContent = ''), kept ? 1600 : 4000);
+              paintStats();
+            }, 450);
+          });
+        }
+        work.append(frag);
+      }
+    }
 
     function say(text: string) {
       msg.textContent = text;
       setTimeout(() => (msg.textContent = ''), 2200);
+    }
+
+    /** counters only — safe to call while someone is typing */
+    function paintStats() {
+      const p = progress();
+      $('[data-stat="picked"]').textContent = `${p.picked}/${p.required}`;
+      $('[data-stat="both"]').textContent = String(p.bothWatched);
+      $('[data-stat="notes"]').textContent = String(p.notesDone);
+      $('[data-stat="questions"]').textContent = String(p.questions);
+      $<HTMLElement>('[data-bar]').style.inlineSize =
+        `${Math.min(100, (p.notesDone / REQUIRED_PICKS) * 100)}%`;
     }
 
     function paint() {
@@ -207,32 +432,9 @@ const index = lectures.map((l) => ({
         `${Math.min(100, (p.notesDone / REQUIRED_PICKS) * 100)}%`;
 
       const picked = Object.entries(s).filter(([, e]) => e.picked);
-      list.replaceChildren();
-      for (const [id, e] of picked) {
-        const r = byId.get(id);
-        const li = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = r?.href ?? '#';
-        a.textContent = r ? `${r.name}` : id;
-        li.append(a);
-        const tags = document.createElement('span');
-        tags.className = 'tags';
-        const mk = (label: string, on: boolean) => {
-          const t2 = document.createElement('span');
-          t2.className = 'tag';
-          t2.textContent = label;
-          if (on) t2.setAttribute('data-on', '');
-          return t2;
-        };
-        tags.append(
-          mk(list.dataset.tw!, !!e.watchedTaiwan),
-          mk(list.dataset.nobel!, !!e.watchedNobel),
-          mk(list.dataset.note!, noteComplete(e)),
-        );
-        li.append(tags);
-        list.append(li);
-      }
       empty.hidden = picked.length > 0;
+      for (const [id, box] of boxes) box.checked = !!s[id]?.picked;
+      paintWork(picked.map(([id]) => id));
       paintSpread(picked.map(([id]) => byId.get(id)?.cat).filter(Boolean) as string[]);
     }
 

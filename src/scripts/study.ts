@@ -45,13 +45,33 @@ export function read(): Store {
   }
 }
 
-function write(s: Store) {
+/**
+ * True when this browser will actually keep what we write. A private window,
+ * or a browser set to block site data, throws on setItem — and a student who
+ * is told "saved" in that state loses everything on reload, which is worse
+ * than being told plainly that nothing is being kept.
+ */
+export function storageAvailable(): boolean {
+  try {
+    const probe = `${KEY}:probe`;
+    localStorage.setItem(probe, '1');
+    localStorage.removeItem(probe);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Returns false when the write was refused, so callers can say so. */
+function write(s: Store): boolean {
+  let kept = true;
   try {
     localStorage.setItem(KEY, JSON.stringify(s));
   } catch {
-    /* private mode — the page must still work, the work just is not kept */
+    kept = false;
   }
   dispatchEvent(new CustomEvent('study:changed', { detail: s }));
+  return kept;
 }
 
 export const entry = (id: string): Entry => read()[id] ?? {};
@@ -63,11 +83,18 @@ export function update(id: string, patch: Partial<Entry>) {
   return s[id];
 }
 
-export function setNote(id: string, patch: Partial<Note>) {
+/** as update(), but reports whether the change was actually kept */
+export function updateKept(id: string, patch: Partial<Entry>): boolean {
+  const s = read();
+  s[id] = { ...(s[id] ?? {}), ...patch };
+  return write(s);
+}
+
+export function setNote(id: string, patch: Partial<Note>): boolean {
   const s = read();
   const prev = s[id]?.note ?? { summary: '', reflection: '', question: '' };
   s[id] = { ...(s[id] ?? {}), note: { ...prev, ...patch, updated: new Date().toISOString() } };
-  write(s);
+  return write(s);
 }
 
 export const picks = () => Object.entries(read()).filter(([, e]) => e.picked).map(([id]) => id);
