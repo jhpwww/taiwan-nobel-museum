@@ -199,3 +199,18 @@ src/
 - Keyboard-navigable, visible focus, WCAG AA contrast
 - No console errors; no layout shift
 - Test at 390px before 1440px
+
+## Copy voice
+
+Every descriptive string on the site is a museum wall label, not a lesson.
+
+- Facts first. State what was found, then why it mattered. No preamble.
+- Third person throughout gallery, lecture and hall copy. Second person is
+  allowed only in the study tools, where the reader is writing.
+- No rhetorical-question hooks, no closing moral, no telling the reader what
+  to feel or how impressed to be.
+- Never the 「不是 X，而是 Y」 rhythm as an ornament; only where the contrast
+  is the actual point, and at most once.
+- Chinese: 破折號 (——) sparingly, and never in a hook. Official lecture
+  titles keep whatever punctuation they were delivered with.
+- Every proper noun carries its original in parentheses on first use.
