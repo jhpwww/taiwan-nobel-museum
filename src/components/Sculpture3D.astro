@@ -123,3 +123,17 @@ const gap = 1.5;   // px between slices
     transform: translateZ(calc(var(--depth) / 2)) rotateY(-12deg);
   }
 </style>
+
+<script>
+  /*
+   * display:none stops the paint but the nodes are still parsed and retained.
+   * On a small screen drop them properly — the room holds 144 of these and
+   * iOS Safari will discard the whole tab rather than carry them.
+   */
+  if (matchMedia('(max-width: 62rem)').matches) {
+    for (const stack of document.querySelectorAll('.x3d__turn')) {
+      const slices = [...stack.querySelectorAll(':scope > .x3d__slice')];
+      for (const s of slices.slice(3)) s.remove();
+    }
+  }
+</script>

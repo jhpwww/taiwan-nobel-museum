@@ -332,6 +332,12 @@ const cats = ORDER.map((key, i) => ({
     .hall__plinths { grid-template-columns: repeat(2, 1fr); --sculpt-w: 104px; gap: 0.5rem; }
     .hall { min-block-size: 0; }
   }
+
+  /* clear the style switcher and the motion toggle, which stack down the
+     left on narrow screens */
+  @media (max-width: 34rem) {
+    .hall { padding-block-start: 8.7rem; }
+  }
 </style>
 
 <script>

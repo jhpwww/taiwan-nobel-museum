@@ -306,14 +306,20 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
 
   /* the room pushes toward whichever plinth was chosen */
   .stage { transition: transform .78s cubic-bezier(.5,0,.75,0); }
-  .hall3d[data-walking] .stage,
-  .stage[data-walking] {
-    transform: translate3d(var(--wx,0), var(--wy,0), 0) scale(2.35);
-  }
   .plinths, .masthead, .intro { transition: opacity .5s ease, transform .78s cubic-bezier(.5,0,.75,0); }
-  .hall3d[data-walking] .plinths { transform: translate3d(var(--wx,0), var(--wy,0), 0) scale(2.1); opacity: .25; }
   .hall3d[data-walking] .masthead, .hall3d[data-walking] .intro { opacity: 0; }
 
+  /* Scaling the whole 3D room re-rasterises every composited layer at the new
+     size. That is affordable on a desktop GPU and is what tips a phone over
+     the edge, right at the moment of navigating away — so the amount is a
+     variable, and walkin.ts sets it to 1 on a small screen. */
+  .hall3d[data-walking] .stage {
+    transform: translate3d(var(--wx, 0px), var(--wy, 0px), 0) scale(var(--walk-zoom, 1));
+  }
+  .hall3d[data-walking] .plinths {
+    transform: translate3d(var(--wx, 0px), var(--wy, 0px), 0) scale(var(--walk-zoom-near, 1));
+    opacity: .28;
+  }
   /* ---------- masthead ---------- */
   .masthead { text-align: center; display: grid; justify-items: center; gap: .45rem; padding-inline: 1rem; }
   .title {
@@ -394,6 +400,10 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
   .intro:hover .intro__cta { translate: .25rem 0; }
 
   @media (max-width: 62rem) {
+    /* the reflection doubles the sculpture count, and carries a blur and a
+       mask on top of it — far too much for a phone */
+    .plinth__mirror { display: none; }
+    .vwall { display: none; }
     .plinths { grid-template-columns: repeat(3, 1fr); row-gap: 1.25rem; }
     .plinth { transform: none; }
     .plinth:hover, .plinth:focus-visible { transform: translateZ(0) scale(1.05); }
@@ -405,6 +415,12 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
     .intro { border-radius: var(--radius); padding: 1rem; flex-wrap: wrap; }
   }
   @media (max-width: 40rem) { .intro__cta { inline-size: 100%; } }
+
+  /* clear the style switcher and the motion toggle, which stack down the
+     left on narrow screens */
+  @media (max-width: 34rem) {
+    .hall3d { padding-block-start: 8.7rem; }
+  }
 </style>
 
 <script>

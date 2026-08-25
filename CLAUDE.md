@@ -165,6 +165,17 @@ src/
 - Never put `pointer-events: none` on the facade button. It is still waiting for the pointerup
   and click that hand over to the player; suppressing them strands the video permanently.
 
+**Weight of the CSS-3D room**
+- `Sculpture3D` extrudes each SVG into 12 slices, each with its own `filter` — so each slice is
+  a separate composited surface. The room holds six of those plus a mirrored copy of each: 144
+  filtered SVGs. That is fine on a desktop GPU and will get the tab discarded on iOS Safari.
+- Below 62rem the mirrors, the video wall and all but three slices are removed — the extra
+  slices are deleted from the DOM, not merely hidden, because display:none still retains them.
+- The walk-in zoom is set from JS (`--walk-zoom`), 1 on small screens. Scaling the room
+  re-rasterises every composited layer at the new size, which is what used to kill the tab at
+  exactly the moment of navigating into a gallery.
+- If you add anything to this room, check the phone numbers first: `document.querySelectorAll('.x3d svg').length` should stay around 39 on a phone, not 150.
+
 **CSS**
 - Two accent tokens, and they are not interchangeable. `--accent` paints strokes, text, borders
   and the sculptures — full-strength hue. `--accent-block` paints solid fills (material buttons,

@@ -33,6 +33,14 @@ export function wireWalkIn(opts: {
       veil.style.setProperty('--veil', getComputedStyle(a).getPropertyValue('--accent') || '#e0aa53');
       scene.style.setProperty('--wx', `${(-fx * 46).toFixed(1)}%`);
       scene.style.setProperty('--wy', `${(-fy * 26).toFixed(1)}%`);
+
+      // Zooming the room means re-rasterising every composited layer at the
+      // new scale. A phone cannot afford that on top of an already heavy 3D
+      // scene — iOS discards the tab — so small screens get the wash and the
+      // fade without the zoom.
+      const roomy = matchMedia('(min-width: 62.01rem)').matches;
+      scene.style.setProperty('--walk-zoom', roomy ? '2.35' : '1');
+      scene.style.setProperty('--walk-zoom-near', roomy ? '2.1' : '1');
       scene.setAttribute('data-walking', '');
       requestAnimationFrame(() => veil.setAttribute('data-on', ''));
 

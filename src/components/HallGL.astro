@@ -186,6 +186,12 @@ const stills = lectures
     .intro { border-radius: var(--radius); padding: 1rem; flex-wrap: wrap; }
     .intro__cta { inline-size: 100%; }
   }
+
+  /* clear the style switcher and the motion toggle, which stack down the
+     left on narrow screens */
+  @media (max-width: 34rem) {
+    .hallgl { padding-block-start: 8.7rem; }
+  }
 </style>
 
 <script>
