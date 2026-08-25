@@ -7,10 +7,17 @@
  * sculptures.
  *
  * Nothing is downloaded or re-hosted — it is the same youtube-nocookie embed
- * used everywhere else on the site, with the chrome turned off. It costs a
- * real network stream, so it is gated hard: never on small screens, never
- * under Save-Data, never when motion is off, and never before the poster has
- * already given the page something to show.
+ * used everywhere else on the site, with the chrome turned off.
+ *
+ * It costs a real network stream, so it is gated: never under Save-Data, never
+ * on a 2G-class connection, never when motion is off, and never before the
+ * still has already given the page something to show.
+ *
+ * Phones do get it. They used not to, which left a static frame where the
+ * museum promised moving footage. What they do not get is the 42-second
+ * cycle: one player is mounted and left alone, because it is tearing an
+ * iframe down and building another every 42 seconds that grows memory on a
+ * device that has little to spare. Desktop keeps the rotation.
  */
 import { lectures } from '../data/catalog';
 interface Props { opacity?: number; count?: number }
@@ -58,13 +65,32 @@ const first = picks[0];
   .ls__stage[data-on] ~ .ls__grade + .ls__still,
   .ls:has(.ls__stage[data-on]) .ls__still { opacity: 0; }
 
+  /* An iframe cannot be object-fit, and a 16:9 player dropped into a tall box
+     letterboxes itself — black bands where the hall wanted footage. So it is
+     sized to cover: whichever of width-driven or height-driven is larger wins,
+     and the overflow is clipped by .ls. */
   .ls__stage :global(iframe) {
-    inline-size: 100%;
-    block-size: 100%;
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    translate: -50% -50%;
+    inline-size: max(100%, 177.8svh);
+    block-size: max(100%, 56.25vw);
     border: 0;
     display: block;
     filter: saturate(0.42) brightness(0.46) contrast(1.06);
     pointer-events: none;
+  }
+
+  /* On a phone the hall runs well past the fold — six pieces stacked two to a
+     row — and a backdrop spanning all of it centres the footage somewhere the
+     visitor never looks. Holding it to one screen puts it behind the masthead
+     and the first pieces, which is where it is actually seen. */
+  @media (max-width: 48rem) {
+    .ls {
+      block-size: 100svh;
+      inset-block-end: auto;
+    }
   }
 
   /* keeps the footage as a backdrop rather than a distraction */
@@ -83,8 +109,12 @@ const first = picks[0];
   if (el) {
     const stage = el;
     const picks: { id: string; start: number }[] = JSON.parse(stage.dataset.picks ?? '[]');
-    const tooSmall = matchMedia('(max-width: 48rem)').matches;
-    const saveData = (navigator as any).connection?.saveData === true;
+    const conn = (navigator as any).connection;
+    const saveData = conn?.saveData === true;
+    const crawling = /^(slow-)?2g$/.test(conn?.effectiveType ?? '');
+    /* Not a capability test — a courtesy one. A phone can play this perfectly
+       well; it just should not be handed a rolling series of new players. */
+    const small = matchMedia('(max-width: 48rem)').matches;
     let i = 0, timer = 0;
 
     const src = (p: { id: string; start: number }) =>
@@ -113,10 +143,10 @@ const first = picks[0];
     }
 
     function startScreen() {
-      if (tooSmall || saveData || !motionOn() || stage.dataset.live) return;
+      if (saveData || crawling || !motionOn() || stage.dataset.live) return;
       stage.dataset.live = '1';
       mount();
-      timer = window.setTimeout(cycle, 42000);
+      if (!small) timer = window.setTimeout(cycle, 42000);
     }
 
     function stopScreen() {
@@ -133,7 +163,8 @@ const first = picks[0];
 
     addEventListener('motionpref', () => (motionOn() ? startScreen() : stopScreen()));
     document.addEventListener('visibilitychange', () => {
-      if (document.hidden) { clearTimeout(timer); } else if (stage.dataset.live) { timer = window.setTimeout(cycle, 42000); }
+      if (document.hidden) { clearTimeout(timer); }
+      else if (stage.dataset.live && !small) { timer = window.setTimeout(cycle, 42000); }
     });
   }
 </script>
