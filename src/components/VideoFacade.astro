@@ -25,6 +25,7 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
 ---
 
 <figure class="vf" data-kind={kind}>
+  {note && <figcaption class="vf__note">{note}</figcaption>}
   <button
     class="vf__btn"
     type="button"
@@ -52,7 +53,6 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     </span>
     {label && <span class="vf__label">{label}</span>}
   </button>
-  {note && <figcaption class="vf__note">{note}</figcaption>}
 </figure>
 
 <style>
@@ -162,10 +162,11 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     padding: 0.16rem 0.5rem;
   }
 
+  /* the note leads the frame: it is the line that decides whether someone presses play */
   .vf__note {
-    margin-block-start: 0.55rem;
+    margin-block-end: 0.5rem;
     font-size: var(--step--1);
-    color: var(--muted);
+    color: var(--text);
   }
 
   /* the player, built on pointerdown and hidden until the tap completes */
