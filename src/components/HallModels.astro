@@ -1,0 +1,353 @@
+---
+/**
+ * HallModels.astro — the fourth hall: six real objects instead of drawings.
+ *
+ * The other three halls draw their sculptures: SVG (flat), stacked SVG slices
+ * (room), procedural geometry (rotunda). This one shows actual glTF models,
+ * one <model-viewer> per piece rather than a single shared three.js scene, so
+ * a piece that fails to load costs only itself. model-viewer keeps one
+ * WebGLRenderer for every element on the page, which is what makes six of them
+ * affordable.
+ *
+ * The models are other people's work, normalised by scripts/normalise-models.mjs
+ * and re-cast in each hall's own accent colour. Provenance for every one is in
+ * data/model-credits.json, rendered both as the comments beside each element
+ * and as the attribution block at the foot of this hall — the licences are
+ * mostly CC-BY, and credit that lives only in a commit message is not credit.
+ *
+ * Nothing here imitates a Nobel medal. The pieces stand for what each prize is
+ * about, not for the prize's own artwork.
+ *
+ * Degrading, in order: model → poster (WebGL missing or still loading) →
+ * plain link (custom element never upgrades, so the slotted <img> is all that
+ * renders). The heading, name, count and href never depend on any of it.
+ */
+import Sculpture from './Sculpture.astro';
+import AmbientVideo from './AmbientVideo.astro';
+import StyleSwitch from './StyleSwitch.astro';
+import MotionToggle from './MotionToggle.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { gallery, asset } from '../i18n/routing';
+import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
+import credits from '../../data/model-credits.json';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const counts = lectures.reduce<Record<string, number>>((a, l) => {
+  a[l.prize.category] = (a[l.prize.category] ?? 0) + 1;
+  return a;
+}, {});
+
+const [introA, introConj, introB] = introParts(lang);
+
+type Credit = { title: string; author: string; licence: string; page: string };
+const credited = credits as Record<string, Credit>;
+
+const cats = categoryList()
+  .map((c) => c.key)
+  .filter((key) => key in credited)
+  .map((key) => ({
+    key,
+    name: catName(key, lang),
+    n: counts[key] ?? 0,
+    href: gallery(lang, key),
+    model: asset(`assets/models/${key}.glb`),
+    poster: asset(`assets/models/${key}.webp`),
+    credit: credited[key],
+  }));
+
+/** kept in step with scripts/render-posters.mjs, or the poster would jump */
+const CAMERA = '35deg 70deg 2.2m';
+
+/**
+ * A real HTML comment, not a JSX one — `{/* … *\/}` is stripped at build and
+ * would leave the credit in the source only. Anyone reading the page source to
+ * find out where a model came from should find the answer next to it.
+ */
+const creditComment = (c: Credit) =>
+  `<!-- model: ${[c.title, c.author, c.licence, c.page]
+    .map((v) => String(v).replace(/[<>]/g, '').replace(/--+/g, '-'))
+    .join(' · ')} -->`;
+---
+
+<section class="mh" aria-labelledby="mh-title">
+  <StyleSwitch lang={lang} current="models" />
+  <MotionToggle lang={lang} />
+  <AmbientVideo opacity={0.12} />
+
+  <div class="mh__scene" aria-hidden="true">
+    <div class="mh__glow"></div>
+    <div class="mh__floor"></div>
+  </div>
+
+  <div class="mh__masthead">
+    <h1 id="mh-title" class="mh__title">{t('site.tagline')}</h1>
+    <p class="mh__hint">{t('hall.hint')}</p>
+  </div>
+
+  <nav class="mh__cases" aria-label={t('hall.enter')} data-models>
+    {cats.map((c) => (
+      <Fragment>
+        <Fragment set:html={creditComment(c.credit)} />
+        <a class="case" href={c.href} data-cat={c.key}>
+          <span class="case__frame">
+            <model-viewer
+              class="case__mv"
+              src={c.model}
+              alt={t('models.alt', { what: c.credit.title, cat: c.name })}
+              poster={c.poster}
+              loading="lazy"
+              reveal="auto"
+              camera-orbit={CAMERA}
+              field-of-view="30deg"
+              interaction-prompt="none"
+              disable-zoom
+              environment-image="neutral"
+              exposure="1.15"
+              shadow-intensity="0"
+              auto-rotate
+              auto-rotate-delay="0"
+              rotation-per-second="14deg"
+            >
+              {/* the only thing a browser without the custom element renders */}
+              <img class="case__poster" slot="poster" src={c.poster} alt="" width="512" height="512" />
+            </model-viewer>
+          </span>
+          <span class="case__plinth" aria-hidden="true"></span>
+          <span class="case__name">{c.name}</span>
+          <span class="case__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
+        </a>
+      </Fragment>
+    ))}
+  </nav>
+
+  <a class="intro" href={gallery(lang, INTRO)} data-cat={INTRO}>
+    <span class="intro__medal" aria-hidden="true">
+      <Sculpture cat={INTRO} size={150} id="mh-intro" />
+    </span>
+    <span class="intro__text">
+      <span class="intro__eyebrow">{t('hall.nobelRoom')}</span>
+      <span class="intro__title">{introA}<span class="conj">{introConj}</span>{introB}</span>
+      <span class="intro__desc">{t('hall.introDesc')}</span>
+    </span>
+    <span class="intro__cta" aria-hidden="true">{t('hall.introCta')} →</span>
+  </a>
+
+  <aside class="mh__credit">
+    <h2>{t('models.creditTitle')}</h2>
+    <p>{t('models.creditNote')}</p>
+    <ul role="list">
+      {cats.map((c) => (
+        <li>
+          <a href={c.credit.page} target="_blank" rel="noopener noreferrer">{c.credit.title}</a>
+          <span>{t('models.by', { who: c.credit.author, lic: c.credit.licence })}</span>
+        </li>
+      ))}
+    </ul>
+  </aside>
+</section>
+
+<style>
+  .mh {
+    position: relative;
+    min-block-size: min(100svh, 62rem);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-content: start;
+    padding-block: max(clamp(1.5rem, 4vh, 3.5rem), 4.4rem) clamp(2rem, 5vh, 4rem);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .mh__scene { position: absolute; inset: 0; z-index: -1; }
+  .mh__glow {
+    position: absolute; inset-inline: 0; inset-block-start: -18%;
+    block-size: 78%;
+    background: radial-gradient(ellipse 60% 70% at 50% 0%,
+      rgba(74, 49, 21, 0.95), rgba(42, 26, 13, 0.55) 45%, transparent 78%);
+  }
+  /* one horizon line: the pieces are lit objects in a dark room, and more
+     scenery than that competes with them */
+  .mh__floor {
+    position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 42%;
+    background:
+      linear-gradient(to bottom, transparent, rgba(232, 198, 142, 0.05)),
+      linear-gradient(to bottom, rgba(232, 198, 142, 0.16) 0 1px, transparent 1px);
+  }
+
+  .mh__masthead { text-align: center; padding-inline: 1rem; }
+  .mh__title {
+    font-family: var(--font-han-serif);
+    font-size: var(--step-4);
+    color: var(--cream);
+    letter-spacing: 0.04em;
+  }
+  /* the global 62ch cap on <p> would otherwise pin this to the left edge */
+  .mh__hint {
+    font-size: var(--step--1); color: var(--muted);
+    margin: 0.5rem auto 0; max-inline-size: none;
+  }
+
+  .mh__cases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: clamp(0.6rem, 2vw, 1.6rem);
+    align-items: end;
+    inline-size: min(100% - 2rem, 78rem);
+    margin: clamp(1.4rem, 4vh, 3rem) auto 0;
+  }
+
+  .case {
+    display: grid;
+    justify-items: center;
+    gap: 0.15rem;
+    padding: 0.6rem 0.4rem 0.9rem;
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: transform 0.4s var(--ease), background 0.3s var(--ease);
+  }
+  .case:hover, .case:focus-visible { background: var(--surface); }
+  .case:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .case__frame {
+    inline-size: 100%;
+    aspect-ratio: 1;
+    max-inline-size: 11rem;
+    display: grid;
+    place-items: center;
+    position: relative;
+  }
+  /* a pool of the hall's own colour under each piece, standing in for the
+     spill a real spotlight would leave */
+  .case__frame::after {
+    content: '';
+    position: absolute;
+    inset-inline: 12%;
+    inset-block-end: 2%;
+    block-size: 14%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse at center,
+      color-mix(in srgb, var(--accent) 34%, transparent), transparent 70%);
+    filter: blur(5px);
+  }
+
+  .case__mv {
+    inline-size: 100%;
+    block-size: 100%;
+    /* decoration inside a link: every pointer event belongs to the anchor */
+    pointer-events: none;
+    --poster-color: transparent;
+    background: transparent;
+  }
+  .case__poster { inline-size: 100%; block-size: 100%; object-fit: contain; }
+
+  .case__plinth {
+    inline-size: min(78%, 8.5rem);
+    block-size: 0.55rem;
+    border-radius: 2px 2px 0 0;
+    background: linear-gradient(to bottom,
+      color-mix(in srgb, var(--accent) 26%, transparent), transparent);
+    border-block-start: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
+  }
+
+  .case__name {
+    font-family: var(--font-han-serif);
+    font-size: var(--step-0);
+    color: var(--cream);
+    margin-block-start: 0.55rem;
+  }
+  .case:hover .case__name { color: var(--accent); }
+  .case__n { font-size: var(--step--1); color: var(--muted); }
+
+  .case, .case__frame { transform: translateZ(0); }
+  .case:hover { transform: translateY(-4px); }
+  :global(html[data-motion='off']) .case:hover { transform: none; }
+
+  /* ---------- the introduction, as in the other halls ---------- */
+  .intro {
+    display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.8rem);
+    inline-size: min(100% - 2rem, 46rem);
+    margin: clamp(1.6rem, 4vh, 2.6rem) auto 0;
+    padding: 0.85rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+    text-decoration: none;
+    transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+  }
+  .intro:hover { border-color: var(--line-hi); background: var(--surface-hi); }
+  .intro__medal { flex: none; inline-size: 3.6rem; display: grid; place-items: center; }
+  .intro__medal :global(svg) { inline-size: 100%; block-size: auto; }
+  .intro__text { display: grid; gap: 0.15rem; }
+  .intro__eyebrow {
+    font-size: var(--step--2); letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--gold);
+  }
+  .intro__title { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); }
+  .intro__title :global(.conj) { font-size: 0.72em; opacity: 0.8; margin-inline: 0.12em; }
+  .intro__desc { font-size: var(--step--1); color: var(--muted); }
+  .intro__cta { margin-inline-start: auto; color: var(--gold); font-size: var(--step--1); white-space: nowrap; }
+
+  /* ---------- attribution ---------- */
+  .mh__credit {
+    inline-size: min(100% - 2rem, 78rem);
+    margin: clamp(2rem, 5vh, 3.2rem) auto 0;
+    padding-block-start: 1rem;
+    border-block-start: 1px solid var(--line);
+  }
+  .mh__credit h2 {
+    font-size: var(--step--1); letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--muted);
+    font-family: var(--font-body); font-weight: 400;
+  }
+  .mh__credit p { font-size: var(--step--1); color: var(--muted-dim); margin-block: 0.35rem 0.6rem; max-inline-size: 70ch; }
+  .mh__credit ul {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 0.2rem 1.4rem; padding: 0; margin: 0;
+    list-style: none;
+  }
+  .mh__credit li { font-size: var(--step--2); color: var(--muted-dim); }
+  .mh__credit a { color: var(--muted); text-decoration: none; }
+  .mh__credit a:hover { color: var(--gold); text-decoration: underline; }
+  .mh__credit span { margin-inline-start: 0.4em; }
+
+  @media (max-width: 40rem) {
+    .mh__cases { grid-template-columns: repeat(2, 1fr); }
+    .intro { flex-wrap: wrap; }
+    .intro__cta { margin-inline-start: 0; }
+  }
+
+  /* clear the style switcher and the motion toggle, which stack down the left
+     on narrow screens — the same allowance the other halls make */
+  @media (max-width: 34rem) {
+    .mh { padding-block-start: 8.7rem; }
+  }
+</style>
+
+<script>
+  import { motionOn } from '../scripts/motion';
+
+  // model-viewer is vendored rather than pulled from a CDN: the page cannot
+  // render its pieces without it, and a third party's outage should not be
+  // able to empty a hall. Kept outside public/ so it is bundled exactly once
+  // — a copy in public/ would ship a second megabyte that nothing requests.
+  import '../../vendor/model-viewer.min.js';
+
+  const viewers = [...document.querySelectorAll<HTMLElement>('.case__mv')];
+
+  /* The site's own motion switch is the authority, not the media query alone —
+     the OS preference is only its default, and a visitor who turned motion
+     back on expects the pieces to turn. */
+  function applyRotation() {
+    const on = motionOn();
+    for (const v of viewers) {
+      if (on) v.setAttribute('auto-rotate', '');
+      else v.removeAttribute('auto-rotate');
+    }
+  }
+
+  applyRotation();
+  addEventListener('motionpref', applyRotation);
+</script>

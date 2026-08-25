@@ -9,12 +9,13 @@
 import { type Lang } from '../i18n/ui';
 import { path } from '../i18n/routing';
 
-interface Props { lang: Lang; current: 'flat' | 'room' | 'gl' }
+interface Props { lang: Lang; current: 'flat' | 'room' | 'gl' | 'models' }
 const { lang, current } = Astro.props;
 const OPTIONS = [
   { key: 'flat', href: path(lang), zh: '平面', en: 'Flat', dzh: '最輕量', den: 'Lightest' },
   { key: 'room', href: path(lang, 'room'), zh: '展廳', en: 'Room', dzh: 'CSS 3D 景深', den: 'CSS 3D depth' },
   { key: 'gl', href: path(lang, 'rotunda'), zh: '圓廳', en: 'Rotunda', dzh: 'WebGL 實體建模', den: 'WebGL models' },
+  { key: 'models', href: path(lang, 'models'), zh: '藏品', en: 'Objects', dzh: 'glTF 模型', den: 'glTF objects' },
 ] as const;
 ---
 

@@ -257,3 +257,35 @@ its notes open automatically once that lecture is chosen.
 Rebuild the editable blocks only when the *set* of chosen ids changes — never
 on input. Repainting a textarea from storage mid-sentence is exactly how the
 panel used to lose text.
+
+## The objects hall (`/models/`)
+
+The fourth hall shows real glTF models instead of drawn ones. Three scripts
+own the pipeline and are meant to be re-run in order:
+
+1. `scripts/fetch-models.py` — downloads each GLB from Poly Pizza and writes
+   `data/model-credits.json`. Provenance is re-read from the model page at
+   fetch time rather than typed in, so the credit cannot drift from the file.
+   Swapping a model is a one-line change to `PICKS`.
+2. `scripts/normalise-models.mjs` — six authors means six scales (the flask
+   arrives 19 units tall, the coin 0.03) and six pivots. Each is re-centred on
+   its own bounding box and scaled so its longest axis is 1, after which every
+   icon takes the same camera. Materials are then re-cast in the hall's accent
+   colour, which is also what removes the coin's dollar sign.
+3. `scripts/render-posters.mjs` — renders the poster through model-viewer
+   itself, so the still matches the frame the live model settles into. Serves
+   `public/` on its own port; needs no external server.
+
+`CAMERA` appears in both the renderer and `HallModels.astro`. They must match
+or the poster jumps when the model takes over.
+
+- model-viewer lives in `vendor/`, not `public/`. Imported it is bundled once;
+  a copy in `public/` would ship a second megabyte that nothing requests.
+- The model is decoration inside the link, so it carries `pointer-events:
+  none`. Without it the anchor never sees the click.
+- The fallback chain is model → poster → bare link. The `<img slot="poster">`
+  is what a browser that never upgrades the custom element renders, so it must
+  stay a real child element.
+- Credits are emitted with `<Fragment set:html>`. A JSX comment (`{/* … */}`)
+  is stripped at build and never reaches the page.
+- Rotation follows `motionOn()`, never the media query alone.
