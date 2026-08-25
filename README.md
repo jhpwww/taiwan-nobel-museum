@@ -1,4 +1,4 @@
-# 諾貝爾演講博物館 · Nobel Lecture Museum
+# 諾貝爾講座博物館 · Nobel Lecture Museum
 
 A web-based virtual museum for the Nobel laureate lectures delivered in Taiwan under the
 **臺灣橋樑計畫 (Taiwan Bridges Program)** — the lectures themselves, their 導讀影片, and the

@@ -548,7 +548,7 @@
       },
       "description": {
         "en": "Ciechanover discovered how cells tag unwanted proteins for destruction, a system that can end in cancer when it goes wrong. Here he traces medicine's move away from one-size-fits-all: two patients may share a diagnosis without sharing a genome.",
-        "zh": "切哈諾沃發現細胞如何標記並分解不需要的蛋白質（ubiquitin-mediated protein degradation），這套機制失控時可能導致癌症。他在此談醫學離開「一體適用」的過程：兩名病人可以共有一個診斷，卻不共有一套基因。"
+        "zh": "切哈諾沃發現細胞如何標記並分解不需要的蛋白質（ubiquitin-mediated protein degradation），這套機制失控時可能導致癌症。他在此談醫學離開「一體適用」的過程：2 名病人可以共有一個診斷，卻不共有一套基因。"
       },
       "video": {
         "lecture": "m14M1uLkFFU",
@@ -1275,8 +1275,8 @@
         "zh": "回答關於宇宙及其演化的根本問題"
       },
       "description": {
-        "en": "Only a third of the neutrinos the Sun should send us were being counted, a discrepancy that troubled physics for thirty years. McDonald's experiment, deep underground, showed they had not vanished but changed identity: neutrinos must have mass, and the Standard Model is incomplete.",
-        "zh": "太陽送出的微中子（neutrino），地面只測到預期的三分之一，這個落差困擾物理學界三十年。麥克唐納在地底深處的實驗證明它們並未消失，只是改變了身分。微中子因此必須具有質量，標準模型（Standard Model）並不完整。"
+        "en": "Only a third of the neutrinos the Sun should send us were being counted, a discrepancy that troubled physics for 30 years. McDonald's experiment, deep underground, showed they had not vanished but changed identity: neutrinos must have mass, and the Standard Model is incomplete.",
+        "zh": "太陽送出的微中子（neutrino），地面只測到預期的三分之一，這個落差困擾物理學界 30 年。麥克唐納在地底深處的實驗證明它們並未消失，只是改變了身分。微中子因此必須具有質量，標準模型（Standard Model）並不完整。"
       },
       "video": {
         "lecture": "io3z9LwxM34",
@@ -1295,7 +1295,7 @@
         "method-discovery"
       ],
       "hook": {
-        "zh": "地底兩公里處，為了看清楚太陽。",
+        "zh": "地底 2 公里處，為了看清楚太陽。",
         "en": "Two kilometres underground, in order to see the Sun."
       }
     },
@@ -1328,7 +1328,7 @@
       },
       "description": {
         "en": "Many molecules exist in two mirror-image forms, like a left and a right hand. Inside the body often only one is useful and the other may do harm. Noyori developed asymmetric catalysis, which builds only the hand that is wanted.",
-        "zh": "許多分子存在互為鏡像的兩種形式，如同左右手。在人體內往往只有一種有效，另一種可能有害。野依良治發展出不對稱催化（asymmetric catalysis），能選擇性地只合成需要的那一種。"
+        "zh": "許多分子存在互為鏡像的 2 種形式，如同左右手。在人體內往往只有一種有效，另一種可能有害。野依良治發展出不對稱催化（asymmetric catalysis），能選擇性地只合成需要的那一種。"
       },
       "video": {
         "lecture": "zAM1_fhu6kY",
@@ -2013,8 +2013,8 @@
         "en": "The Nobel Prize in Physics recognises the discovery or invention of greatest benefit to humankind. The list opens with X-rays and radioactivity, passes through quantum mechanics, and reaches the accelerating universe and gravitational waves. A century of physics is more or less contained in it."
       },
       "history": {
-        "zh": "1901 年首屆頒給發現 X 射線的倫琴（Wilhelm Röntgen）。此後六度從缺，多在兩次世界大戰期間。",
-        "en": "First awarded in 1901 to Wilhelm Röntgen, for the discovery of X-rays. It has since been withheld six times, mostly during the two world wars."
+        "zh": "1901 年首屆頒給發現 X 射線的倫琴（Wilhelm Röntgen）。此後 6 度從缺，多在兩次世界大戰期間。",
+        "en": "First awarded in 1901 to Wilhelm Röntgen, for the discovery of X-rays. It has since been withheld 6 times, mostly during the two world wars."
       },
       "stats": [
         {
@@ -2081,7 +2081,7 @@
           "url": "https://www.nobelprize.org/prizes/facts/nobel-prize-facts/",
           "zh": "諾貝爾獎總覽統計",
           "en": "Nobel Prize facts",
-          "dzh": "所有獎項的整體統計：最年輕、最年長、得過兩次的人",
+          "dzh": "所有獎項的整體統計：最年輕、最年長、得過 2 次的人",
           "den": "Across all prizes: youngest, oldest, and those who won twice"
         }
       ]
@@ -2163,7 +2163,7 @@
           "url": "https://www.nobelprize.org/prizes/facts/nobel-prize-facts/",
           "zh": "諾貝爾獎總覽統計",
           "en": "Nobel Prize facts",
-          "dzh": "所有獎項的整體統計：最年輕、最年長、得過兩次的人",
+          "dzh": "所有獎項的整體統計：最年輕、最年長、得過 2 次的人",
           "den": "Across all prizes: youngest, oldest, and those who won twice"
         }
       ]
@@ -2245,7 +2245,7 @@
           "url": "https://www.nobelprize.org/prizes/facts/nobel-prize-facts/",
           "zh": "諾貝爾獎總覽統計",
           "en": "Nobel Prize facts",
-          "dzh": "所有獎項的整體統計：最年輕、最年長、得過兩次的人",
+          "dzh": "所有獎項的整體統計：最年輕、最年長、得過 2 次的人",
           "den": "Across all prizes: youngest, oldest, and those who won twice"
         }
       ]
@@ -2255,11 +2255,11 @@
       "en": "Peace",
       "order": 4,
       "intro": {
-        "zh": "和平獎頒給為國與國之間的情誼、裁減軍備，以及推動和平會議（peace congresses）貢獻最多的個人或組織。六個獎項之中，只有這一項由挪威諾貝爾委員會（Norwegian Nobel Committee）評選，也只有這一項可以頒給組織。",
+        "zh": "和平獎頒給為國與國之間的情誼、裁減軍備，以及推動和平會議（peace congresses）貢獻最多的個人或組織。6 個獎項之中，只有這一項由挪威諾貝爾委員會（Norwegian Nobel Committee）評選，也只有這一項可以頒給組織。",
         "en": "The Peace Prize goes to whoever has done most for fraternity between nations, the reduction of standing armies, and the holding of peace congresses. Alone among the six it is decided by a Norwegian committee, and alone among the six it may go to an organisation."
       },
       "history": {
-        "zh": "1901 年首屆由紅十字會（Red Cross）創辦人杜南（Henry Dunant）與和平運動者帕西（Frédéric Passy）共同獲得。它從缺的年份多於其他五項。",
+        "zh": "1901 年首屆由紅十字會（Red Cross）創辦人杜南（Henry Dunant）與和平運動者帕西（Frédéric Passy）共同獲得。它從缺的年份多於其他 5 項。",
         "en": "First shared in 1901 by Red Cross founder Henry Dunant and the peace campaigner Frédéric Passy. It has been withheld in more years than any of the other five."
       },
       "stats": [
@@ -2327,7 +2327,7 @@
           "url": "https://www.nobelprize.org/prizes/facts/nobel-prize-facts/",
           "zh": "諾貝爾獎總覽統計",
           "en": "Nobel Prize facts",
-          "dzh": "所有獎項的整體統計：最年輕、最年長、得過兩次的人",
+          "dzh": "所有獎項的整體統計：最年輕、最年長、得過 2 次的人",
           "den": "Across all prizes: youngest, oldest, and those who won twice"
         }
       ]
@@ -2337,11 +2337,11 @@
       "en": "Economic Sciences",
       "order": 5,
       "intro": {
-        "zh": "全名為「瑞典中央銀行紀念阿佛烈‧諾貝爾經濟學獎」（Sveriges Riksbank Prize in Economic Sciences in Memory of Alfred Nobel）。它不在諾貝爾的遺囑之列，而是瑞典中央銀行（Sveriges Riksbank）於 1968 年成立三百週年時設置；評選仍由瑞典皇家科學院（Kungliga Vetenskapsakademien）負責，與物理、化學兩獎相同。",
-        "en": "Its full name is the Sveriges Riksbank Prize in Economic Sciences in Memory of Alfred Nobel. It was not among the prizes in Nobel’s will; Sweden’s central bank established it in 1968, on its three-hundredth anniversary. Selection rests with the Royal Swedish Academy of Sciences, as it does for physics and chemistry."
+        "zh": "全名為「瑞典中央銀行紀念阿佛烈‧諾貝爾經濟學獎」（Sveriges Riksbank Prize in Economic Sciences in Memory of Alfred Nobel）。它不在諾貝爾的遺囑之列，而是瑞典中央銀行（Sveriges Riksbank）於 1968 年成立 300 週年時設置；評選仍由瑞典皇家科學院（Kungliga Vetenskapsakademien）負責，與物理、化學兩獎相同。",
+        "en": "Its full name is the Sveriges Riksbank Prize in Economic Sciences in Memory of Alfred Nobel. It was not among the prizes in Nobel’s will; Sweden’s central bank established it in 1968, on its 300th anniversary. Selection rests with the Royal Swedish Academy of Sciences, as it does for physics and chemistry."
       },
       "history": {
-        "zh": "1969 年首屆由弗里希（Ragnar Frisch）與丁伯根（Jan Tinbergen）共同獲得，表彰其分析經濟過程的動態模型（dynamic models）。六個獎項中它最年輕，也從未從缺。",
+        "zh": "1969 年首屆由弗里希（Ragnar Frisch）與丁伯根（Jan Tinbergen）共同獲得，表彰其分析經濟過程的動態模型（dynamic models）。6 個獎項中它最年輕，也從未從缺。",
         "en": "First shared in 1969 by Ragnar Frisch and Jan Tinbergen, for dynamic models of economic processes. It is the youngest of the six, and the only one never withheld."
       },
       "stats": [
@@ -2409,7 +2409,7 @@
           "url": "https://www.nobelprize.org/prizes/facts/nobel-prize-facts/",
           "zh": "諾貝爾獎總覽統計",
           "en": "Nobel Prize facts",
-          "dzh": "所有獎項的整體統計：最年輕、最年長、得過兩次的人",
+          "dzh": "所有獎項的整體統計：最年輕、最年長、得過 2 次的人",
           "den": "Across all prizes: youngest, oldest, and those who won twice"
         }
       ]
@@ -2419,12 +2419,12 @@
       "en": "Literature",
       "order": 6,
       "intro": {
-        "zh": "文學獎頒給在文學領域寫出「具理想傾向之最傑出作品」（the most outstanding work in an idealistic direction）的作家。六個獎項之中，只有這一項表彰的是一整個創作生涯，而非單一成果。",
+        "zh": "文學獎頒給在文學領域寫出「具理想傾向之最傑出作品」（the most outstanding work in an idealistic direction）的作家。6 個獎項之中，只有這一項表彰的是一整個創作生涯，而非單一成果。",
         "en": "The Literature prize goes to the author of “the most outstanding work in an idealistic direction”. Alone among the six, it honours a body of work rather than a single result."
       },
       "history": {
-        "zh": "1901 年首屆頒給法國詩人蘇利‧普魯東（Sully Prudhomme）。得主由瑞典學院（Svenska Akademien）十八位院士選出，提名紀錄封存五十年。",
-        "en": "First awarded in 1901 to the French poet Sully Prudhomme. Laureates are chosen by the eighteen members of the Swedish Academy, and the nomination records stay sealed for fifty years."
+        "zh": "1901 年首屆頒給法國詩人蘇利‧普魯東（Sully Prudhomme）。得主由瑞典學院（Svenska Akademien）18 位院士選出，提名紀錄封存 50 年。",
+        "en": "First awarded in 1901 to the French poet Sully Prudhomme. Laureates are chosen by the 18 members of the Swedish Academy, and the nomination records stay sealed for 50 years."
       },
       "stats": [
         {
@@ -2491,7 +2491,7 @@
           "url": "https://www.nobelprize.org/prizes/facts/nobel-prize-facts/",
           "zh": "諾貝爾獎總覽統計",
           "en": "Nobel Prize facts",
-          "dzh": "所有獎項的整體統計：最年輕、最年長、得過兩次的人",
+          "dzh": "所有獎項的整體統計：最年輕、最年長、得過 2 次的人",
           "den": "Across all prizes: youngest, oldest, and those who won twice"
         }
       ]

@@ -111,7 +111,7 @@ COPY = {
   title_zh="個人化醫療革命：我們能治好所有疾病嗎？代價又是什麼？",
   hook_zh="同樣的診斷，同樣的藥，結果卻不同。",
   hook_en="Same diagnosis, same drug, different outcome.",
-  summary_zh="切哈諾沃發現細胞如何標記並分解不需要的蛋白質（ubiquitin-mediated protein degradation），這套機制失控時可能導致癌症。他在此談醫學離開「一體適用」的過程：兩名病人可以共有一個診斷，卻不共有一套基因。",
+  summary_zh="切哈諾沃發現細胞如何標記並分解不需要的蛋白質（ubiquitin-mediated protein degradation），這套機制失控時可能導致癌症。他在此談醫學離開「一體適用」的過程：2 名病人可以共有一個診斷，卻不共有一套基因。",
   summary_en="Ciechanover discovered how cells tag unwanted proteins for destruction, a system that can end in cancer when it goes wrong. Here he traces medicine's move away from one-size-fits-all: two patients may share a diagnosis without sharing a genome.",
   tags=["chemistry-molecular", "medicine-clinical", "ethics-responsibility"]),
 
@@ -205,17 +205,17 @@ COPY = {
 
 "mcdonald": dict(
   title_zh="回答關於宇宙及其演化的根本問題",
-  hook_zh="地底兩公里處，為了看清楚太陽。",
+  hook_zh="地底 2 公里處，為了看清楚太陽。",
   hook_en="Two kilometres underground, in order to see the Sun.",
-  summary_zh="太陽送出的微中子（neutrino），地面只測到預期的三分之一，這個落差困擾物理學界三十年。麥克唐納在地底深處的實驗證明它們並未消失，只是改變了身分。微中子因此必須具有質量，標準模型（Standard Model）並不完整。",
-  summary_en="Only a third of the neutrinos the Sun should send us were being counted, a discrepancy that troubled physics for thirty years. McDonald's experiment, deep underground, showed they had not vanished but changed identity: neutrinos must have mass, and the Standard Model is incomplete.",
+  summary_zh="太陽送出的微中子（neutrino），地面只測到預期的三分之一，這個落差困擾物理學界 30 年。麥克唐納在地底深處的實驗證明它們並未消失，只是改變了身分。微中子因此必須具有質量，標準模型（Standard Model）並不完整。",
+  summary_en="Only a third of the neutrinos the Sun should send us were being counted, a discrepancy that troubled physics for 30 years. McDonald's experiment, deep underground, showed they had not vanished but changed identity: neutrinos must have mass, and the Standard Model is incomplete.",
   tags=["physics-fundamental", "method-discovery"]),
 
 "noyori": dict(
   title_zh="化學是創造價值的科學",
   hook_zh="同一個分子的左手與右手，作用可能相反。",
   hook_en="The left and right hand of one molecule can do opposite things.",
-  summary_zh="許多分子存在互為鏡像的兩種形式，如同左右手。在人體內往往只有一種有效，另一種可能有害。野依良治發展出不對稱催化（asymmetric catalysis），能選擇性地只合成需要的那一種。",
+  summary_zh="許多分子存在互為鏡像的 2 種形式，如同左右手。在人體內往往只有一種有效，另一種可能有害。野依良治發展出不對稱催化（asymmetric catalysis），能選擇性地只合成需要的那一種。",
   summary_en="Many molecules exist in two mirror-image forms, like a left and a right hand. Inside the body often only one is useful and the other may do harm. Noyori developed asymmetric catalysis, which builds only the hand that is wanted.",
   tags=["chemistry-molecular", "method-discovery"]),
 
