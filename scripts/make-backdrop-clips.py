@@ -48,6 +48,13 @@ CLIPS = [
 ]
 
 
+# YouTube answers datacenter addresses — a CI runner, for one — with "sign in
+# to confirm you're not a bot", and which player client it will serve without
+# that challenge moves around. Rather than pin one and have the job break next
+# month, try them in turn and take the first that yields a file.
+CLIENTS = ['tv_simply', 'android_vr', 'web_safari', 'mweb', 'ios', 'default']
+
+
 def grab(name: str, vid: str, start: str) -> pathlib.Path:
     """Pull just the needed seconds, not the whole recording."""
     RAW.mkdir(parents=True, exist_ok=True)
@@ -58,15 +65,23 @@ def grab(name: str, vid: str, start: str) -> pathlib.Path:
     begin = h * 3600 + m * 60 + sec
     # a couple of seconds of slack, so the encoder has a keyframe to cut on
     section = f'*{begin}-{begin + SECONDS + 2}'
-    subprocess.run([
-        YTDLP, '-q', '--no-warnings',
-        # yt-dlp needs ffmpeg to cut a section, and this box has no system one
-        '--ffmpeg-location', str(HERE / '.tools'),
-        '-f', 'bv*[height<=720][ext=mp4]/bv*[height<=720]',
-        '--download-sections', section, '--force-keyframes-at-cuts',
-        '-o', str(dest), f'https://www.youtube.com/watch?v={vid}',
-    ], check=True)
-    return dest
+
+    last = ''
+    for client in CLIENTS:
+        r = subprocess.run([
+            YTDLP, '--no-warnings', '--no-progress',
+            '--extractor-args', f'youtube:player_client={client}',
+            '--ffmpeg-location', str(pathlib.Path(FF).parent),
+            '-f', 'bv*[height<=720]/bv*',
+            '--download-sections', section, '--force-keyframes-at-cuts',
+            '-o', str(dest), f'https://www.youtube.com/watch?v={vid}',
+        ], capture_output=True, text=True)
+        if dest.exists() and dest.stat().st_size > 0:
+            print(f'  {name}: fetched via player_client={client}')
+            return dest
+        last = (r.stderr or r.stdout).strip().splitlines()[-1] if (r.stderr or r.stdout).strip() else ''
+        print(f'  {name}: {client} failed — {last[:120]}')
+    raise SystemExit(f'{name}: every player client refused. Last error: {last}')
 
 
 def encode(src: pathlib.Path, name: str) -> tuple[float, float]:
