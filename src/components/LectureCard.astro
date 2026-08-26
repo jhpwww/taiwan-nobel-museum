@@ -2,6 +2,7 @@
 import { useT, type Lang } from '../i18n/ui';
 import { lecture as lectureUrl } from '../i18n/routing';
 import { catName, videoCount, localDate, type Lecture } from '../data/catalog';
+import posters from '../data/posters.json';
 
 interface Props { lang: Lang; rec: Lecture; featured?: boolean }
 const { lang, rec, featured = false } = Astro.props;
@@ -9,7 +10,20 @@ const t = useT(lang);
 
 const cat = rec.prize.category;
 const catLabel = catName(cat, lang);
-const poster = `https://i.ytimg.com/vi/${rec.video.guide ?? rec.video.lecture}/hqdefault.jpg`;
+/*
+ * The card always shows the Taiwan lecture, never the 導讀, and the frame is
+ * one the laureate's face was actually recognised in — see
+ * scripts/pick-posters.py, which matches every face in every available frame
+ * against the laureate's official portrait. Detection alone was not enough:
+ * it kept returning the printed banner behind the stage, a portrait on a
+ * slide, or a grey-haired man in the third row.
+ *
+ * Where no frame could be verified the recording's own thumbnail stands in —
+ * still the Taiwan lecture, just not a guaranteed portrait.
+ */
+const frame = (posters as Record<string, string>)[rec.id];
+const posterVid = rec.video.lecture ?? rec.video.guide;
+const poster = `https://i.ytimg.com/vi/${posterVid}/${frame ?? 'maxresdefault'}.jpg`;
 const date = localDate(rec.event.date, lang);
 const nVideos = videoCount(rec);
 ---

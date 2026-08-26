@@ -11,3 +11,6 @@ __pycache__/
 assets-src/fonts/*.ttf
 .tools/
 assets-src/backdrop/
+assets-src/posters/
+assets-src/portraits/
+.venv-cv/

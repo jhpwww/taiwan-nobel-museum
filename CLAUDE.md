@@ -354,3 +354,30 @@ Never verify this by asking whether the element exists. `iframe present` and
 paused player to phones. Compare two frames after the reveal has finished, and
 remember that headless Chromium applies desktop autoplay policy whatever the
 `isMobile` flag says.
+
+## Card thumbnails
+
+`scripts/pick-posters.py` chooses them; `src/data/posters.json` is its output;
+`LectureCard.astro` reads it. Two rules from the owner: the frame comes from
+the **Taiwan lecture** recording, never the 導讀, and it shows the
+**laureate's** face.
+
+Detection alone cannot do the second. Run over these recordings YuNet happily
+returns a face — on the printed banner behind the stage, on a portrait in a
+slide, on an audience member. So each laureate's official portrait is read
+from the nobelprize.org page the catalogue already links to and every
+candidate face is matched against it with SFace. `SAME_PERSON` is 0.363, the
+model's own threshold; loosening it lets through any grey-haired man in a dark
+suit, which at these lectures is most of the third row.
+
+`maxresdefault` is a hard last resort, not a scoring nudge — in this series it
+is usually a designed title card, which is not a 講座截圖, and its large
+centred portrait out-scores every real stage shot.
+
+The pool is only the three frames YouTube samples from inside the recording
+plus the uploader's pick. Storyboards would give far more but are 320×180, and
+the recording itself cannot be reached from this network to cut a frame at an
+arbitrary time — same block as the backdrop clips.
+
+Re-run after changing which video a lecture points at. Models live in
+`.tools/` (gitignored); the script names where to fetch them.
