@@ -22,16 +22,19 @@ decoration. Update the About page if this changes.
 before committing several minutes of encoding.
 """
 import json
+import os
 import pathlib
+import shutil
 import subprocess
 import sys
 
 HERE = pathlib.Path(__file__).resolve().parent.parent
-FF = str(HERE / '.tools/ffmpeg')
+# the runner has ffmpeg on PATH; the working machine keeps a static build in .tools
+FF = str(HERE / '.tools/ffmpeg') if (HERE / '.tools/ffmpeg').exists() else (shutil.which('ffmpeg') or 'ffmpeg')
 YTDLP = 'yt-dlp'
 RAW = HERE / 'assets-src/backdrop'
 OUT = HERE / 'public/media/backdrop'
-SECONDS = 10
+SECONDS = int(os.environ.get('CLIP_SECONDS') or 10)
 
 # id → (youtube id, start). Starts are chosen to land on the speaker mid-talk,
 # clear of title cards and applause, and verified from the probe sheet.
@@ -51,9 +54,10 @@ def grab(name: str, vid: str, start: str) -> pathlib.Path:
     dest = RAW / f'{name}.mp4'
     if dest.exists():
         return dest
-    end = f'{start[:6]}{int(start[6:]) + SECONDS + 2:02d}' if int(start[6:]) + SECONDS + 2 < 60 \
-        else None
-    section = f'*{start}-{end}' if end else f'*{start}+{SECONDS + 2}'
+    h, m, sec = (int(x) for x in start.split(':'))
+    begin = h * 3600 + m * 60 + sec
+    # a couple of seconds of slack, so the encoder has a keyframe to cut on
+    section = f'*{begin}-{begin + SECONDS + 2}'
     subprocess.run([
         YTDLP, '-q', '--no-warnings',
         # yt-dlp needs ffmpeg to cut a section, and this box has no system one
