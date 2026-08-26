@@ -1,0 +1,147 @@
+---
+/**
+ * VideoWall.astro — the curved wall of lecture panels.
+ *
+ * The room hall has had this since its first version and it is the thing that
+ * makes the hall read as a film archive rather than a dark page: a row of lit
+ * frames, curving away, each showing a different lecture. The flat and objects
+ * halls had only the single wash behind them, which is so faint it reads as
+ * nothing at all. This lifts the room's layout out into a component the other
+ * halls can mount.
+ *
+ * Each panel plays a clip when `src/data/backdrop.json` has them, and
+ * cross-fades two lecture stills when it does not — see LectureScreen for why
+ * the clips are not simply streamed from YouTube. The panels stagger their
+ * timing so the wall never changes all at once, which is what makes a row of
+ * stills read as a slideshow.
+ */
+import { lectures } from '../data/catalog';
+import { asset } from '../i18n/routing';
+import clips from '../data/backdrop.json';
+
+interface Props {
+  /** how many frames across the wall */
+  count?: number;
+  /** overall strength; the halls each want a different weight */
+  opacity?: number;
+  /** how far back the wall sits, in px of Z */
+  depth?: number;
+  /** degrees between neighbouring panels */
+  spread?: number;
+}
+const { count = 11, opacity = 0.5, depth = 760, spread = 11 } = Astro.props;
+
+const stills = lectures
+  .filter((l) => l.video.guide || l.video.lecture)
+  .map((l) => `https://i.ytimg.com/vi/${l.video.guide ?? l.video.lecture}/mqdefault.jpg`);
+
+type Clip = { id: string; webm: string; mp4: string };
+const reel = (clips as Clip[]).map((c) => ({ webm: asset(c.webm), mp4: asset(c.mp4) }));
+
+const panels = Array.from({ length: count }, (_, i) => ({
+  deg: -((count - 1) / 2) * spread + i * spread,
+  a: stills[i % stills.length],
+  b: stills[(i + count) % stills.length],
+  clip: reel.length ? reel[i % reel.length] : null,
+  delay: (i * 1.7) % 9,
+}));
+---
+
+<div class="vw" style={`--vw-o:${opacity}; --vw-z:${-depth}px`} aria-hidden="true">
+  <div class="vw__arc">
+    {panels.map((p) => (
+      <span class="vw__panel" style={`--deg:${p.deg}deg; --delay:${p.delay}s`}>
+        {p.clip ? (
+          <video class="vw__vid" muted loop playsinline preload="none"
+                 data-vw-clip={JSON.stringify(p.clip)} width="320" height="180"></video>
+        ) : (
+          <>
+            <img src={p.a} alt="" loading="lazy" decoding="async" width="320" height="180" />
+            <img class="b" src={p.b} alt="" loading="lazy" decoding="async" width="320" height="180" />
+          </>
+        )}
+      </span>
+    ))}
+  </div>
+  <span class="vw__glass"></span>
+</div>
+
+<style>
+  .vw {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-start: 8%;
+    block-size: 46%;
+    z-index: -3;
+    pointer-events: none;
+    perspective: 1100px;
+    perspective-origin: 50% 42%;
+    overflow: hidden;
+  }
+  .vw__arc {
+    position: absolute;
+    inset-block-start: 46%;
+    inset-inline-start: 50%;
+    inline-size: 0; block-size: 0;
+    transform-style: preserve-3d;
+  }
+  .vw__panel {
+    position: absolute;
+    inline-size: 196px; block-size: 110px;
+    margin: -55px -98px;
+    transform: rotateY(var(--deg)) translateZ(var(--vw-z));
+    border: 1px solid rgba(232, 198, 142, 0.14);
+    overflow: hidden;
+    background: #140d06;
+    box-shadow: 0 0 40px -8px rgba(0, 0, 0, 0.9);
+    opacity: var(--vw-o);
+  }
+  .vw__panel img, .vw__vid {
+    position: absolute; inset: 0;
+    inline-size: 100%; block-size: 100%; object-fit: cover;
+    filter: saturate(0.45) brightness(0.34) contrast(1.12);
+  }
+  /* staggered, so the wall never turns over all at once — a row changing in
+     unison is what makes stills look like a slideshow */
+  .vw__panel .b { opacity: 0; animation: vwswap 18s var(--delay) ease-in-out infinite; }
+  @keyframes vwswap { 0%, 42% { opacity: 0 } 50%, 92% { opacity: 1 } 100% { opacity: 0 } }
+
+  .vw__glass {
+    position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 55%;
+    background: linear-gradient(to bottom, transparent, rgba(10, 6, 3, 0.86) 78%);
+  }
+
+  :global(html[data-motion='off']) .vw__panel .b { animation: none; }
+
+  /* a phone sees perhaps three panels of a wall built for eleven; fewer, and
+     nearer, or it is just a smear behind the pieces */
+  @media (max-width: 48rem) {
+    .vw { inset-block-start: 6%; block-size: 34%; perspective: 700px; }
+    .vw__panel { inline-size: 132px; block-size: 74px; margin: -37px -66px; }
+  }
+</style>
+
+<script>
+  import { motionOn } from '../scripts/motion';
+
+  /* Only the panels that are actually on screen get a decoder. A wall of
+     eleven simultaneous videos is a lot of decode for decoration, and the ones
+     turned furthest away are barely a sliver. */
+  const vids = [...document.querySelectorAll<HTMLVideoElement>('.vw__vid')];
+  if (vids.length && motionOn()) {
+    const PLAYING = 5;
+    vids.forEach((v, i) => {
+      const mid = Math.abs(i - (vids.length - 1) / 2);
+      if (mid > PLAYING / 2) return;
+      const c = JSON.parse(v.dataset.vwClip ?? 'null');
+      if (!c) return;
+      const webm = document.createElement('source');
+      webm.src = c.webm; webm.type = 'video/webm';
+      const mp4 = document.createElement('source');
+      mp4.src = c.mp4; mp4.type = 'video/mp4';
+      v.append(webm, mp4);
+      v.load();
+      v.play().catch(() => {});
+    });
+  }
+</script>

@@ -189,7 +189,7 @@ export function createRotunda(opts: RotundaOptions) {
    * (1/2/3.jpg, ~3.5 KB each). Real lecture imagery, in motion, for almost
    * nothing.
    */
-  type Panel = { mat: MeshBasicMaterial; canvas: HTMLCanvasElement; tex: CanvasTexture | null; frames: HTMLImageElement[]; at: number };
+  type Panel = { mat: MeshBasicMaterial; canvas: HTMLCanvasElement; tex: CanvasTexture | null; frames: HTMLImageElement[]; at: number; blend: number };
   const wallPanels: Panel[] = [];
 
   stills.slice(0, N).forEach((url, i) => {
@@ -197,7 +197,7 @@ export function createRotunda(opts: RotundaOptions) {
     if (!vid) return;
     const canvas = document.createElement('canvas');
     canvas.width = 256; canvas.height = 144;
-    const panel: Panel = { mat: panels[i], canvas, tex: null, frames: [], at: 0 };
+    const panel: Panel = { mat: panels[i], canvas, tex: null, frames: [], at: 0, blend: 1 };
     wallPanels.push(panel);
 
     for (const n of [1, 2, 3]) {
@@ -211,11 +211,23 @@ export function createRotunda(opts: RotundaOptions) {
     }
   });
 
-  function drawPanel(p: Panel, idx: number) {
+  /**
+   * `blend` is how far the incoming frame has come up over the outgoing one.
+   * With only three frames per video, a hard cut every second reads as a
+   * strobe rather than as footage; fading between them at least reads as a
+   * dissolve.
+   */
+  function drawPanel(p: Panel, idx: number, blend = 1) {
     const g = p.canvas.getContext('2d');
-    const img = p.frames[idx % Math.max(1, p.frames.length)];
+    const n = Math.max(1, p.frames.length);
+    const img = p.frames[idx % n];
+    const prev = p.frames[(idx - 1 + n) % n];
     if (!g || !img) return;
+    g.globalAlpha = 1;
+    if (prev && blend < 1) g.drawImage(prev, 0, 0, p.canvas.width, p.canvas.height);
+    g.globalAlpha = prev ? blend : 1;
     g.drawImage(img, 0, 0, p.canvas.width, p.canvas.height);
+    g.globalAlpha = 1;
     if (!p.tex) {
       p.tex = new CanvasTexture(p.canvas);
       p.tex.colorSpace = SRGBColorSpace;
@@ -227,14 +239,29 @@ export function createRotunda(opts: RotundaOptions) {
     }
   }
 
+  /* Three frames is not footage, so do not pretend otherwise by cutting fast.
+     Hold each frame for three and a half seconds and dissolve over one, which
+     reads as a slow archive rather than a slideshow stuck on shuffle. */
+  const WALL_HOLD = 3500;
+  const WALL_FADE = 1000;
   let wallTick = 0;
   function advanceWall(now: number) {
-    if (now - wallTick < 900) return;      // a slow flicker, not a strobe
+    const since = now - wallTick;
+    if (since < WALL_HOLD) {
+      // finish the dissolve started at the last tick
+      for (const p of wallPanels) {
+        if (p.frames.length < 2 || p.blend >= 1) continue;
+        p.blend = Math.min(1, since / WALL_FADE);
+        drawPanel(p, p.at, p.blend);
+      }
+      return;
+    }
     wallTick = now;
     for (const p of wallPanels) {
       if (p.frames.length < 2) continue;
       p.at++;
-      drawPanel(p, p.at);
+      p.blend = 0;
+      drawPanel(p, p.at, 0);
     }
   }
 

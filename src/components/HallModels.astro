@@ -24,6 +24,7 @@
  */
 import Sculpture from './Sculpture.astro';
 import AmbientVideo from './AmbientVideo.astro';
+import VideoWall from './VideoWall.astro';
 import LectureScreen from './LectureScreen.astro';
 import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
@@ -95,6 +96,7 @@ const creditComment = (c: Credit) =>
       LectureScreen gates itself hard — never on small screens, never under
       Save-Data, never with motion off — so the phone profile is untouched.
       Dimmer here than in the flat hall: six lit objects need a quieter ground. */}
+  <VideoWall count={9} opacity={0.42} depth={820} spread={12} />
   <LectureScreen opacity={0.38} />
   <AmbientVideo opacity={0.10} />
 
