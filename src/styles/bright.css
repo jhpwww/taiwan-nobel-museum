@@ -1,0 +1,135 @@
+/* ============================================================
+   Bright theme — the same museum in daylight.
+
+   Everything here is a token override scoped to html[data-theme='bright'],
+   so the dark site is untouched: the two builds share one stylesheet and
+   differ only by an attribute on <html>. See BRIGHT_THEME in astro.config.mjs.
+
+   White ground, near-black text, red for anything the visitor can act on,
+   gold for what the museum owns — the statues, the crest, the ornament.
+   Category hues stay inside that red-to-gold band rather than reaching for
+   six unrelated colours, and each is dark enough to hold its own on white.
+   ============================================================ */
+
+html[data-theme='bright'] {
+  /* the gallery itself: paper, not vault */
+  --bg-0: #ffffff;
+  --bg-1: #f8f6f3;
+  --bg-2: #f1ede7;
+  --bg-3: #e6e0d6;
+
+  --surface:    rgba(20, 18, 16, 0.035);
+  --surface-hi: rgba(20, 18, 16, 0.075);
+  --line:       rgba(20, 18, 16, 0.145);
+  --line-hi:    rgba(20, 18, 16, 0.32);
+
+  /* Gold has to be darkened hard to survive on white — the dark theme's
+     #e0aa53 reads as beige here and fails contrast on body text. */
+  --gold: #a9781f;
+  --gold-bright: #c8952c;
+  --gold-deep: #7c5613;
+
+  /* red is the interactive colour, as on the reference site */
+  --red: #d8231b;
+  --red-deep: #a5140e;
+
+  /* --cream is the dark theme's brightest text; on paper that is the darkest */
+  --cream: #14110e;
+  --text: #23201c;
+  --muted: #5d574f;
+  --muted-dim: #857e74;
+
+  /* prize categories, kept within red / gold / black */
+  --c-physics:    #a9781f;   /* gold        */
+  --c-chemistry:  #bc5a17;   /* amber       */
+  --c-medicine:   #c0392b;   /* red clay    */
+  --c-literature: #8a5636;   /* brown       */
+  --c-peace:      #33302c;   /* near-black  */
+  --c-economics:  #8a6b1c;   /* bronze      */
+  --c-nobel:      #a9781f;
+
+  /* On white the dark theme's problem inverts: a tinted fill disappears
+     rather than shouting, so a block is simply the full-strength hue. */
+  --c-chemistry-block: var(--c-chemistry);
+  --c-medicine-block: var(--c-medicine);
+
+  --accent: var(--red);
+  --accent-block: var(--red);
+
+  --shadow-lift: 0 16px 40px -20px rgba(20, 18, 16, 0.45);
+}
+
+/* ---------- ground ---------- */
+html[data-theme='bright'] body {
+  background: var(--bg-0);
+  color: var(--text);
+}
+
+/* A category page paints its own accent; on white the heading wants the hue
+   at full strength rather than the washed block value. */
+html[data-theme='bright'] [data-cat='chemistry'] { --accent-block: var(--c-chemistry); }
+html[data-theme='bright'] [data-cat='medicine'] { --accent-block: var(--c-medicine); }
+
+/* ---------- chrome ---------- */
+html[data-theme='bright'] .topbar {
+  background: rgba(255, 255, 255, 0.86);
+  border-block-end: 1px solid var(--line);
+}
+html[data-theme='bright'] .topbar--ghost { background: none; }
+/* the dark hall needed a scrim to keep the controls legible; a white one
+   does not, and the gradient would only smear grey across the marble */
+html[data-theme='bright'] .topbar--ghost::before { display: none; }
+
+html[data-theme='bright'] .foot {
+  background: var(--bg-1);
+  border-block-start: 1px solid var(--line);
+}
+html[data-theme='bright'] .foot__uni { color: var(--cream); }
+
+/* ---------- links and controls ---------- */
+html[data-theme='bright'] a:hover { color: var(--red); }
+html[data-theme='bright'] .skip-link { background: #fff; color: var(--cream); }
+
+html[data-theme='bright'] .sw,
+html[data-theme='bright'] .mt {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: var(--line-hi);
+  color: var(--text);
+}
+html[data-theme='bright'] .sw__opt { color: var(--muted); }
+html[data-theme='bright'] .sw__opt:hover { color: var(--cream); background: var(--surface-hi); }
+html[data-theme='bright'] .sw__opt.is-on { background: var(--red); color: #fff; }
+html[data-theme='bright'] .mt { color: var(--cream); }
+
+/* ---------- media ---------- */
+/* Posters carry their own darkness; on paper they want a light mount rather
+   than a scrim that pretends the page behind them is black. */
+html[data-theme='bright'] .vf__btn { background: var(--bg-2); }
+html[data-theme='bright'] .vf__scrim {
+  background: linear-gradient(to top, rgba(20, 18, 16, 0.5), transparent 55%);
+}
+html[data-theme='bright'] .card__scrim {
+  background: linear-gradient(to top, rgba(20, 18, 16, 0.55), transparent 60%);
+}
+html[data-theme='bright'] .card {
+  background: #fff;
+  border: 1px solid var(--line);
+  box-shadow: 0 1px 2px rgba(20, 18, 16, 0.05);
+}
+html[data-theme='bright'] .card:hover {
+  border-color: var(--line-hi);
+  box-shadow: var(--shadow-lift);
+}
+
+/* ---------- the standing controls ---------- */
+html[data-theme='bright'] .pn__b {
+  background: rgba(255, 255, 255, 0.94);
+  border-color: var(--line-hi);
+  color: var(--muted);
+  box-shadow: 0 6px 22px rgba(20, 18, 16, 0.16);
+}
+html[data-theme='bright'] .pn__b:hover {
+  color: #fff;
+  background: var(--red);
+  border-color: var(--red);
+}

@@ -1,0 +1,585 @@
+---
+/**
+ * HallBright.astro — the bright museum's entrance.
+ *
+ * Two references, combined as asked: the neoclassical hall — white marble,
+ * gold-edged coffers, a balustrade running round a mezzanine, a radial
+ * medallion set into the floor — and the curved multi-row video wall, which
+ * stands where that hall's far doorway was. Six gold pieces are set out in
+ * front of it on plinths, in the row the objects hall already uses.
+ *
+ * Built the way the room hall is built: real CSS 3D, one perspective, every
+ * plane at a genuine Z. Nothing here is an image of a room; the coffers
+ * recede because they are rotated, and the wall curves because each panel
+ * is turned on its own axis.
+ *
+ * No drifting embers. They belonged to a dark vault, and on marble they read
+ * as dirt. What moves here is daylight: two slow shafts crossing the floor,
+ * and dust visible only inside them.
+ */
+import StyleSwitch from './StyleSwitch.astro';
+import MotionToggle from './MotionToggle.astro';
+import { useT, type Lang } from '../i18n/ui';
+import { gallery, asset } from '../i18n/routing';
+import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
+import credits from '../../data/model-credits.json';
+import clips from '../data/backdrop.json';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+
+const counts = lectures.reduce<Record<string, number>>((a, l) => {
+  a[l.prize.category] = (a[l.prize.category] ?? 0) + 1;
+  return a;
+}, {});
+const [introA, introConj, introB] = introParts(lang);
+
+type Credit = { title: string; author: string; licence: string; page: string; source?: string };
+const credited = credits as Record<string, Credit>;
+
+const cats = categoryList()
+  .map((c) => c.key)
+  .filter((k) => k in credited)
+  .map((key) => ({
+    key,
+    name: catName(key, lang),
+    n: counts[key] ?? 0,
+    href: gallery(lang, key),
+    model: asset(`assets/models/gold/${key}.glb`),
+    poster: asset(`assets/models/${key}.webp`),
+    credit: credited[key],
+  }));
+
+/* The wall: four rows, curving away on both sides, as in the reference. Every
+   panel carries a different lecture so the wall reads as a catalogue rather
+   than a repeat. */
+const COLS = 9;
+const ROWS = 4;
+const stills = lectures
+  .filter((l) => l.video.guide || l.video.lecture)
+  .map((l) => `https://i.ytimg.com/vi/${l.video.guide ?? l.video.lecture}/mqdefault.jpg`);
+
+type Clip = { id: string; webm: string; mp4: string };
+const reel = (clips as Clip[]).map((c) => ({ webm: asset(c.webm), mp4: asset(c.mp4) }));
+
+const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
+  const col = i % COLS;
+  const row = Math.floor(i / COLS);
+  return {
+    deg: -((COLS - 1) / 2) * 9 + col * 9,
+    row: row - (ROWS - 1) / 2,
+    a: stills[i % stills.length],
+    b: stills[(i + 7) % stills.length],
+    delay: ((i * 2.3) % 11).toFixed(1),
+    clip: reel.length ? reel[i % reel.length] : null,
+  };
+});
+
+const CAMERA = '35deg 70deg 2.2m';
+
+/*
+ * The room is drawn, not stacked. Rotated planes fought each other — a ceiling
+ * laid back far enough to be seen swung across the wall — so the architecture
+ * is computed against one vanishing point and emitted as SVG, and CSS 3D is
+ * kept for the one thing it does better than anything else: the curve of the
+ * screens.
+ *
+ * viewBox 1600×900. The vanishing point sits a little above centre, where a
+ * standing visitor's eye would be.
+ */
+const VP = { x: 800, y: 404 };
+/** a point on the line from the frame edge to the vanishing point */
+const toVP = (x: number, y: number, t: number) => [
+  x + (VP.x - x) * t,
+  y + (VP.y - y) * t,
+];
+
+/** floor and ceiling both recede to VP; t is how far back, 0 = at the viewer */
+const DEPTHS = [0, 0.3, 0.52, 0.68, 0.79, 0.865, 0.917, 0.95];
+
+const floorLines = Array.from({ length: 13 }, (_, i) => {
+  const x = -700 + i * 250;
+  const [x2, y2] = toVP(x, 900, 0.93);
+  return { x1: x, y1: 900, x2, y2 };
+});
+const floorBands = DEPTHS.slice(1).map((t) => {
+  const [, y] = toVP(0, 900, t);
+  return y;
+});
+
+/** the coffered ceiling: a grid of quads, each one smaller as it goes back */
+const coffers: { d: string; shade: number }[] = [];
+for (let r = 0; r < DEPTHS.length - 3; r++) {
+  const t0 = DEPTHS[r], t1 = DEPTHS[r + 1];
+  for (let c = 0; c < 7; c++) {
+    const xa = -300 + c * 314, xb = -300 + (c + 1) * 314;
+    const [ax, ay] = toVP(xa, -60, t0);
+    const [bx, by] = toVP(xb, -60, t0);
+    const [cx, cy] = toVP(xb, -60, t1);
+    const [dx, dy] = toVP(xa, -60, t1);
+    coffers.push({
+      d: `M${ax} ${ay} L${bx} ${by} L${cx} ${cy} L${dx} ${dy} Z`,
+      shade: (r + c) % 2,
+    });
+  }
+}
+
+/** the mezzanine rail, left and right of where the screens stand */
+const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
+---
+
+<section class="bh" aria-labelledby="hall-title">
+  <StyleSwitch lang={lang} current="bright" />
+  <MotionToggle lang={lang} />
+
+  <div class="bh__scene" aria-hidden="true">
+    <svg class="bh__room" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <linearGradient id="bh-wallg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#ffffff" />
+          <stop offset="60%" stop-color="#f8f5ef" />
+          <stop offset="100%" stop-color="#efe9dd" />
+        </linearGradient>
+        <linearGradient id="bh-floorg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f2ece1" />
+          <stop offset="45%" stop-color="#f8f5ee" />
+          <stop offset="100%" stop-color="#e7e0d2" />
+        </linearGradient>
+        <radialGradient id="bh-glow" cx="0.5" cy="0.32" r="0.5">
+          <stop offset="0%" stop-color="#fff9e6" stop-opacity="0.95" />
+          <stop offset="100%" stop-color="#fff9e6" stop-opacity="0" />
+        </radialGradient>
+      </defs>
+
+      <rect width="1600" height="900" fill="url(#bh-wallg)" />
+
+      {/* floor */}
+      <path d={`M0 900 L1600 900 L${VP.x + 470} ${VP.y + 4} L${VP.x - 470} ${VP.y + 4} Z`}
+            fill="url(#bh-floorg)" />
+      {floorLines.map((l) => (
+        <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
+              stroke="#cfc6b4" stroke-width="1.4" opacity="0.5" />
+      ))}
+      {floorBands.map((y) => (
+        <line x1="0" y1={y} x2="1600" y2={y} stroke="#cfc6b4" stroke-width="1.2" opacity="0.34" />
+      ))}
+
+      {/* the medallion set into the floor, seen at a grazing angle */}
+      <g transform={`translate(${VP.x} 742) scale(1 0.30)`} opacity="0.62">
+        <circle r="330" fill="#f4f0e7" />
+        {Array.from({ length: 24 }, (_, i) => {
+          const a0 = (i * 15 - 7.4) * (Math.PI / 180);
+          const a1 = (i * 15 + 7.4) * (Math.PI / 180);
+          const R = 300;
+          return (
+            <path d={`M0 0 L${Math.cos(a0) * R} ${Math.sin(a0) * R} A${R} ${R} 0 0 1 ${Math.cos(a1) * R} ${Math.sin(a1) * R} Z`}
+                  fill={i % 2 ? '#cdc3b0' : '#8e8578'} opacity={i % 4 === 0 ? 0.95 : 0.6} />
+          );
+        })}
+        <circle r="300" fill="none" stroke="#8e8578" stroke-width="6" />
+        <circle r="92" fill="#f4f0e7" stroke="#8e8578" stroke-width="6" />
+        <circle r="330" fill="none" stroke="#bcae98" stroke-width="7" />
+      </g>
+
+      {/* coffered ceiling */}
+      {coffers.map((c) => (
+        <path d={c.d} fill={c.shade ? '#f6f2ea' : '#fffdf8'}
+              stroke="#e4d9bf" stroke-width="2.4" />
+      ))}
+
+      {/* pilasters down each side wall */}
+      {[0, 1, 2, 3].map((i) => {
+        const t = DEPTHS[i + 1];
+        const [lx, ly] = toVP(-140, -60, t);
+        const [lx2, ly2] = toVP(-140, 900, t);
+        const [rx, ry] = toVP(1740, -60, t);
+        const [rx2, ry2] = toVP(1740, 900, t);
+        const w = 26 * (1 - t) + 5;
+        return (
+          <g opacity={0.9 - i * 0.14}>
+            <rect x={lx - w / 2} y={ly} width={w} height={ly2 - ly} fill="#fffdf9" stroke="#e6dcc6" stroke-width="1.6" />
+            <rect x={rx - w / 2} y={ry} width={w} height={ry2 - ry} fill="#fffdf9" stroke="#e6dcc6" stroke-width="1.6" />
+          </g>
+        );
+      })}
+
+      {/* mezzanine rail, stopping short of the screens on both sides */}
+      {[[0, 470], [1130, 1600]].map(([x0, x1]) => (
+        <g>
+          <rect x={x0} y={rail.y} width={x1 - x0} height="7" fill="#fffdf8" />
+          <rect x={x0} y={rail.y + 52} width={x1 - x0} height="9" fill="#efe9dc" />
+          {Array.from({ length: Math.round((x1 - x0) / 34) }, (_, i) => (
+            <rect x={x0 + 10 + i * 34} y={rail.y + 8} width="13" height="45" rx="6"
+                  fill="#fbf8f1" stroke="#e8e1d2" stroke-width="1.4" />
+          ))}
+        </g>
+      ))}
+
+      {/* the light the chandelier throws */}
+      <ellipse cx={VP.x} cy={VP.y - 210} rx="360" ry="240" fill="url(#bh-glow)" />
+    </svg>
+
+    {/* chandelier */}
+    <div class="bh__chandelier">
+      <span class="bh__chain"></span>
+      <span class="bh__lustre"></span>
+      <span class="bh__lustre bh__lustre--sm"></span>
+    </div>
+
+    {/* the curved video wall, standing where the far doorway was */}
+    <div class="bh__wallwrap">
+      <div class="bh__wall">
+        {screens.map((s) => (
+          <span class="bh__screen" style={`--deg:${s.deg}deg; --row:${s.row}; --delay:${s.delay}s`}>
+            {s.clip ? (
+              <video class="bh__vid" muted loop playsinline preload="none"
+                     data-bh-clip={JSON.stringify(s.clip)} width="320" height="180"></video>
+            ) : (
+              <>
+                <img src={s.a} alt="" loading="lazy" decoding="async" width="320" height="180" />
+                <img class="b" src={s.b} alt="" loading="lazy" decoding="async" width="320" height="180" />
+              </>
+            )}
+          </span>
+        ))}
+      </div>
+      <span class="bh__wallfoot"></span>
+    </div>
+
+    {/* daylight: two slow shafts, and dust visible only inside them */}
+    <div class="bh__shaft bh__shaft--l"></div>
+    <div class="bh__shaft bh__shaft--r"></div>
+    <div class="bh__dust">
+      {Array.from({ length: 22 }, (_, i) => (
+        <span style={`--x:${(i * 37) % 100}%; --y:${(i * 53) % 80}%; --d:${14 + (i % 6) * 3}s; --s:${0.5 + (i % 4) * 0.3}`}></span>
+      ))}
+    </div>
+  </div>
+
+  <div class="bh__masthead">
+    <h1 id="hall-title" class="bh__title">{t('site.tagline')}</h1>
+    <p class="bh__hint">{t('hall.hint')}</p>
+  </div>
+
+  <nav class="bh__plinths" aria-label={t('hall.enter')}>
+    {cats.map((c) => (
+      <a class="bh__piece" href={c.href} data-cat={c.key}>
+        <span class="bh__art">
+          <model-viewer
+            class="bh__mv"
+            src={c.model}
+            alt={t('models.alt', { what: c.credit.title, cat: c.name })}
+            poster={c.poster}
+            loading="lazy"
+            camera-orbit={CAMERA}
+            field-of-view="30deg"
+            interaction-prompt="none"
+            disable-zoom
+            environment-image="neutral"
+            exposure="1.35"
+            shadow-intensity="0.55"
+            shadow-softness="0.9"
+            auto-rotate
+            auto-rotate-delay="0"
+            rotation-per-second="14deg"
+          >
+            <img class="bh__poster" slot="poster" src={c.poster} alt="" width="512" height="512" />
+          </model-viewer>
+        </span>
+        <span class="bh__plinth" aria-hidden="true"></span>
+        <span class="bh__name">{c.name}</span>
+        <span class="bh__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
+      </a>
+    ))}
+  </nav>
+
+  <a class="bh__intro" href={gallery(lang, INTRO)} data-cat={INTRO}>
+    <span class="bh__intro-txt">
+      <span class="bh__eyebrow">{t('hall.nobelRoom')}</span>
+      <span class="bh__intro-title">{introA}<span class="conj">{introConj}</span>{introB}</span>
+      <span class="bh__intro-desc">{t('hall.introDesc')}</span>
+    </span>
+    <span class="bh__cta" aria-hidden="true">{t('hall.introCta')} →</span>
+  </a>
+</section>
+
+<style>
+  .bh {
+    position: relative;
+    min-block-size: min(100svh, 62rem);
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-content: start;
+    padding-block: max(clamp(1.5rem, 4vh, 3.5rem), 4.4rem) clamp(2rem, 5vh, 4rem);
+    overflow: hidden;
+    isolation: isolate;
+    background:
+      linear-gradient(to bottom, #ffffff 0%, #faf8f4 42%, #f0ebe2 100%);
+  }
+
+  /* ---------- the room ---------- */
+  .bh__scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .bh__room {
+    position: absolute; inset: 0;
+    inline-size: 100%; block-size: 100%;
+    max-inline-size: none;
+  }
+
+  .bh__chandelier {
+    position: absolute; inset-inline-start: 50%; inset-block-start: 0;
+    transform: translateX(-50%);
+    display: grid; justify-items: center;
+  }
+  .bh__chain { inline-size: 3px; block-size: clamp(1.2rem, 4vh, 2.6rem); background: linear-gradient(#e6dcc4, #cbbb92); }
+  .bh__lustre {
+    inline-size: clamp(4rem, 8vw, 7rem); block-size: clamp(2.8rem, 5.5vw, 4.6rem);
+    margin-block-start: -2px;
+    border-radius: 50% 50% 46% 46%;
+    background:
+      radial-gradient(60% 55% at 50% 32%, rgba(255, 252, 240, 0.98), rgba(248, 236, 204, 0.5) 62%, rgba(240, 226, 190, 0) 100%);
+    box-shadow: 0 0 70px 20px rgba(255, 246, 220, 0.7);
+  }
+  .bh__lustre--sm { inline-size: 58%; block-size: 56%; margin-block-start: -0.7rem; opacity: 0.85; }
+
+  /* the wall: each panel turned on its own axis, four rows deep. Sized against
+     the same 1600×900 frame the room is drawn in, so it keeps its place in the
+     architecture as the viewport changes. */
+  .bh__wallwrap {
+    position: absolute; inset-inline-start: 50%; inset-block-start: 40%;
+    perspective: 1500px;
+    transform: translateX(-50%);
+  }
+  .bh__wall {
+    position: relative; inline-size: 0; block-size: 0;
+    transform-style: preserve-3d;
+  }
+  .bh__screen {
+    position: absolute;
+    inline-size: clamp(88px, 9.4vw, 152px);
+    aspect-ratio: 16 / 9;
+    margin-inline-start: calc(clamp(88px, 9.4vw, 152px) / -2);
+    margin-block-start: calc(clamp(88px, 9.4vw, 152px) / -3.56);
+    /* 104% of the panel's own height: stacked, with the bezel showing */
+    transform: rotateY(var(--deg)) translateZ(-430px) translateY(calc(var(--row) * 104%));
+    background: #0d1013;
+    border: 2px solid #191d21;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
+  }
+  .bh__screen img, .bh__vid {
+    position: absolute; inset: 0;
+    inline-size: 100%; block-size: 100%; object-fit: cover;
+  }
+  .bh__screen .b { opacity: 0; animation: bhswap 22s var(--delay) ease-in-out infinite; }
+  @keyframes bhswap { 0%, 44% { opacity: 0 } 52%, 94% { opacity: 1 } 100% { opacity: 0 } }
+
+  /* the wall's own reflection on the marble, as in the reference */
+  .bh__wallfoot {
+    position: absolute; inset-inline-start: 50%; inset-block-start: 14%;
+    inline-size: clamp(30rem, 62vw, 62rem); block-size: 6rem;
+    transform: translateX(-50%);
+    background: linear-gradient(to bottom, rgba(120, 140, 160, 0.16), transparent 78%);
+    filter: blur(7px);
+    pointer-events: none;
+  }
+
+  /* daylight, replacing the dark hall's embers */
+  .bh__shaft {
+    position: absolute; inset-block: -14% 22%; inline-size: 22%;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+      rgba(255, 251, 236, 0.9), rgba(255, 248, 226, 0.22) 60%, transparent 94%);
+    filter: blur(9px);
+    animation: bhshaft 26s ease-in-out infinite alternate;
+  }
+  .bh__shaft--l { inset-inline-start: 5%; transform: skewX(-10deg); }
+  .bh__shaft--r { inset-inline-end: 3%; transform: skewX(10deg); animation-delay: -13s; }
+  @keyframes bhshaft {
+    from { opacity: 0.45; }
+    to   { opacity: 0.9; }
+  }
+
+  .bh__dust { position: absolute; inset: 0; pointer-events: none; }
+  .bh__dust span {
+    position: absolute;
+    inset-inline-start: var(--x); inset-block-start: var(--y);
+    inline-size: 4px; block-size: 4px; border-radius: 50%;
+    background: rgba(255, 253, 242, 0.95);
+    box-shadow: 0 0 7px 2px rgba(255, 244, 210, 0.65);
+    transform: scale(var(--s));
+    animation: bhdust var(--d) linear infinite;
+  }
+  @keyframes bhdust {
+    0%   { transform: translate3d(0, 0, 0) scale(var(--s)); opacity: 0 }
+    12%  { opacity: 0.85 }
+    88%  { opacity: 0.5 }
+    100% { transform: translate3d(26px, -130px, 0) scale(var(--s)); opacity: 0 }
+  }
+
+  :global(html[data-motion='off']) .bh__shaft,
+  :global(html[data-motion='off']) .bh__dust span,
+  :global(html[data-motion='off']) .bh__screen .b { animation: none; }
+
+  /* ---------- masthead ---------- */
+  .bh__masthead { text-align: center; padding-inline: 1rem; position: relative; }
+  .bh__title {
+    font-family: var(--font-han-serif);
+    font-size: var(--step-4);
+    color: var(--cream);
+    letter-spacing: 0.04em;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+  }
+  .bh__hint {
+    font-size: var(--step--1); color: var(--muted);
+    margin: 0.5rem auto 0; max-inline-size: none;
+    /* the wall can end up behind this line at narrow widths; the halo keeps it
+       legible whatever it lands on */
+    text-shadow: 0 0 6px #fff, 0 0 12px #fff;
+  }
+
+  /* ---------- the pieces ---------- */
+  .bh__plinths {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    gap: clamp(0.6rem, 2vw, 1.4rem);
+    align-items: end;
+    inline-size: min(100% - 2rem, 80rem);
+    margin: clamp(1.2rem, 3.5vh, 2.6rem) auto 0;
+    position: relative;
+  }
+  .bh__piece {
+    display: grid; justify-items: center; gap: 0.1rem;
+    padding: 0.5rem 0.4rem 0.9rem;
+    text-decoration: none;
+    border-radius: var(--radius);
+    transition: transform 0.4s var(--ease), background 0.3s var(--ease);
+  }
+  .bh__piece:hover { background: rgba(255, 255, 255, 0.72); transform: translateY(-4px); }
+  .bh__piece:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  :global(html[data-motion='off']) .bh__piece:hover { transform: none; }
+
+  .bh__art {
+    inline-size: 100%; aspect-ratio: 1; max-inline-size: 11rem;
+    display: grid; place-items: center; position: relative;
+  }
+  .bh__mv {
+    inline-size: 100%; block-size: 100%;
+    pointer-events: none;              /* the anchor owns every click */
+    --poster-color: transparent;
+    background: transparent;
+  }
+  .bh__poster { inline-size: 100%; block-size: 100%; object-fit: contain; }
+
+  /* a marble pedestal, lit from the front */
+  .bh__plinth {
+    inline-size: min(72%, 8rem); block-size: 0.85rem;
+    border-radius: 3px 3px 1px 1px;
+    background: linear-gradient(to bottom, #ffffff, #e9e3d6 60%, #d8d0be);
+    box-shadow: 0 6px 14px -6px rgba(60, 50, 34, 0.4);
+  }
+  .bh__name {
+    font-family: var(--font-han-serif);
+    font-size: var(--step-0); color: var(--cream);
+    margin-block-start: 0.55rem;
+  }
+  .bh__piece:hover .bh__name { color: var(--accent); }
+  .bh__n { font-size: var(--step--1); color: var(--muted); }
+
+  /* ---------- introduction ---------- */
+  .bh__intro {
+    display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.8rem);
+    inline-size: min(100% - 2rem, 46rem);
+    margin: clamp(1.4rem, 3.5vh, 2.4rem) auto 0;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(3px);
+    text-decoration: none;
+    transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+  }
+  .bh__intro:hover { border-color: var(--accent); background: #fff; }
+  .bh__intro-txt { display: grid; gap: 0.15rem; }
+  .bh__eyebrow {
+    font-size: var(--step--2); letter-spacing: 0.16em;
+    text-transform: uppercase; color: var(--accent);
+  }
+  .bh__intro-title { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); }
+  .bh__intro-title :global(.conj) { font-size: 0.72em; opacity: 0.7; margin-inline: 0.12em; }
+  .bh__intro-desc { font-size: var(--step--1); color: var(--muted); }
+  .bh__cta { margin-inline-start: auto; color: var(--accent); font-size: var(--step--1); white-space: nowrap; }
+
+  @media (max-width: 48rem) {
+    .bh__plinths { grid-template-columns: repeat(2, 1fr); }
+
+    /* On a phone the pieces stack three rows deep, so a room drawn over the
+       whole column ends up with a video wall sitting across the labels. The
+       architecture is held to the first screen and faded out below it. */
+    .bh__scene { block-size: 64svh; }
+    .bh__scene::after {
+      content: '';
+      position: absolute; inset-inline: 0; inset-block-end: 0;
+      block-size: 38%;
+      background: linear-gradient(to bottom, transparent, var(--bg-0) 88%);
+    }
+    /* two rows, not four: at this width a four-row wall reaches up into the
+       masthead and the title becomes unreadable over the screens */
+    .bh__screen:nth-child(-n + 9),
+    .bh__screen:nth-child(n + 28) { display: none; }
+    /* the panel clamp bottoms out at 88px, which is wider than this viewport
+       wants; below 48rem the wall is sized directly */
+    .bh__screen {
+      inline-size: 62px;
+      margin-inline-start: -31px;
+      margin-block-start: -17px;
+      transform: rotateY(var(--deg)) translateZ(-190px) translateY(calc(var(--row) * 104%));
+    }
+    /* set into the gap between the masthead and the first pieces, so it backs
+       the room without crossing the title */
+    .bh__wallwrap { inset-block-start: 50%; }
+    /* the wall is built for a wide room; on a phone only the middle is seen */
+    .bh__screen { inline-size: 116px; block-size: 65px; margin: -32px -58px; }
+    .bh__ceiling { grid-template-columns: repeat(4, 1fr); }
+    .bh__intro { flex-wrap: wrap; }
+    .bh__cta { margin-inline-start: 0; }
+  }
+  @media (max-width: 34rem) {
+    .bh { padding-block-start: 8.7rem; }
+  }
+</style>
+
+<script>
+  import { motionOn } from '../scripts/motion';
+  import '../../vendor/model-viewer.min.js';
+
+  const viewers = [...document.querySelectorAll<HTMLElement>('.bh__mv')];
+  function applyRotation() {
+    for (const v of viewers) {
+      if (motionOn()) v.setAttribute('auto-rotate', '');
+      else v.removeAttribute('auto-rotate');
+    }
+  }
+  applyRotation();
+  addEventListener('motionpref', applyRotation);
+
+  /* Only the middle of the wall gets a decoder if clips ever land — thirty-six
+     simultaneous videos is not a backdrop, it is a stress test. */
+  const screens = [...document.querySelectorAll<HTMLVideoElement>('.bh__vid')];
+  if (screens.length && motionOn()) {
+    const mid = screens.length / 2;
+    screens.forEach((v, i) => {
+      if (Math.abs(i - mid) > 4) return;
+      const c = JSON.parse(v.dataset.bhClip ?? 'null');
+      if (!c) return;
+      const webm = document.createElement('source');
+      webm.src = c.webm; webm.type = 'video/webm';
+      const mp4 = document.createElement('source');
+      mp4.src = c.mp4; mp4.type = 'video/mp4';
+      v.append(webm, mp4);
+      v.load();
+      v.play().catch(() => {});
+    });
+  }
+</script>

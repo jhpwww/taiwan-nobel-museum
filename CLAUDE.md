@@ -381,3 +381,30 @@ arbitrary time — same block as the backdrop clips.
 
 Re-run after changing which video a lecture points at. Models live in
 `.tools/` (gitignored); the script names where to fetch them.
+
+## The bright museum
+
+The same site in daylight, at `/bright/`. Same routes, same data, same
+components — built a second time with `THEME=bright` and a nested
+`BASE_PATH`, then copied into `dist/bright` by the deploy workflow. The dark
+build is byte-for-byte what it was: nothing about it reads the flag.
+
+- `src/styles/bright.css` is nothing but token overrides scoped to
+  `html[data-theme='bright']`. Both builds ship the same stylesheet; only the
+  attribute differs. Add a bright rule there, never a fork of a component.
+- White ground, near-black text, **red** for anything actionable, **gold** for
+  what the museum owns. Category hues stay inside that band — six unrelated
+  colours would fight the palette — and each is dark enough to hold on white.
+- Gold models: `scripts/normalise-models.mjs` writes a second set to
+  `public/assets/models/gold/`. Metalness near 1 with low roughness is what
+  makes them read as a statuette; the base colour alone reads as yellow paint.
+- `HallBright.astro` is the one component with no dark counterpart. The room is
+  **drawn** — perspective computed against a single vanishing point and emitted
+  as SVG — because rotated CSS planes fought each other: a ceiling laid back far
+  enough to be seen swung across the wall. CSS 3D is kept only for the curve of
+  the screens, which it does better than anything else.
+- Wall rows translate by `104%` of a panel's own height, not a pixel value. The
+  panels are clamped to the viewport, so a fixed gap opened between rows at
+  every width but one.
+- No embers: they belonged to a vault and read as dirt on marble. Daylight
+  shafts, with dust visible only inside them.

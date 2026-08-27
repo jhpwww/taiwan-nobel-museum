@@ -71,7 +71,17 @@ const euler = ([x, y, z]) => {
   ];
 };
 
+/**
+ * The bright museum casts every piece in one gold instead of six hall hues —
+ * the look of an award statuette rather than a set of coloured markers.
+ * Metalness near 1 with a low roughness is what makes it read as polished
+ * metal; the base colour alone, on a rough dielectric, reads as yellow paint.
+ */
+const GOLD = { hex: '#d4a02a', metallic: 1.0, roughness: 0.22 };
+const OUT_GOLD = 'public/assets/models/gold';
+
 fs.mkdirSync(OUT, { recursive: true });
+fs.mkdirSync(OUT_GOLD, { recursive: true });
 const io = new NodeIO();
 
 for (const file of fs.readdirSync(SRC).sort()) {
@@ -118,6 +128,16 @@ for (const file of fs.readdirSync(SRC).sort()) {
   await doc.transform(prune());
 
   await io.write(path.join(OUT, `${cat}.glb`), doc);
+
+  // the same geometry again, cast in gold, for the bright museum
+  const [gr, gg, gb] = linear(GOLD.hex);
+  for (const mat of root.listMaterials()) {
+    mat.setBaseColorFactor([gr, gg, gb, 1])
+      .setMetallicFactor(GOLD.metallic)
+      .setRoughnessFactor(GOLD.roughness);
+  }
+  await io.write(path.join(OUT_GOLD, `${cat}.glb`), doc);
+
   const after = getBounds(scene);
   const outSize = after.max.map((v, i) => v - after.min[i]);
   const kb = fs.statSync(path.join(OUT, `${cat}.glb`)).size / 1024;

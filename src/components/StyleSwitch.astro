@@ -9,8 +9,11 @@
 import { type Lang } from '../i18n/ui';
 import { path } from '../i18n/routing';
 
-interface Props { lang: Lang; current: 'flat' | 'room' | 'gl' | 'models' }
+interface Props { lang: Lang; current: 'flat' | 'room' | 'gl' | 'models' | 'bright' }
 const { lang, current } = Astro.props;
+/* The bright museum has a single hall, so its switcher has nothing to switch
+   between; it names where the visitor is and links back to the dark museum. */
+const bright = process.env.THEME === 'bright';
 const OPTIONS = [
   { key: 'flat', href: path(lang), zh: '平面', en: 'Flat', dzh: '最輕量', den: 'Lightest' },
   { key: 'room', href: path(lang, 'room'), zh: '展廳', en: 'Room', dzh: 'CSS 3D 景深', den: 'CSS 3D depth' },
@@ -20,7 +23,12 @@ const OPTIONS = [
 ---
 
 <div class="sw" role="group" aria-label={lang === 'zh' ? '大廳風格' : 'Hall style'}>
-  {OPTIONS.map((o) => (
+  {bright ? (
+    <a class="sw__opt is-on" href={path(lang)} aria-current="true">
+      <span class="sw__t">{lang === 'zh' ? '明亮館' : 'Bright'}</span>
+      <span class="sw__d">{lang === 'zh' ? '白底紅金' : 'White, red, gold'}</span>
+    </a>
+  ) : OPTIONS.map((o) => (
     <a
       class:list={['sw__opt', o.key === current && 'is-on']}
       href={o.href}

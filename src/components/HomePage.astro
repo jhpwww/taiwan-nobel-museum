@@ -4,6 +4,7 @@ import Hall from './Hall.astro';
 import Hall3D from './Hall3D.astro';
 import HallGL from './HallGL.astro';
 import HallModels from './HallModels.astro';
+import HallBright from './HallBright.astro';
 import LectureCard from './LectureCard.astro';
 import VideoFacade from './VideoFacade.astro';
 import { useT, type Lang } from '../i18n/ui';
@@ -12,6 +13,8 @@ import { lectures, byDateDesc, catName, totalVideos, nextUpcoming, recommended, 
 
 interface Props { lang: Lang; style?: 'flat' | 'room' | 'gl' | 'models' }
 const { lang, style = 'flat' } = Astro.props;
+/** the bright build has one hall of its own — see BRIGHT in astro.config.mjs */
+const bright = process.env.THEME === 'bright';
 const t = useT(lang);
 
 const byDate = byDateDesc();
@@ -31,7 +34,8 @@ const nVideos = totalVideos();
 ---
 
 <Base lang={lang} bare>
-  {style === 'gl' ? <HallGL lang={lang} />
+  {bright ? <HallBright lang={lang} />
+   : style === 'gl' ? <HallGL lang={lang} />
    : style === 'room' ? <Hall3D lang={lang} />
    : style === 'models' ? <HallModels lang={lang} />
    : <Hall lang={lang} />}

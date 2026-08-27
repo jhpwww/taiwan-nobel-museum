@@ -11,6 +11,15 @@ import sitemap from '@astrojs/sitemap';
 const SITE = process.env.SITE_URL || 'https://jhpwww.github.io';
 const BASE = process.env.BASE_PATH || '/taiwan-nobel-museum';
 
+/**
+ * The bright museum is the same site in daylight — same routes, same data,
+ * same components — built a second time with a different palette and its own
+ * hall, and deployed alongside under /bright/. Nothing about the dark build
+ * changes: the theme is one attribute on <html>, and every bright rule in
+ * src/styles/bright.css is scoped to it.
+ */
+export const BRIGHT = process.env.THEME === 'bright';
+
 export default defineConfig({
   site: SITE,
   base: BASE,

@@ -1,7 +1,11 @@
 ---
 import '../styles/fonts.css';
 import '../styles/global.css';
+import '../styles/bright.css';
 import fonts from '../data/font-manifest.json';
+
+/** set at build time — see BRIGHT in astro.config.mjs */
+const bright = process.env.THEME === 'bright';
 import PageNav from '../components/PageNav.astro';
 import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
 import { home, browse, about, learn, asset, otherLang } from '../i18n/routing';
@@ -23,7 +27,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang={HTML_LANG[lang]}>
+<html lang={HTML_LANG[lang]} data-theme={bright ? 'bright' : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
