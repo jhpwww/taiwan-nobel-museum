@@ -279,11 +279,11 @@ const index = lectures.map((l) => ({
     font-size: .64rem; letter-spacing: .06em; padding: .12rem .5rem;
     border-radius: 999px; border: 1px solid var(--line); color: var(--muted-dim);
   }
-  .picks .tag[data-on] { color: #150d05; background: var(--gold); border-color: var(--gold); }
+  .picks .tag[data-on] { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
 
   .study__actions { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-block-start: 1rem; }
   .study button, .study__file span {
-    font-size: var(--step--1); color: #150d05; background: var(--gold);
+    font-size: var(--step--1); color: var(--on-accent); background: var(--gold);
     border: 0; border-radius: 999px; padding: .42rem 1.05rem; cursor: pointer;
     transition: filter .2s;
   }

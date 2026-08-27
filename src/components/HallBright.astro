@@ -65,8 +65,10 @@ const CAMERA = '35deg 70deg 2.2m';
  * the photograph's aspect ratio, so as the viewport crops the picture the two
  * crop together and the screens never drift off the doorway.
  */
-const PLATE = { w: 738, h: 408 };
-const VP = { x: 49.3, y: 58.6 };   // per cent of the plate
+/* the picture with its ceiling cropped away — see scripts note in the commit;
+   the vanishing point moves with the crop, from 58.6% down to 48.2% */
+const PLATE = { w: 738, h: 326 };
+const VP = { x: 49.3, y: 48.2 };   // per cent of the plate
 
 /* Nine columns at 13° wrap 104° — a good deal rounder than the 72° it had,
    and matching how far the reference wall turns away at its ends. */
@@ -214,8 +216,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     position: absolute;
     inset-inline-start: 50%; inset-block-start: 50%;
     translate: -50% -50%;
-    aspect-ratio: 738 / 408;
-    inline-size: max(100%, calc(100vh * 738 / 408));
+    aspect-ratio: 738 / 326;
+    inline-size: max(100%, calc(100vh * 738 / 326));
     block-size: auto;
     min-block-size: 100%;
   }
@@ -242,10 +244,12 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   .bh__wallwrap {
     position: absolute;
     inset-inline-start: 49.3%;
-    /* the vanishing point is the wall's anchor, but a wall stands *on* the
+    /* The vanishing point is the wall's anchor, but a wall stands *on* the
        floor rather than hanging centred on the horizon, so it is lifted by
-       half its own height */
-    inset-block-start: 54.5%;
+       half its own height — and further still, clear of the statues' heads.
+       Sitting level with them read as one flat band rather than as a wall
+       behind objects. */
+    inset-block-start: 40%;
     perspective: 900px;
     transform: translate(-50%, -50%);
   }

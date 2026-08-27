@@ -101,13 +101,13 @@ const sub = v.lecture
   .vc__kind {
     position: absolute; inset-block-start: .6rem; inset-inline-start: .6rem;
     font-size: .66rem; letter-spacing: .12em; font-weight: 500;
-    color: #150d05; background: var(--accent-block); border-radius: 2px;
+    color: var(--on-accent); background: var(--accent-block); border-radius: 2px;
     padding: .16rem .55rem;
   }
   /* the three types are told apart by colour as well as by label */
-  .vc[data-kind='guide']   .vc__kind { background: #e8c07d; }
-  .vc[data-kind='lecture'] .vc__kind { background: #d9a441; }
-  .vc[data-kind='record']  .vc__kind { background: #cf9d7a; }
+  .vc[data-kind='guide']   .vc__kind { background: var(--kind-guide); }
+  .vc[data-kind='lecture'] .vc__kind { background: var(--kind-lecture); }
+  .vc[data-kind='record']  .vc__kind { background: var(--kind-record); }
 
   .vc__play {
     position: absolute; inset-block-end: .55rem; inset-inline-end: .6rem;

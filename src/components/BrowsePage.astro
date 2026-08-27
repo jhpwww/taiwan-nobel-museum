@@ -136,9 +136,9 @@ const KINDS = [
   .chip input:checked + span b { opacity: 0.75; }
   .chip input:focus-visible + span { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
   /* the video-type chips carry their own colour so the three read apart */
-  .chip--kind[data-kind='guide']   input:checked + span { background: #e8c07d; border-color: #e8c07d; }
-  .chip--kind[data-kind='lecture'] input:checked + span { background: #d9a441; border-color: #d9a441; }
-  .chip--kind[data-kind='record']  input:checked + span { background: #cf9d7a; border-color: #cf9d7a; }
+  .chip--kind[data-kind='guide']   input:checked + span { background: var(--kind-guide); border-color: var(--kind-guide); }
+  .chip--kind[data-kind='lecture'] input:checked + span { background: var(--kind-lecture); border-color: var(--kind-lecture); }
+  .chip--kind[data-kind='record']  input:checked + span { background: var(--kind-record); border-color: var(--kind-record); }
 
   .count { font-size: var(--step--1); color: var(--muted); letter-spacing: 0.1em; margin-block-end: 1.2rem; }
   .empty { color: var(--muted); }

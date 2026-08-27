@@ -5,11 +5,12 @@
    so the dark site is untouched: the two builds share one stylesheet and
    differ only by an attribute on <html>. See BRIGHT_THEME in astro.config.mjs.
 
-   White ground, warm near-black text, and a deep crimson doing the carrying.
-   Gold is an accent for quality — the statues, the crest, a rule under a
-   heading — never a second theme colour. Category hues run red to black with
-   one gold among them; the forms already tell the halls apart, so colour only
-   has to place them.
+   White ground, warm near-black type, TED's red doing the carrying, gold for
+   ornament only. Every hall shares the one red — six near-relatives of it
+   carried no meaning and each needed its own contrast check. Red and gold each
+   come in a text-safe step, because a brand colour and a readable colour are
+   rarely the same value: see scripts/check-contrast.mjs, which measures every
+   pairing the site renders.
    ============================================================ */
 
 html[data-theme='bright'] {
@@ -22,46 +23,61 @@ html[data-theme='bright'] {
   --surface:    rgba(20, 18, 16, 0.035);
   --surface-hi: rgba(20, 18, 16, 0.075);
   --line:       rgba(20, 18, 16, 0.145);
-  --line-hi:    rgba(20, 18, 16, 0.32);
+  --line-hi:    rgba(20, 18, 16, 0.30);
 
-  /* Gold is the accent, not the theme. It survives on white only when
-     darkened hard — the dark theme's #e0aa53 reads as beige here — and it is
-     kept for ornament: the statues, the crest, a rule under a heading. */
-  --gold: #a9781f;
-  --gold-bright: #c8952c;
-  --gold-deep: #7c5613;
+  /*
+   * Red, in three steps, because one red cannot do three jobs. TED's own
+   * #e62b1e measures 4.44:1 on white — a hair under AA for body text, fine
+   * above it — so the brand red is kept for large type and for marks, and two
+   * darker steps carry the work it cannot: one for text, one for fills that
+   * hold white type. Every value here was solved against WCAG rather than
+   * chosen by eye; scripts/check-contrast.mjs re-checks them.
+   */
+  --red:      #e62b1e;   /* TED red — large text, rules, marks      4.44:1 */
+  --red-ink:  #c8200f;   /* links, eyebrows, small text             5.94:1 */
+  --red-deep: #9e180c;   /* fills carrying white text               8.36:1 */
 
-  /* The carrying colour. Sampled from the reference template, which is white,
-     a deep crimson and a warm near-black — not the bright signal red used at
-     first, which read as a warning rather than as a museum. */
-  --red: #8f0c14;
-  --red-bright: #b3161f;
-  --red-deep: #5e0509;
+  /*
+   * Gold is ornament and never load-bearing: plinths, the crest, a rule under
+   * a heading, the statues themselves. It gets an ink step too, so that gold
+   * is never asked to be body text at 2.7:1 — which is what made the material
+   * buttons unreadable.
+   */
+  /* --gold is what components reach for when they colour text, so in this
+     theme it *is* the text-safe step; the lighter value is kept separately for
+     rules and marks, where 3:1 is the bar. */
+  --gold:       #8a6516;  /* gold as text                           5.31:1 */
+  --gold-orn:   #b8862a;  /* rules, marks, ornament                 3.24:1 */
+  --gold-ink:   #8a6516;
+  --gold-bright:#6f5111;  /* hover: darker, because hover should gain contrast */
+  --gold-deep:  #6f5111;
 
   /* --cream is the dark theme's brightest text; on paper that is the darkest */
-  --cream: #1c1210;
-  --text: #2b2220;
-  --muted: #5f564f;
-  --muted-dim: #8a8078;
+  --cream: #1a1614;
+  --text:  #2b2523;
+  --muted: #5c554e;
+  --muted-dim: #6e665e;
 
-  /* The categories run red to black, with a single gold among them. Six
-     unrelated hues fought the palette; the forms already tell the halls apart,
-     so colour only has to place them. */
-  --c-physics:    #a3121a;   /* crimson     */
-  --c-chemistry:  #8f3a12;   /* rust        */
-  --c-medicine:   #6e0d13;   /* maroon      */
-  --c-literature: #543026;  /* dark brown  */
-  --c-peace:      #262020;   /* near-black  */
-  --c-economics:  #8a6a1e;   /* bronze gold */
-  --c-nobel:      #8f0c14;
+  /*
+   * One colour for every hall. Six near-relatives of red carried no meaning —
+   * nobody reads rust as chemistry — and each had to be re-checked for
+   * contrast on its own. The sculptures already say which hall this is; the
+   * colour only has to say "this is the museum".
+   */
+  --c-physics: var(--red-ink);
+  --c-chemistry: var(--red-ink);
+  --c-medicine: var(--red-ink);
+  --c-literature: var(--red-ink);
+  --c-peace: var(--red-ink);
+  --c-economics: var(--red-ink);
+  --c-nobel: var(--red-ink);
+  --c-chemistry-block: var(--red-deep);
+  --c-medicine-block: var(--red-deep);
 
-  /* On white the dark theme's problem inverts: a tinted fill disappears
-     rather than shouting, so a block is simply the full-strength hue. */
-  --c-chemistry-block: var(--c-chemistry);
-  --c-medicine-block: var(--c-medicine);
-
-  --accent: var(--red);
-  --accent-block: var(--red);
+  /* --accent paints text and strokes, --accent-block paints fills that carry
+     white type; they differ only where contrast demands it */
+  --accent: var(--red-ink);
+  --accent-block: var(--red-deep);
 
   --shadow-lift: 0 16px 40px -20px rgba(20, 18, 16, 0.45);
 }
@@ -72,10 +88,6 @@ html[data-theme='bright'] body {
   color: var(--text);
 }
 
-/* A category page paints its own accent; on white the heading wants the hue
-   at full strength rather than the washed block value. */
-html[data-theme='bright'] [data-cat='chemistry'] { --accent-block: var(--c-chemistry); }
-html[data-theme='bright'] [data-cat='medicine'] { --accent-block: var(--c-medicine); }
 
 /* ---------- chrome ---------- */
 html[data-theme='bright'] .topbar {
@@ -94,7 +106,7 @@ html[data-theme='bright'] .foot {
 html[data-theme='bright'] .foot__uni { color: var(--cream); }
 
 /* ---------- links and controls ---------- */
-html[data-theme='bright'] a:hover { color: var(--red-bright); }
+html[data-theme='bright'] a:hover { color: var(--red-deep); }
 html[data-theme='bright'] .skip-link { background: #fff; color: var(--cream); }
 
 html[data-theme='bright'] .sw,
@@ -105,7 +117,7 @@ html[data-theme='bright'] .mt {
 }
 html[data-theme='bright'] .sw__opt { color: var(--muted); }
 html[data-theme='bright'] .sw__opt:hover { color: var(--cream); background: var(--surface-hi); }
-html[data-theme='bright'] .sw__opt.is-on { background: var(--red); color: #fff; }
+html[data-theme='bright'] .sw__opt.is-on { background: var(--red-deep); color: #fff; }
 html[data-theme='bright'] .mt { color: var(--cream); }
 
 /* ---------- media ---------- */
@@ -137,6 +149,39 @@ html[data-theme='bright'] .pn__b {
 }
 html[data-theme='bright'] .pn__b:hover {
   color: #fff;
-  background: var(--red);
-  border-color: var(--red);
+  background: var(--red-deep);
+  border-color: var(--red-deep);
+}
+
+/* ---------- text on filled marks ----------
+   The dark theme fills these with gold and writes on them in near-black. Here
+   the fill is a deep red, so the ink is white — set once, through the token
+   the components now use, rather than by out-specifying each of them. */
+html[data-theme='bright'] {
+  --on-accent: #ffffff;
+  /* the video-kind badges are pale golds in the dark theme and cannot carry
+     white ink here; the three keep their distinction, darkened */
+  --kind-guide:   #6f5111;
+  --kind-lecture: #8a5a10;
+  --kind-record:  #7a4a2c;
+}
+html[data-theme='bright'] [data-cat] { --accent-block: var(--red-deep); }
+
+/* marks that keep a gold fill of their own in the dark theme */
+html[data-theme='bright'] .picks .tag[data-on],
+html[data-theme='bright'] .study button,
+html[data-theme='bright'] .study__file span {
+  background: var(--red-deep);
+  border-color: var(--red-deep);
+}
+
+/* a percentage is a figure, not a mark: it wants ink, not a fill */
+html[data-theme='bright'] .marks__pct { color: var(--red-ink); background: none; }
+
+/* Gold as a link sits on tinted panels as often as on paper, and a tint drops
+   it below AA. The deepest step clears both. */
+html[data-theme='bright'] a { --gold: var(--gold-deep); }
+html[data-theme='bright'] .links__key,
+html[data-theme='bright'] .deeper__panel {
+  background: color-mix(in srgb, var(--red) 4%, #fff);
 }

@@ -408,3 +408,35 @@ build is byte-for-byte what it was: nothing about it reads the flag.
   every width but one.
 - No embers: they belonged to a vault and read as dirt on marble. Daylight
   shafts, with dust visible only inside them.
+
+## Colour is measured, not eyeballed
+
+Two scripts, both worth running after any palette change:
+
+- `node scripts/check-contrast.mjs [--theme bright]` — reads the tokens out of
+  the stylesheet and checks the pairings the site renders.
+- `node scripts/audit-contrast.mjs <origin>` — the one that finds real bugs.
+  It walks every text node on the built pages, resolves the colour actually
+  painted and the nearest opaque background behind it, and reports anything
+  under AA. Token-level checking cannot see a safe colour applied over a
+  surface it was never measured against, which is how the gold links ended up
+  at 3.2:1.
+
+Two traps it took a while to see:
+
+- A computed colour comes back as `rgb()` with 0–255 channels, or — once
+  `color-mix()` is involved, which every surface here uses — as
+  `color(srgb r g b / a)` with 0–1 channels. Reading the second as the first
+  makes every surface look black and every reading a false failure.
+- Text over a gradient cannot be sampled this way at all. Skip it and look.
+
+**Never fix a theme problem by out-specifying a component.** Astro's scoped
+selectors carry a `[data-astro-cid-…]` on every part, so `.study[cid]
+button[cid]` beats `html[data-theme='bright'] .study button`. When a component
+hardcodes a colour, give it a token — `--on-accent`, `--kind-guide` — and
+restate that token in the theme. The dark values are unchanged, so the dark
+site renders exactly as before.
+
+The dark theme has ~42 text styles below AA, nearly all muted greys on the
+warm dark ground. Left alone deliberately: the owner asked for that site to
+stay as it is.

@@ -121,7 +121,7 @@ const t = useT(lang);
   .sp__pick input:checked + .sp__pick-box {
     background: var(--accent-block); border-color: var(--accent-block);
   }
-  .sp__pick input:checked + .sp__pick-box::after { content: '✓'; color: #150d05; font-size: 13px; line-height: 1; }
+  .sp__pick input:checked + .sp__pick-box::after { content: '✓'; color: var(--on-accent); font-size: 13px; line-height: 1; }
   .sp__pick input:focus-visible + .sp__pick-box { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
   .sp__pick-txt { display: grid; gap: .1rem; }
   .sp__pick-txt b { font-weight: 500; color: var(--cream); font-size: var(--step-0); }
@@ -164,7 +164,7 @@ const t = useT(lang);
 
   .sp__actions { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; }
   .sp button {
-    font-size: var(--step--1); color: #150d05; background: var(--accent-block);
+    font-size: var(--step--1); color: var(--on-accent); background: var(--accent-block);
     border: 0; border-radius: 999px; padding: .38rem 1rem; cursor: pointer;
     transition: filter .2s;
   }

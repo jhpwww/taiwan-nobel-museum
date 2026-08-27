@@ -55,6 +55,16 @@ a, button, label, summary, input, select, textarea, [role='button'] {
   --c-chemistry-block: #ecb98f;   /* copper  + 40% white — peach */
   --c-medicine-block:  #e5a49f;   /* terracotta + 40% white — dusty rose */
 
+  /* the ink written on a filled accent mark — gold pills, badges, the checked
+     box. A literal here meant a theme could only override it by out-specifying
+     Astro's scoped selectors, which is a fight not worth having. */
+  --on-accent: #150d05;
+  /* the guide badge's own pale gold — a token, so a theme can restate it
+     without out-specifying Astro's scoped selectors */
+  --kind-guide:   #e8c07d;
+  --kind-lecture: #d9a441;
+  --kind-record:  #cf9d7a;
+
   --accent: var(--gold);
   /* --accent paints strokes, text and borders; --accent-block paints solid
      fills. They differ only where a full-strength hue would read as garish. */
