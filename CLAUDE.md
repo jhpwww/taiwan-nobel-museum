@@ -440,3 +440,35 @@ site renders exactly as before.
 The dark theme has ~42 text styles below AA, nearly all muted greys on the
 warm dark ground. Left alone deliberately: the owner asked for that site to
 stay as it is.
+
+## Smooth statues
+
+The pieces are smooth-shaded, in `scripts/normalise-models.mjs`. Order matters:
+
+1. `dedup, prune`
+2. `smoothNormals()` — per **corner**, not per vertex, and crease-aware at 60°:
+   a corner averages only the faces meeting at its position whose own normal
+   lies within the threshold. Average everything and the sharp edges soften
+   too — the flask's rim rounds off, the balance's beam melts into its pans.
+3. `weld()` — worth doing only now. Before smoothing every corner carried its
+   own face normal and nothing could merge; afterwards a sphere collapses from
+   three vertices a triangle to one a lattice point, and most files shrank.
+4. one round of Loop subdivision, for `SUBDIVIDE` only, then smooth and weld
+   again. Smooth normals fix the shading but not the outline: an eight-facet
+   flask has an eight-sided silhouette however it is lit.
+5. `quantize()` — **and the extension must be registered on the `NodeIO`**.
+   gltf-transform silently drops an unregistered extension on write, which
+   leaves quantised accessors with no `KHR_mesh_quantization` declaration:
+   invalid glTF that happens to load in three.js. Check `extensionsRequired`
+   in the output before trusting it.
+
+The dove is deliberately **not** subdivided. Its mesh carries split vertices
+along the wings and tail, and Loop subdivision pulls those apart into visible
+cracks — the wing detaches from the body. Smooth normals alone carry it.
+
+The atom and the balance are generated, so they are simply built at a
+resolution that needs no help; raise the segment counts in `build-models.mjs`
+rather than subdividing them.
+
+Re-run `scripts/render-posters.mjs` after any geometry change, or the poster
+no longer matches the model it stands in for.

@@ -75,7 +75,7 @@ function cylinder(r0, r1, h, seg, caps = true) {
   }
 }
 
-function sphere(r, segU = 12, segV = 8) {
+function sphere(r, segU = 20, segV = 14) {
   const p = (u, v) => {
     const th = (u / segU) * Math.PI * 2, ph = (v / segV) * Math.PI;
     return [Math.sin(ph) * Math.cos(th) * r, Math.cos(ph) * r, Math.sin(ph) * Math.sin(th) * r];
@@ -89,7 +89,7 @@ function sphere(r, segU = 12, segV = 8) {
   }
 }
 
-function torus(R, r, segU = 40, segV = 6) {
+function torus(R, r, segU = 56, segV = 14) {
   const p = (u, v) => {
     const th = (u / segU) * Math.PI * 2, ph = (v / segV) * Math.PI * 2;
     const rr = R + Math.cos(ph) * r;
@@ -116,22 +116,22 @@ function balance() {
   const BEAM_Y = 0.40;
   const PAN_Y = 0.02;
 
-  place(translate([0, -0.52, 0]), () => cylinder(0.34, 0.28, 0.07, 16));   // foot
-  place(translate([0, -0.45, 0]), () => cylinder(0.12, 0.07, 0.10, 12));   // swell
-  place(translate([0, -0.03, 0]), () => cylinder(0.045, 0.04, 0.86, 10));  // column
-  place(translate([0, BEAM_Y, 0]), () => sphere(0.075, 12, 8));            // pivot
+  place(translate([0, -0.52, 0]), () => cylinder(0.34, 0.28, 0.07, 40));   // foot
+  place(translate([0, -0.45, 0]), () => cylinder(0.12, 0.07, 0.10, 32));   // swell
+  place(translate([0, -0.03, 0]), () => cylinder(0.045, 0.04, 0.86, 28));  // column
+  place(translate([0, BEAM_Y, 0]), () => sphere(0.075, 22, 16));            // pivot
 
   // beam: laid along X, then lifted. Rotation has to come first — translate
   // first and the rotation swings the whole beam off the column.
   place(chain(translate([0, BEAM_Y, 0]), rotZ(Math.PI / 2)),
-    () => cylinder(0.028, 0.028, ARM * 2, 8));
+    () => cylinder(0.028, 0.028, ARM * 2, 24));
 
   for (const side of [-1, 1]) {
     const x = side * ARM;
-    place(translate([x, BEAM_Y, 0]), () => sphere(0.045, 10, 6));          // end knob
+    place(translate([x, BEAM_Y, 0]), () => sphere(0.045, 20, 14));          // end knob
     place(translate([x, (BEAM_Y + PAN_Y) / 2 + 0.03, 0]),
-      () => cylinder(0.012, 0.012, BEAM_Y - PAN_Y - 0.06, 6, false));      // hanger
-    place(translate([x, PAN_Y, 0]), () => cylinder(0.09, 0.24, 0.075, 18)); // pan
+      () => cylinder(0.012, 0.012, BEAM_Y - PAN_Y - 0.06, 16, false));      // hanger
+    place(translate([x, PAN_Y, 0]), () => cylinder(0.09, 0.24, 0.075, 40)); // pan
   }
 }
 
@@ -144,19 +144,19 @@ function atom() {
   const NUC = 0.150;
   const t = 0.093;
   for (const c of [[t, t, t], [-t, -t, t], [-t, t, -t], [t, -t, -t]]) {
-    place(translate(c), () => sphere(NUC, 10, 7));
+    place(translate(c), () => sphere(NUC, 24, 18));
   }
 
   const R = 0.86;
   const shells = [0, 1, 2].map((i) =>
     chain(rotY((i * 2 * Math.PI) / 3), rotX(1.19)));  // ~68°, off vertical
   shells.forEach((m, i) => {
-    place(m, () => torus(R, 0.030, 32, 5));
+    place(m, () => torus(R, 0.030, 64, 16));
     // the ring is built in the XZ plane, so an electron on it starts there too
     // and is then carried by the shell's own transform
     const a = (i / 3) * Math.PI * 2 + 0.5;
     place(chain(m, translate([Math.cos(a) * R, 0, Math.sin(a) * R])),
-      () => sphere(0.075, 10, 7));
+      () => sphere(0.075, 22, 16));
   });
 }
 

@@ -16,7 +16,8 @@
  * rendered result, not guessed.
  */
 import { NodeIO, getBounds } from '@gltf-transform/core';
-import { prune, dedup, weld } from '@gltf-transform/functions';
+import { prune, dedup, weld, quantize } from '@gltf-transform/functions';
+import { KHRMeshQuantization } from '@gltf-transform/extensions';
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -80,14 +81,231 @@ const euler = ([x, y, z]) => {
 const GOLD = { hex: '#d4a02a', metallic: 1.0, roughness: 0.22 };
 const OUT_GOLD = 'public/assets/models/gold';
 
+/**
+ * Give every surface smooth shading.
+ *
+ * These arrive flat-shaded: one normal per face, so every facet catches the
+ * light as its own plane. That is the low-poly look, and against the gold
+ * material it reads as a faceted crystal rather than a cast piece.
+ *
+ * Smoothing is per corner rather than per vertex, and crease-aware: a corner
+ * takes the average of the faces meeting at its position, but only those whose
+ * own normal lies within CREASE of it. Average everything and the sharp edges
+ * soften too — the flask's rim rounds off, the balance's beam melts into its
+ * pans. Above the threshold the edge stays hard, which is what a smoothing
+ * group is for.
+ *
+ * Positions are untouched; this changes only how the light is read.
+ */
+const CREASE = Math.cos((60 * Math.PI) / 180);
+
+function smoothNormals(doc) {
+  for (const mesh of doc.getRoot().listMeshes()) {
+    for (const prim of mesh.listPrimitives()) {
+      const posAcc = prim.getAttribute('POSITION');
+      const nrmAcc = prim.getAttribute('NORMAL');
+      if (!posAcc || !nrmAcc) continue;
+
+      const idxAcc = prim.getIndices();
+      const pos = posAcc.getArray();
+      const index = idxAcc ? Array.from(idxAcc.getArray()) : null;
+      const corners = index ?? Array.from({ length: posAcc.getCount() }, (_, i) => i);
+      const faceCount = corners.length / 3;
+
+      const at = (i) => [pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]];
+      // a millimetre at this scale: everything is normalised to a 1-unit box
+      const key = (i) => at(i).map((v) => Math.round(v * 4096)).join(',');
+
+      const fn = new Float32Array(faceCount * 3);   // face normal, area-weighted
+      for (let f = 0; f < faceCount; f++) {
+        const [a, b, c] = [corners[f * 3], corners[f * 3 + 1], corners[f * 3 + 2]];
+        const [ax, ay, az] = at(a), [bx, by, bz] = at(b), [cx, cy, cz] = at(c);
+        const ux = bx - ax, uy = by - ay, uz = bz - az;
+        const vx = cx - ax, vy = cy - ay, vz = cz - az;
+        // the cross product's length is twice the area, which is the weight we
+        // want: a sliver should not pull a corner as hard as a broad face
+        fn[f * 3] = uy * vz - uz * vy;
+        fn[f * 3 + 1] = uz * vx - ux * vz;
+        fn[f * 3 + 2] = ux * vy - uy * vx;
+      }
+
+      const byPos = new Map();
+      for (let f = 0; f < faceCount; f++) {
+        for (let k = 0; k < 3; k++) {
+          const K = key(corners[f * 3 + k]);
+          (byPos.get(K) ?? byPos.set(K, []).get(K)).push(f);
+        }
+      }
+
+      const out = new Float32Array(nrmAcc.getCount() * 3);
+      const unit = (f) => {
+        const l = Math.hypot(fn[f * 3], fn[f * 3 + 1], fn[f * 3 + 2]) || 1;
+        return [fn[f * 3] / l, fn[f * 3 + 1] / l, fn[f * 3 + 2] / l];
+      };
+      for (let f = 0; f < faceCount; f++) {
+        const [nx, ny, nz] = unit(f);
+        for (let k = 0; k < 3; k++) {
+          const corner = corners[f * 3 + k];
+          let sx = 0, sy = 0, sz = 0;
+          for (const g of byPos.get(key(corner))) {
+            const [gx, gy, gz] = unit(g);
+            if (nx * gx + ny * gy + nz * gz < CREASE) continue;   // across a crease
+            sx += fn[g * 3]; sy += fn[g * 3 + 1]; sz += fn[g * 3 + 2];
+          }
+          const l = Math.hypot(sx, sy, sz) || 1;
+          out[corner * 3] = sx / l;
+          out[corner * 3 + 1] = sy / l;
+          out[corner * 3 + 2] = sz / l;
+        }
+      }
+      nrmAcc.setArray(out);
+    }
+  }
+}
+
+/**
+ * One round of Loop subdivision, for the four pieces that came in low-poly.
+ *
+ * Smooth normals fix the shading but not the outline: a flask built from eight
+ * facets still has an eight-sided silhouette however it is lit, and at the size
+ * these render that edge is what the eye catches. Subdividing splits every
+ * triangle in four and moves the vertices onto the limit surface, so the
+ * outline rounds with it.
+ *
+ * Edges that only one face uses are treated as boundaries and keep the simple
+ * midpoint rule — which is what preserves the flask's rim and the parchment's
+ * corners instead of melting them.
+ *
+ * Not applied to the atom or the balance: those are generated at whatever
+ * resolution is asked for, so they are simply built smooth.
+ */
+function subdivide(doc) {
+  for (const mesh of doc.getRoot().listMeshes()) {
+    for (const prim of mesh.listPrimitives()) {
+      const posAcc = prim.getAttribute('POSITION');
+      const idxAcc = prim.getIndices();
+      if (!posAcc || !idxAcc) continue;
+
+      const P = Array.from(posAcc.getArray());
+      const I = Array.from(idxAcc.getArray());
+      const nV = posAcc.getCount();
+      const get = (i) => [P[i * 3], P[i * 3 + 1], P[i * 3 + 2]];
+
+      /* topology: which faces meet on each edge, and who neighbours whom */
+      const ekey = (a, b) => (a < b ? `${a}_${b}` : `${b}_${a}`);
+      const edgeFaces = new Map();
+      const neighbours = Array.from({ length: nV }, () => new Set());
+      for (let f = 0; f < I.length / 3; f++) {
+        const t = [I[f * 3], I[f * 3 + 1], I[f * 3 + 2]];
+        for (let k = 0; k < 3; k++) {
+          const a = t[k], b = t[(k + 1) % 3];
+          neighbours[a].add(b); neighbours[b].add(a);
+          const K = ekey(a, b);
+          (edgeFaces.get(K) ?? edgeFaces.set(K, []).get(K)).push(f);
+        }
+      }
+      const isBoundary = (a, b) => (edgeFaces.get(ekey(a, b)) ?? []).length < 2;
+
+      /* new vertex on every edge */
+      const edgePoint = new Map();
+      const out = P.slice();
+      for (const [K, faces] of edgeFaces) {
+        const [a, b] = K.split('_').map(Number);
+        const A = get(a), B = get(b);
+        let p;
+        if (faces.length < 2) {
+          p = [0, 1, 2].map((i) => (A[i] + B[i]) / 2);
+        } else {
+          // the two vertices opposite this edge, one in each adjacent face
+          const opp = faces.map((f) => {
+            const t = [I[f * 3], I[f * 3 + 1], I[f * 3 + 2]];
+            return t.find((v) => v !== a && v !== b);
+          }).map(get);
+          p = [0, 1, 2].map((i) =>
+            (3 / 8) * (A[i] + B[i]) + (1 / 8) * (opp[0][i] + opp[1][i]));
+        }
+        edgePoint.set(K, out.length / 3);
+        out.push(p[0], p[1], p[2]);
+      }
+
+      /* and every original vertex moves onto the limit surface */
+      const moved = new Float32Array(nV * 3);
+      for (let v = 0; v < nV; v++) {
+        const nb = [...neighbours[v]];
+        const bnd = nb.filter((w) => isBoundary(v, w));
+        const V = get(v);
+        if (bnd.length === 2) {
+          const [A, B] = bnd.map(get);
+          for (let i = 0; i < 3; i++) {
+            moved[v * 3 + i] = (1 / 8) * A[i] + (3 / 4) * V[i] + (1 / 8) * B[i];
+          }
+        } else {
+          const n = nb.length || 1;
+          const c = Math.cos((2 * Math.PI) / n);
+          const beta = (1 / n) * (5 / 8 - (3 / 8 + 0.25 * c) ** 2);
+          const sum = [0, 0, 0];
+          for (const w of nb) {
+            const W = get(w);
+            for (let i = 0; i < 3; i++) sum[i] += W[i];
+          }
+          for (let i = 0; i < 3; i++) {
+            moved[v * 3 + i] = (1 - n * beta) * V[i] + beta * sum[i];
+          }
+        }
+      }
+      for (let v = 0; v < nV * 3; v++) out[v] = moved[v];
+
+      /* four triangles where there was one */
+      const NI = [];
+      for (let f = 0; f < I.length / 3; f++) {
+        const [a, b, c] = [I[f * 3], I[f * 3 + 1], I[f * 3 + 2]];
+        const ab = edgePoint.get(ekey(a, b));
+        const bc = edgePoint.get(ekey(b, c));
+        const ca = edgePoint.get(ekey(c, a));
+        NI.push(a, ab, ca, ab, b, bc, ca, bc, c, ab, bc, ca);
+      }
+
+      posAcc.setArray(new Float32Array(out));
+      idxAcc.setArray(new Uint32Array(NI));
+      // normals are meaningless now; smoothNormals() runs again after this
+      const nrm = prim.getAttribute('NORMAL');
+      if (nrm) nrm.setArray(new Float32Array(out.length));
+    }
+  }
+}
+
+/*
+ * The low-poly pieces worth subdividing. Not the dove: its mesh carries split
+ * vertices along the wings and tail, and Loop subdivision pulls those apart
+ * into visible cracks — the wing detaches from the body. Smooth normals alone
+ * carry it well enough, which is what it gets.
+ *
+ * The atom and the balance are absent for the opposite reason: they are
+ * generated, so they are simply built at a resolution that needs no help.
+ */
+const SUBDIVIDE = new Set(['chemistry', 'medicine', 'literature']);
+
 fs.mkdirSync(OUT, { recursive: true });
 fs.mkdirSync(OUT_GOLD, { recursive: true });
-const io = new NodeIO();
+// quantised accessors are only legal glTF if the extension is declared, and
+// gltf-transform will silently drop an unregistered extension on write
+const io = new NodeIO().registerExtensions([KHRMeshQuantization]);
 
 for (const file of fs.readdirSync(SRC).sort()) {
   const cat = path.basename(file, '.glb');
   const doc = await io.read(path.join(SRC, file));
-  await doc.transform(dedup(), weld(), prune());
+  await doc.transform(dedup(), prune());
+  smoothNormals(doc);
+  // welding is worth doing only now: before smoothing every corner carried its
+  // own face normal and nothing could merge. Afterwards a sphere collapses from
+  // three vertices a triangle to one a lattice point.
+  await doc.transform(weld());
+
+  if (SUBDIVIDE.has(cat)) {
+    subdivide(doc);
+    smoothNormals(doc);
+    await doc.transform(weld());
+  }
 
   const root = doc.getRoot();
   const scene = root.getDefaultScene() ?? root.listScenes()[0];
@@ -126,6 +344,12 @@ for (const file of fs.readdirSync(SRC).sort()) {
       .setEmissiveTexture(null);
   }
   await doc.transform(prune());
+
+  /* Subdivision roughly doubled these. Quantising positions and normals to
+     fewer bits gives most of it back — a 14-bit position is finer than
+     anything visible on a piece an inch across — at the cost of requiring
+     KHR_mesh_quantization, which model-viewer has supported for years. */
+  await doc.transform(quantize({ quantizePosition: 14, quantizeNormal: 10 }));
 
   await io.write(path.join(OUT, `${cat}.glb`), doc);
 
