@@ -486,3 +486,30 @@ Text red is the darkened `--red-ink` (5.72:1) and passes everywhere. Do not
 "fix" the block red by darkening it — that was asked for and reverted once.
 If strict AA is wanted later, the lever is the label, not the colour: at
 18.66px bold the bar drops to 3:1.
+
+## Type on paper
+
+`scripts/audit-type.mjs <origin>` lists what each page actually renders —
+family, size, weight, tracking in em, leading as a ratio — rather than what the
+stylesheet intends. Run it before and after any type change; the numbers a
+typographer reasons in are not the ones `getComputedStyle` returns.
+
+The bright theme restates the type, because light-on-dark and dark-on-light are
+different optical problems. On the dark ground glyphs bloom into the
+background, so that museum opens its tracking to keep counters clear and sits
+at a light weight. Reverse the ground and both corrections invert: the same
+weight reads thin, the same tracking reads loose enough that words stop
+holding together.
+
+- Cormorant Garamond goes to **600** everywhere on paper. It is a display
+  Garamond — very high stroke contrast, small x-height — and under about 40px
+  its hairlines disappear on white. Backlit they held.
+- Uppercase Latin labels keep their tracking; that is correct typography. What
+  is cut is Chinese that inherited a Latin small-caps measure — the eyebrows
+  at 0.16em, the hall hints at 0.18em. CJK is already set on an even body.
+- Leading tightens slightly (1.75 → 1.72), because the higher contrast lets the
+  eye find the next line with less help.
+
+All of it is scoped to `html[data-theme='bright']`; the dark museum's type is
+untouched, and the audit on the dark origin should still report `.lec__who` at
+500/0.03em and `.eyebrow` at 0.16em.

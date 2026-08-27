@@ -187,3 +187,93 @@ html[data-theme='bright'] .links__key,
 html[data-theme='bright'] .deeper__panel {
   background: color-mix(in srgb, var(--red) 4%, #fff);
 }
+
+/* ============================================================
+   Type on paper
+
+   Light-on-dark and dark-on-light are not the same optical problem. On a dark
+   ground the glyphs bloom into the background, so the dark museum opens its
+   tracking to keep counters clear and can sit comfortably at a light weight.
+   Reverse the ground and both corrections work against you: the same weight
+   now reads thin, and the same tracking reads loose enough that words stop
+   holding together as shapes.
+
+   So on paper: a little more weight, noticeably less tracking, and slightly
+   tighter leading — the higher contrast lets the eye return along the line
+   without as much help.
+
+   Measured with scripts/audit-type.mjs, which lists what each page actually
+   renders rather than what the stylesheet intends.
+   ============================================================ */
+
+/* ---------- headings ---------- */
+html[data-theme='bright'] :is(h1, h2, h3, h4) {
+  font-weight: 600;
+  letter-spacing: 0.004em;
+}
+html[data-theme='bright'] :lang(zh) :is(h1, h2, h3) {
+  letter-spacing: 0.012em;
+}
+
+/*
+ * Cormorant Garamond is a display Garamond: very high stroke contrast and a
+ * small x-height. Backlit on the dark ground its hairlines held; on white at
+ * anything under about 40px they thin to nothing. Every place the Latin
+ * display face is set gets the top of its weight axis.
+ */
+html[data-theme='bright'] :is(
+  .lec__who, .feature__who, .card__who, .vc__who,
+  .cmp__when, .marks__pct, .gh__title, .bh__title, .topbar__series
+) {
+  font-weight: 600;
+}
+
+/* ---------- eyebrows and small caps ---------- */
+/* 0.22em is a dark-room measure; on paper it reads as a gap, not a rhythm */
+html[data-theme='bright'] .eyebrow,
+html[data-theme='bright'] .bh__eyebrow,
+html[data-theme='bright'] .intro__eyebrow {
+  letter-spacing: 0.13em;
+  font-weight: 500;
+}
+html[data-theme='bright'] :lang(zh) .eyebrow,
+html[data-theme='bright'] :lang(zh) .bh__eyebrow {
+  letter-spacing: 0.08em;
+}
+
+/*
+ * Uppercase Latin genuinely needs tracking and keeps it. What does not is a
+ * line of Chinese tracked out to match: CJK glyphs are already set on an even
+ * body, and adding 0.16em to them only pulls the sentence apart. These are the
+ * places a Latin small-caps measure was applied to Chinese text.
+ */
+html[data-theme='bright'] .lec__prize a { letter-spacing: 0.05em; }
+html[data-theme='bright'] :is(.hint, .hall__hint, .bh__hint, .mh__hint) { letter-spacing: 0.07em; }
+html[data-theme='bright'] .gh__n { letter-spacing: 0.05em; }
+
+/* set at 400 in the component, which on white is the thinnest line on the page */
+html[data-theme='bright'] .lec__title { font-weight: 500; }
+
+/* the second language, set under the first: lowercase Latin wants none of the
+   tracking the tracked-out labels above it want */
+html[data-theme='bright'] :is(
+  .bh__name-en, .case__name-en, .plinth__name-en, .tile__name-en, .gh__title-en
+) {
+  letter-spacing: 0.012em;
+  font-weight: 400;
+}
+
+/* ---------- running text ---------- */
+html[data-theme='bright'] body { line-height: 1.72; }
+html[data-theme='bright'] :is(.about__lede, .about__hist, .lec__lede, .forcourse__lede) {
+  line-height: 1.78;
+}
+/* the serif pull-quotes carry a whole thought at reading size; at 400 on white
+   they are the thinnest thing on the page */
+html[data-theme='bright'] :is(.lec__hook, .feature__hook, .card__hook, .vc__hook) {
+  font-weight: 500;
+}
+/* small muted labels lose the most to a light ground */
+html[data-theme='bright'] :is(.gloss, .card__meta, .vc__meta, .lec__meta dt) {
+  font-weight: 450;
+}
