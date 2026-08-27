@@ -239,7 +239,10 @@ const creditComment = (c: Credit) =>
     border-radius: var(--radius);
     transition: transform 0.4s var(--ease), background 0.3s var(--ease);
   }
-  .case:hover, .case:focus-visible { background: var(--surface); }
+  /* No plate behind the piece on hover. Lighting a rectangle around a
+     sculpture flattens it back into a card and undoes the depth the whole
+     hall is built for; the piece itself lifts instead. */
+  .case:focus-visible { background: var(--surface); }
   .case:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
   .case__frame {

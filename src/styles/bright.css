@@ -5,10 +5,11 @@
    so the dark site is untouched: the two builds share one stylesheet and
    differ only by an attribute on <html>. See BRIGHT_THEME in astro.config.mjs.
 
-   White ground, near-black text, red for anything the visitor can act on,
-   gold for what the museum owns — the statues, the crest, the ornament.
-   Category hues stay inside that red-to-gold band rather than reaching for
-   six unrelated colours, and each is dark enough to hold its own on white.
+   White ground, warm near-black text, and a deep crimson doing the carrying.
+   Gold is an accent for quality — the statues, the crest, a rule under a
+   heading — never a second theme colour. Category hues run red to black with
+   one gold among them; the forms already tell the halls apart, so colour only
+   has to place them.
    ============================================================ */
 
 html[data-theme='bright'] {
@@ -23,30 +24,36 @@ html[data-theme='bright'] {
   --line:       rgba(20, 18, 16, 0.145);
   --line-hi:    rgba(20, 18, 16, 0.32);
 
-  /* Gold has to be darkened hard to survive on white — the dark theme's
-     #e0aa53 reads as beige here and fails contrast on body text. */
+  /* Gold is the accent, not the theme. It survives on white only when
+     darkened hard — the dark theme's #e0aa53 reads as beige here — and it is
+     kept for ornament: the statues, the crest, a rule under a heading. */
   --gold: #a9781f;
   --gold-bright: #c8952c;
   --gold-deep: #7c5613;
 
-  /* red is the interactive colour, as on the reference site */
-  --red: #d8231b;
-  --red-deep: #a5140e;
+  /* The carrying colour. Sampled from the reference template, which is white,
+     a deep crimson and a warm near-black — not the bright signal red used at
+     first, which read as a warning rather than as a museum. */
+  --red: #8f0c14;
+  --red-bright: #b3161f;
+  --red-deep: #5e0509;
 
   /* --cream is the dark theme's brightest text; on paper that is the darkest */
-  --cream: #14110e;
-  --text: #23201c;
-  --muted: #5d574f;
-  --muted-dim: #857e74;
+  --cream: #1c1210;
+  --text: #2b2220;
+  --muted: #5f564f;
+  --muted-dim: #8a8078;
 
-  /* prize categories, kept within red / gold / black */
-  --c-physics:    #a9781f;   /* gold        */
-  --c-chemistry:  #bc5a17;   /* amber       */
-  --c-medicine:   #c0392b;   /* red clay    */
-  --c-literature: #8a5636;   /* brown       */
-  --c-peace:      #33302c;   /* near-black  */
-  --c-economics:  #8a6b1c;   /* bronze      */
-  --c-nobel:      #a9781f;
+  /* The categories run red to black, with a single gold among them. Six
+     unrelated hues fought the palette; the forms already tell the halls apart,
+     so colour only has to place them. */
+  --c-physics:    #a3121a;   /* crimson     */
+  --c-chemistry:  #8f3a12;   /* rust        */
+  --c-medicine:   #6e0d13;   /* maroon      */
+  --c-literature: #543026;  /* dark brown  */
+  --c-peace:      #262020;   /* near-black  */
+  --c-economics:  #8a6a1e;   /* bronze gold */
+  --c-nobel:      #8f0c14;
 
   /* On white the dark theme's problem inverts: a tinted fill disappears
      rather than shouting, so a block is simply the full-strength hue. */
@@ -87,7 +94,7 @@ html[data-theme='bright'] .foot {
 html[data-theme='bright'] .foot__uni { color: var(--cream); }
 
 /* ---------- links and controls ---------- */
-html[data-theme='bright'] a:hover { color: var(--red); }
+html[data-theme='bright'] a:hover { color: var(--red-bright); }
 html[data-theme='bright'] .skip-link { background: #fff; color: var(--cream); }
 
 html[data-theme='bright'] .sw,

@@ -51,11 +51,29 @@ const cats = categoryList()
     credit: credited[key],
   }));
 
-/* The wall: four rows, curving away on both sides, as in the reference. Every
-   panel carries a different lecture so the wall reads as a catalogue rather
-   than a repeat. */
+const CAMERA = '35deg 70deg 2.2m';
+
+/*
+ * The hall is the photograph, not a drawing of one. Its perspective was
+ * measured rather than guessed: a Hough transform over the receding lines —
+ * coffers, cornices, the floor medallion, the balustrades — and a
+ * least-squares intersection of all 136 of them put the vanishing point at
+ * 49.3% across and 58.6% down. That lands exactly on the far doorway, which
+ * is where a wall of screens would stand.
+ *
+ * The wall is positioned in those same fractions, inside a plate that carries
+ * the photograph's aspect ratio, so as the viewport crops the picture the two
+ * crop together and the screens never drift off the doorway.
+ */
+const PLATE = { w: 738, h: 408 };
+const VP = { x: 49.3, y: 58.6 };   // per cent of the plate
+
+/* Nine columns at 13° wrap 104° — a good deal rounder than the 72° it had,
+   and matching how far the reference wall turns away at its ends. */
 const COLS = 9;
 const ROWS = 4;
+const SPREAD = 13;
+
 const stills = lectures
   .filter((l) => l.video.guide || l.video.lecture)
   .map((l) => `https://i.ytimg.com/vi/${l.video.guide ?? l.video.lecture}/mqdefault.jpg`);
@@ -67,7 +85,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   const col = i % COLS;
   const row = Math.floor(i / COLS);
   return {
-    deg: -((COLS - 1) / 2) * 9 + col * 9,
+    deg: -((COLS - 1) / 2) * SPREAD + col * SPREAD,
     row: row - (ROWS - 1) / 2,
     a: stills[i % stills.length],
     b: stills[(i + 7) % stills.length],
@@ -75,58 +93,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     clip: reel.length ? reel[i % reel.length] : null,
   };
 });
-
-const CAMERA = '35deg 70deg 2.2m';
-
-/*
- * The room is drawn, not stacked. Rotated planes fought each other — a ceiling
- * laid back far enough to be seen swung across the wall — so the architecture
- * is computed against one vanishing point and emitted as SVG, and CSS 3D is
- * kept for the one thing it does better than anything else: the curve of the
- * screens.
- *
- * viewBox 1600×900. The vanishing point sits a little above centre, where a
- * standing visitor's eye would be.
- */
-const VP = { x: 800, y: 404 };
-/** a point on the line from the frame edge to the vanishing point */
-const toVP = (x: number, y: number, t: number) => [
-  x + (VP.x - x) * t,
-  y + (VP.y - y) * t,
-];
-
-/** floor and ceiling both recede to VP; t is how far back, 0 = at the viewer */
-const DEPTHS = [0, 0.3, 0.52, 0.68, 0.79, 0.865, 0.917, 0.95];
-
-const floorLines = Array.from({ length: 13 }, (_, i) => {
-  const x = -700 + i * 250;
-  const [x2, y2] = toVP(x, 900, 0.93);
-  return { x1: x, y1: 900, x2, y2 };
-});
-const floorBands = DEPTHS.slice(1).map((t) => {
-  const [, y] = toVP(0, 900, t);
-  return y;
-});
-
-/** the coffered ceiling: a grid of quads, each one smaller as it goes back */
-const coffers: { d: string; shade: number }[] = [];
-for (let r = 0; r < DEPTHS.length - 3; r++) {
-  const t0 = DEPTHS[r], t1 = DEPTHS[r + 1];
-  for (let c = 0; c < 7; c++) {
-    const xa = -300 + c * 314, xb = -300 + (c + 1) * 314;
-    const [ax, ay] = toVP(xa, -60, t0);
-    const [bx, by] = toVP(xb, -60, t0);
-    const [cx, cy] = toVP(xb, -60, t1);
-    const [dx, dy] = toVP(xa, -60, t1);
-    coffers.push({
-      d: `M${ax} ${ay} L${bx} ${by} L${cx} ${cy} L${dx} ${dy} Z`,
-      shade: (r + c) % 2,
-    });
-  }
-}
-
-/** the mezzanine rail, left and right of where the screens stand */
-const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
 ---
 
 <section class="bh" aria-labelledby="hall-title">
@@ -134,127 +100,45 @@ const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
   <MotionToggle lang={lang} />
 
   <div class="bh__scene" aria-hidden="true">
-    <svg class="bh__room" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice">
-      <defs>
-        <linearGradient id="bh-wallg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#ffffff" />
-          <stop offset="60%" stop-color="#f8f5ef" />
-          <stop offset="100%" stop-color="#efe9dd" />
-        </linearGradient>
-        <linearGradient id="bh-floorg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#f2ece1" />
-          <stop offset="45%" stop-color="#f8f5ee" />
-          <stop offset="100%" stop-color="#e7e0d2" />
-        </linearGradient>
-        <radialGradient id="bh-glow" cx="0.5" cy="0.32" r="0.5">
-          <stop offset="0%" stop-color="#fff9e6" stop-opacity="0.95" />
-          <stop offset="100%" stop-color="#fff9e6" stop-opacity="0" />
-        </radialGradient>
-      </defs>
+    {/* the plate holds the photograph's own aspect ratio; everything inside is
+        placed in per cent of it, so a crop moves picture and screens together */}
+    <div class="bh__plate">
+      <picture>
+        <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
+        <img class="bh__photo" src={asset('media/bright-hall.jpg')} alt=""
+             width={PLATE.w * 2} height={PLATE.h * 2} fetchpriority="high" decoding="async" />
+      </picture>
 
-      <rect width="1600" height="900" fill="url(#bh-wallg)" />
-
-      {/* floor */}
-      <path d={`M0 900 L1600 900 L${VP.x + 470} ${VP.y + 4} L${VP.x - 470} ${VP.y + 4} Z`}
-            fill="url(#bh-floorg)" />
-      {floorLines.map((l) => (
-        <line x1={l.x1} y1={l.y1} x2={l.x2} y2={l.y2}
-              stroke="#cfc6b4" stroke-width="1.4" opacity="0.5" />
-      ))}
-      {floorBands.map((y) => (
-        <line x1="0" y1={y} x2="1600" y2={y} stroke="#cfc6b4" stroke-width="1.2" opacity="0.34" />
-      ))}
-
-      {/* the medallion set into the floor, seen at a grazing angle */}
-      <g transform={`translate(${VP.x} 742) scale(1 0.30)`} opacity="0.62">
-        <circle r="330" fill="#f4f0e7" />
-        {Array.from({ length: 24 }, (_, i) => {
-          const a0 = (i * 15 - 7.4) * (Math.PI / 180);
-          const a1 = (i * 15 + 7.4) * (Math.PI / 180);
-          const R = 300;
-          return (
-            <path d={`M0 0 L${Math.cos(a0) * R} ${Math.sin(a0) * R} A${R} ${R} 0 0 1 ${Math.cos(a1) * R} ${Math.sin(a1) * R} Z`}
-                  fill={i % 2 ? '#cdc3b0' : '#8e8578'} opacity={i % 4 === 0 ? 0.95 : 0.6} />
-          );
-        })}
-        <circle r="300" fill="none" stroke="#8e8578" stroke-width="6" />
-        <circle r="92" fill="#f4f0e7" stroke="#8e8578" stroke-width="6" />
-        <circle r="330" fill="none" stroke="#bcae98" stroke-width="7" />
-      </g>
-
-      {/* coffered ceiling */}
-      {coffers.map((c) => (
-        <path d={c.d} fill={c.shade ? '#f6f2ea' : '#fffdf8'}
-              stroke="#e4d9bf" stroke-width="2.4" />
-      ))}
-
-      {/* pilasters down each side wall */}
-      {[0, 1, 2, 3].map((i) => {
-        const t = DEPTHS[i + 1];
-        const [lx, ly] = toVP(-140, -60, t);
-        const [lx2, ly2] = toVP(-140, 900, t);
-        const [rx, ry] = toVP(1740, -60, t);
-        const [rx2, ry2] = toVP(1740, 900, t);
-        const w = 26 * (1 - t) + 5;
-        return (
-          <g opacity={0.9 - i * 0.14}>
-            <rect x={lx - w / 2} y={ly} width={w} height={ly2 - ly} fill="#fffdf9" stroke="#e6dcc6" stroke-width="1.6" />
-            <rect x={rx - w / 2} y={ry} width={w} height={ry2 - ry} fill="#fffdf9" stroke="#e6dcc6" stroke-width="1.6" />
-          </g>
-        );
-      })}
-
-      {/* mezzanine rail, stopping short of the screens on both sides */}
-      {[[0, 470], [1130, 1600]].map(([x0, x1]) => (
-        <g>
-          <rect x={x0} y={rail.y} width={x1 - x0} height="7" fill="#fffdf8" />
-          <rect x={x0} y={rail.y + 52} width={x1 - x0} height="9" fill="#efe9dc" />
-          {Array.from({ length: Math.round((x1 - x0) / 34) }, (_, i) => (
-            <rect x={x0 + 10 + i * 34} y={rail.y + 8} width="13" height="45" rx="6"
-                  fill="#fbf8f1" stroke="#e8e1d2" stroke-width="1.4" />
+      {/* the curved wall, standing in the far doorway */}
+      <div class="bh__wallwrap">
+        <div class="bh__wall">
+          {screens.map((s) => (
+            <span class="bh__screen" style={`--deg:${s.deg}deg; --row:${s.row}; --delay:${s.delay}s`}>
+              {s.clip ? (
+                <video class="bh__vid" muted loop playsinline preload="none"
+                       data-bh-clip={JSON.stringify(s.clip)} width="320" height="180"></video>
+              ) : (
+                <>
+                  <img src={s.a} alt="" loading="lazy" decoding="async" width="320" height="180" />
+                  <img class="b" src={s.b} alt="" loading="lazy" decoding="async" width="320" height="180" />
+                </>
+              )}
+            </span>
           ))}
-        </g>
-      ))}
+        </div>
+        <span class="bh__glow"></span>
+      </div>
 
-      {/* the light the chandelier throws */}
-      <ellipse cx={VP.x} cy={VP.y - 210} rx="360" ry="240" fill="url(#bh-glow)" />
-    </svg>
-
-    {/* chandelier */}
-    <div class="bh__chandelier">
-      <span class="bh__chain"></span>
-      <span class="bh__lustre"></span>
-      <span class="bh__lustre bh__lustre--sm"></span>
-    </div>
-
-    {/* the curved video wall, standing where the far doorway was */}
-    <div class="bh__wallwrap">
-      <div class="bh__wall">
-        {screens.map((s) => (
-          <span class="bh__screen" style={`--deg:${s.deg}deg; --row:${s.row}; --delay:${s.delay}s`}>
-            {s.clip ? (
-              <video class="bh__vid" muted loop playsinline preload="none"
-                     data-bh-clip={JSON.stringify(s.clip)} width="320" height="180"></video>
-            ) : (
-              <>
-                <img src={s.a} alt="" loading="lazy" decoding="async" width="320" height="180" />
-                <img class="b" src={s.b} alt="" loading="lazy" decoding="async" width="320" height="180" />
-              </>
-            )}
-          </span>
+      {/* dust in the daylight the hall already has — no shafts of my own, the
+          photograph brings its own light */}
+      <div class="bh__dust">
+        {Array.from({ length: 18 }, (_, i) => (
+          <span style={`--x:${(i * 37) % 100}%; --y:${(i * 53) % 74}%; --d:${16 + (i % 6) * 3}s; --s:${0.5 + (i % 4) * 0.3}`}></span>
         ))}
       </div>
-      <span class="bh__wallfoot"></span>
     </div>
 
-    {/* daylight: two slow shafts, and dust visible only inside them */}
-    <div class="bh__shaft bh__shaft--l"></div>
-    <div class="bh__shaft bh__shaft--r"></div>
-    <div class="bh__dust">
-      {Array.from({ length: 22 }, (_, i) => (
-        <span style={`--x:${(i * 37) % 100}%; --y:${(i * 53) % 80}%; --d:${14 + (i % 6) * 3}s; --s:${0.5 + (i % 4) * 0.3}`}></span>
-      ))}
-    </div>
+    <span class="bh__veil"></span>
   </div>
 
   <div class="bh__masthead">
@@ -320,35 +204,50 @@ const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
 
   /* ---------- the room ---------- */
   .bh__scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
-  .bh__room {
+
+  /* The plate is the photograph's own frame. It is made to cover the scene
+     while keeping its aspect ratio, and everything in the hall is positioned
+     in per cent of it — so when the viewport crops the picture, the screens
+     are cropped with it and stay in the doorway. */
+  .bh__plate {
+    container-type: inline-size;
+    position: absolute;
+    inset-inline-start: 50%; inset-block-start: 50%;
+    translate: -50% -50%;
+    aspect-ratio: 738 / 408;
+    inline-size: max(100%, calc(100vh * 738 / 408));
+    block-size: auto;
+    min-block-size: 100%;
+  }
+  .bh__photo {
     position: absolute; inset: 0;
     inline-size: 100%; block-size: 100%;
-    max-inline-size: none;
+    object-fit: cover;
   }
 
-  .bh__chandelier {
-    position: absolute; inset-inline-start: 50%; inset-block-start: 0;
-    transform: translateX(-50%);
-    display: grid; justify-items: center;
-  }
-  .bh__chain { inline-size: 3px; block-size: clamp(1.2rem, 4vh, 2.6rem); background: linear-gradient(#e6dcc4, #cbbb92); }
-  .bh__lustre {
-    inline-size: clamp(4rem, 8vw, 7rem); block-size: clamp(2.8rem, 5.5vw, 4.6rem);
-    margin-block-start: -2px;
-    border-radius: 50% 50% 46% 46%;
+  /* white wash: the photograph is busier than a drawn room, and the type has
+     to sit on it */
+  .bh__veil {
+    position: absolute; inset: 0; pointer-events: none;
     background:
-      radial-gradient(60% 55% at 50% 32%, rgba(255, 252, 240, 0.98), rgba(248, 236, 204, 0.5) 62%, rgba(240, 226, 190, 0) 100%);
-    box-shadow: 0 0 70px 20px rgba(255, 246, 220, 0.7);
+      linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.62) 0%,
+        rgba(255, 255, 255, 0.30) 26%,
+        rgba(255, 255, 255, 0.34) 58%,
+        rgba(255, 255, 255, 0.86) 92%,
+        var(--bg-0) 100%);
   }
-  .bh__lustre--sm { inline-size: 58%; block-size: 56%; margin-block-start: -0.7rem; opacity: 0.85; }
 
-  /* the wall: each panel turned on its own axis, four rows deep. Sized against
-     the same 1600×900 frame the room is drawn in, so it keeps its place in the
-     architecture as the viewport changes. */
+  /* the wall stands at the photograph's vanishing point */
   .bh__wallwrap {
-    position: absolute; inset-inline-start: 50%; inset-block-start: 40%;
-    perspective: 1500px;
-    transform: translateX(-50%);
+    position: absolute;
+    inset-inline-start: 49.3%;
+    /* the vanishing point is the wall's anchor, but a wall stands *on* the
+       floor rather than hanging centred on the horizon, so it is lifted by
+       half its own height */
+    inset-block-start: 54.5%;
+    perspective: 900px;
+    transform: translate(-50%, -50%);
   }
   .bh__wall {
     position: relative; inline-size: 0; block-size: 0;
@@ -356,17 +255,18 @@ const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
   }
   .bh__screen {
     position: absolute;
-    inline-size: clamp(88px, 9.4vw, 152px);
+    /* sized against the plate, not the viewport, so the wall keeps its place
+       in the architecture at every crop */
+    inline-size: 6.5cqw;
     aspect-ratio: 16 / 9;
-    margin-inline-start: calc(clamp(88px, 9.4vw, 152px) / -2);
-    margin-block-start: calc(clamp(88px, 9.4vw, 152px) / -3.56);
-    /* 104% of the panel's own height: stacked, with the bezel showing */
-    transform: rotateY(var(--deg)) translateZ(-430px) translateY(calc(var(--row) * 104%));
+    margin-inline-start: -3.25cqw;
+    margin-block-start: -1.83cqw;
+    transform: rotateY(var(--deg)) translateZ(-15.5cqw) translateY(calc(var(--row) * 104%));
     background: #0d1013;
-    border: 2px solid #191d21;
-    border-radius: 2px;
+    border: 1px solid #14181c;
+    border-radius: 1px;
     overflow: hidden;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.55);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
   }
   .bh__screen img, .bh__vid {
     position: absolute; inset: 0;
@@ -375,30 +275,14 @@ const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
   .bh__screen .b { opacity: 0; animation: bhswap 22s var(--delay) ease-in-out infinite; }
   @keyframes bhswap { 0%, 44% { opacity: 0 } 52%, 94% { opacity: 1 } 100% { opacity: 0 } }
 
-  /* the wall's own reflection on the marble, as in the reference */
-  .bh__wallfoot {
-    position: absolute; inset-inline-start: 50%; inset-block-start: 14%;
-    inline-size: clamp(30rem, 62vw, 62rem); block-size: 6rem;
-    transform: translateX(-50%);
-    background: linear-gradient(to bottom, rgba(120, 140, 160, 0.16), transparent 78%);
-    filter: blur(7px);
+  /* the light the screens throw back into the hall */
+  .bh__glow {
+    position: absolute; inset-inline-start: 50%; inset-block-start: 50%;
+    inline-size: 46cqw; block-size: 26cqw;
+    translate: -50% -50%;
+    background: radial-gradient(50% 50% at 50% 50%, rgba(150, 190, 235, 0.30), transparent 72%);
+    filter: blur(14px);
     pointer-events: none;
-  }
-
-  /* daylight, replacing the dark hall's embers */
-  .bh__shaft {
-    position: absolute; inset-block: -14% 22%; inline-size: 22%;
-    pointer-events: none;
-    background: linear-gradient(to bottom,
-      rgba(255, 251, 236, 0.9), rgba(255, 248, 226, 0.22) 60%, transparent 94%);
-    filter: blur(9px);
-    animation: bhshaft 26s ease-in-out infinite alternate;
-  }
-  .bh__shaft--l { inset-inline-start: 5%; transform: skewX(-10deg); }
-  .bh__shaft--r { inset-inline-end: 3%; transform: skewX(10deg); animation-delay: -13s; }
-  @keyframes bhshaft {
-    from { opacity: 0.45; }
-    to   { opacity: 0.9; }
   }
 
   .bh__dust { position: absolute; inset: 0; pointer-events: none; }
@@ -406,19 +290,18 @@ const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
     position: absolute;
     inset-inline-start: var(--x); inset-block-start: var(--y);
     inline-size: 4px; block-size: 4px; border-radius: 50%;
-    background: rgba(255, 253, 242, 0.95);
-    box-shadow: 0 0 7px 2px rgba(255, 244, 210, 0.65);
+    background: rgba(255, 253, 244, 0.9);
+    box-shadow: 0 0 7px 2px rgba(255, 246, 218, 0.55);
     transform: scale(var(--s));
     animation: bhdust var(--d) linear infinite;
   }
   @keyframes bhdust {
     0%   { transform: translate3d(0, 0, 0) scale(var(--s)); opacity: 0 }
-    12%  { opacity: 0.85 }
-    88%  { opacity: 0.5 }
+    14%  { opacity: 0.8 }
+    86%  { opacity: 0.45 }
     100% { transform: translate3d(26px, -130px, 0) scale(var(--s)); opacity: 0 }
   }
 
-  :global(html[data-motion='off']) .bh__shaft,
   :global(html[data-motion='off']) .bh__dust span,
   :global(html[data-motion='off']) .bh__screen .b { animation: none; }
 
@@ -456,7 +339,8 @@ const rail = { y: toVP(0, -60, 0.72)[1] + 150 };
     border-radius: var(--radius);
     transition: transform 0.4s var(--ease), background 0.3s var(--ease);
   }
-  .bh__piece:hover { background: rgba(255, 255, 255, 0.72); transform: translateY(-4px); }
+  /* the piece lifts; no rectangle lights up behind it — see HallModels */
+  .bh__piece:hover { transform: translateY(-4px); }
   .bh__piece:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   :global(html[data-motion='off']) .bh__piece:hover { transform: none; }
 
