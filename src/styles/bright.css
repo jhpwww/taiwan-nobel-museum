@@ -88,11 +88,21 @@ html[data-theme='bright'] {
    * line. Cormorant is a display Garamond whose hairlines vanish on white at
    * text size; it stays in the dark museum, where it was backlit.
    */
-  --font-display: 'Source Serif 4', 'Noto Serif TC', 'Source Han Serif TC',
-                  'PingFang TC', 'Songti TC', serif;
   --font-body: 'Source Sans 3', 'Noto Sans TC', 'PingFang TC',
                'Microsoft JhengHei', system-ui, sans-serif;
-  --font-han-serif: 'Noto Serif TC', 'Source Han Serif TC', 'PingFang TC', 'Songti TC', serif;
+  /*
+   * The bright museum leads with its sans, as the reference site does, so the
+   * two heading tokens *are* the sans here. Done at the token rather than by
+   * out-specifying each component: Astro scopes every rule with a
+   * [data-astro-cid-…], and a theme that tries to win that fight loses it
+   * somewhere unnoticed.
+   */
+  --font-display: var(--font-body);
+  --font-han-serif: var(--font-body);
+  /* the pull-quote keeps the serif: the one place the museum speaks rather
+     than labels */
+  --font-hook: 'Source Serif 4', 'Noto Serif TC', 'Source Han Serif TC',
+               'PingFang TC', 'Songti TC', serif;
 
   --shadow-lift: 0 16px 40px -20px rgba(20, 18, 16, 0.45);
 }
@@ -288,4 +298,21 @@ html[data-theme='bright'] :is(.lec__hook, .feature__hook, .card__hook, .vc__hook
 /* small muted labels lose the most to a light ground */
 html[data-theme='bright'] :is(.card__meta, .vc__meta, .lec__meta dt, .cmp__when) {
   font-weight: 450;
+}
+
+/* ---------- titles ----------
+   Family comes from the tokens above. What is left here is weight: Source Sans
+   carries less colour than the serif did at the same number, and a title has
+   to hold the top of a page on its own. */
+/* Source Sans carries less weight than the serif did at the same number, and a
+   title has to hold the top of a page on its own. */
+html[data-theme='bright'] :is(
+  .bh__title, .mh__title, .hall__title, .gh__title, .section-h, .lec__h,
+  .bh__intro-title, .intro__title, .topbar__series,
+  .lec__who, .feature__who, .card__who, .vc__who, .marks__pct
+) {
+  font-weight: 600;
+}
+html[data-theme='bright'] :is(.bh__name, .case__name, .plinth__name, .tile__name, .lec__title) {
+  font-weight: 500;
 }

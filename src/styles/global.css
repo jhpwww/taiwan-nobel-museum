@@ -76,6 +76,10 @@ a, button, label, summary, input, select, textarea, [role='button'] {
   --font-body: 'Noto Sans TC', 'PingFang TC', 'Microsoft JhengHei',
                -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --font-han-serif: 'Noto Serif TC', 'Source Han Serif TC', 'PingFang TC', 'Songti TC', serif;
+  /* The one-line hook that carries a lecture's argument. It has its own token
+     because it is a pull-quote rather than a heading: a theme can set every
+     title in the sans without taking the editorial voice with it. */
+  --font-hook: var(--font-han-serif);
 
   --step--1: clamp(0.80rem, 0.77rem + 0.15vw, 0.88rem);
   --step-0:  clamp(0.95rem, 0.90rem + 0.24vw, 1.08rem);
@@ -157,6 +161,13 @@ a:hover { color: var(--gold-bright); text-decoration-color: currentColor; }
 /* the Chinese title under an English one, likewise */
 .lec__title-zh, .vc__sub { font-weight: 400; }
 :lang(zh) .eyebrow { letter-spacing: 0.16em; }
+
+/* The second language under a hall's category name. "Physiology or Medicine"
+   wraps to two lines where the others take one, which pushed that whole column
+   up; reserving two lines everywhere keeps the row level. */
+.bh__name-en, .case__name-en, .plinth__name-en, .tile__name-en {
+  min-block-size: 2lh;
+}
 
 /* a Chinese gloss set smaller under an English original */
 .gloss { font-size: 0.78em; color: var(--muted); font-family: var(--font-body); letter-spacing: 0.02em; line-height: 1.6; }

@@ -546,3 +546,24 @@ Three traps, all of which bit:
 against it when a label looks different between a parent and child page — the
 same text set in two faces is a defect, but a filter chip set in sans while the
 heading is serif is not: those are different roles.
+
+
+## The bright museum leads with its sans
+
+Every title, and every laureate's name where it heads a block, is set in
+Source Sans. Only the one-line hook keeps a serif — it is a pull-quote, the
+one place the museum speaks rather than labels, and it has its own token
+(`--font-hook`) so a theme can move every heading without dragging the
+editorial voice along.
+
+Do this **at the token**, never by out-specifying components. `--font-display`
+and `--font-han-serif` are both the sans in the bright theme. A per-selector
+list was tried first and lost quietly: Astro scopes every rule with a
+`[data-astro-cid-…]`, so `.study[cid] h2[cid]` beats any reasonable theme
+selector, and the failure shows up as one heading in the wrong face on one
+page.
+
+Re-run `scripts/subset-fonts.mjs --theme bright` after moving text between
+faces. Headings moving from the serif to the sans moves their glyphs too:
+Noto Serif TC dropped from 350 ideographs to 270 and Noto Sans TC gained them.
+Skip it and the headings lose coverage.
