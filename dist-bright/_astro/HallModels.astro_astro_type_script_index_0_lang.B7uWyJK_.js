@@ -1,1 +1,0 @@
-import{m as r}from"./motion.BTVRVjnQ.js";import"./model-viewer.min.BunisL4P.js";const n=[...document.querySelectorAll(".case__mv")];function o(){const e=r();for(const t of n)e?t.setAttribute("auto-rotate",""):t.removeAttribute("auto-rotate")}o();addEventListener("motionpref",o);

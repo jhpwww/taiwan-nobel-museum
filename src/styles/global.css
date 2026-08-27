@@ -148,8 +148,14 @@ a:hover { color: var(--gold-bright); text-decoration-color: currentColor; }
   font-size: var(--step--1);
   letter-spacing: 0.22em;
   text-transform: uppercase;
+  font-weight: 500;
   color: var(--muted);
 }
+/* the prize line and the source label are eyebrows wherever they appear, and
+   were drifting between 400 and 500 depending on which component drew them */
+.vc__prize, .vc__prize--src, .vf__label, .card__prize { font-weight: 500; }
+/* the Chinese title under an English one, likewise */
+.lec__title-zh, .vc__sub { font-weight: 400; }
 :lang(zh) .eyebrow { letter-spacing: 0.16em; }
 
 /* a Chinese gloss set smaller under an English original */

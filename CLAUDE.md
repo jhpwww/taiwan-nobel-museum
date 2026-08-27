@@ -513,3 +513,36 @@ holding together.
 All of it is scoped to `html[data-theme='bright']`; the dark museum's type is
 untouched, and the audit on the dark origin should still report `.lec__who` at
 500/0.03em and `.eyebrow` at 0.16em.
+
+## Two museums, two sets of faces
+
+`scripts/subset-fonts.mjs [--theme bright]` runs once per museum and nothing is
+shared: separate font list, separate output directory, separate stylesheet,
+separate manifest.
+
+- dark: Cormorant Garamond + Noto Sans/Serif TC → `public/assets/fonts/`
+- bright: Source Serif 4 + Source Sans 3 + Noto Sans/Serif TC →
+  `public/assets/fonts/bright/`
+
+Source Serif and Source Sans are chosen on purpose: Noto Serif TC **is** Source
+Han Serif TC and Noto Sans TC **is** Source Han Sans TC, so the Source Latin
+faces are their siblings by design and share their proportions and colour.
+Cormorant is a display Garamond whose hairlines vanish on white at text size.
+
+Three traps, all of which bit:
+
+- **Bucket by the font that will draw the character, not the head of the
+  stack.** The bright body stack names Source Sans 3 first, so reading only
+  `fontFamily.split(',')[0]` credited 964 ideographs to a face that has none and
+  left the CJK face with nothing at all.
+- **Link the stylesheet, do not bundle it.** Both museums name families like
+  `Noto Serif TC`. With both stylesheets in one build the browser matched the
+  other museum's `@font-face` and fetched a file that was not there. One
+  `<link>` per build makes the collision impossible.
+- **Derive the URL from the output path.** Hardcoding `assets/fonts/` produced
+  a preload pointing at nothing once the bright faces moved to a subdirectory.
+
+`scripts/audit-type.mjs` reports what each page renders. Run the conflict check
+against it when a label looks different between a parent and child page — the
+same text set in two faces is a defect, but a filter chip set in sans while the
+heading is serif is not: those are different roles.

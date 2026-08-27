@@ -1,11 +1,13 @@
 ---
-import '../styles/fonts.css';
 import '../styles/global.css';
 import '../styles/bright.css';
 import fonts from '../data/font-manifest.json';
+import fontsBright from '../data/font-manifest-bright.json';
 
 /** set at build time — see BRIGHT in astro.config.mjs */
 const bright = process.env.THEME === 'bright';
+/** this museum's faces: names, hashed URLs, and its own stylesheet */
+const face: Record<string, string> = bright ? fontsBright : fonts;
 import PageNav from '../components/PageNav.astro';
 import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
 import { home, browse, about, learn, asset, otherLang } from '../i18n/routing';
@@ -52,7 +54,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         chunks per page and put a third party in the request path of every
         visit, which the About page's privacy claim is better without.
         Body text is preloaded; the other two are wanted a moment later. */}
-    <link rel="preload" as="font" type="font/woff2" crossorigin href={fonts['noto-sans-tc']} />
+    {/* One museum, one set of faces. Both name families like 'Noto Serif TC',
+        so the stylesheets are linked rather than bundled — bundling both let
+        the browser match the other museum's declaration and fetch a file that
+        is not there. */}
+    <link rel="stylesheet" href={face._stylesheet} />
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href={bright ? face['source-sans-3'] : face['noto-sans-tc']} />
+    {bright && (
+      <link rel="preload" as="font" type="font/woff2" crossorigin href={face['noto-sans-tc']} />
+    )}
 
     <!-- decide motion before first paint, so nothing flashes on either setting -->
     <script is:inline>

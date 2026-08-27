@@ -81,6 +81,19 @@ html[data-theme='bright'] {
   --accent: var(--red-ink);
   --accent-block: var(--red);
 
+  /*
+   * The bright museum's own faces. Noto Serif TC is Source Han Serif TC and
+   * Noto Sans TC is Source Han Sans TC, so Source Serif 4 and Source Sans 3
+   * are their Latin siblings by design — same proportions, same colour on the
+   * line. Cormorant is a display Garamond whose hairlines vanish on white at
+   * text size; it stays in the dark museum, where it was backlit.
+   */
+  --font-display: 'Source Serif 4', 'Noto Serif TC', 'Source Han Serif TC',
+                  'PingFang TC', 'Songti TC', serif;
+  --font-body: 'Source Sans 3', 'Noto Sans TC', 'PingFang TC',
+               'Microsoft JhengHei', system-ui, sans-serif;
+  --font-han-serif: 'Noto Serif TC', 'Source Han Serif TC', 'PingFang TC', 'Songti TC', serif;
+
   --shadow-lift: 0 16px 40px -20px rgba(20, 18, 16, 0.45);
 }
 
@@ -216,14 +229,13 @@ html[data-theme='bright'] :lang(zh) :is(h1, h2, h3) {
 }
 
 /*
- * Cormorant Garamond is a display Garamond: very high stroke contrast and a
- * small x-height. Backlit on the dark ground its hairlines held; on white at
- * anything under about 40px they thin to nothing. Every place the Latin
- * display face is set gets the top of its weight axis.
+ * Source Serif is a text face and needs none of the rescue Cormorant did, but
+ * a display line still wants a little more presence on paper than on a dark
+ * ground, where it was carrying its own glow.
  */
 html[data-theme='bright'] :is(
   .lec__who, .feature__who, .card__who, .vc__who,
-  .cmp__when, .marks__pct, .gh__title, .bh__title, .topbar__series
+  .marks__pct, .gh__title, .bh__title, .topbar__series
 ) {
   font-weight: 600;
 }
@@ -274,6 +286,6 @@ html[data-theme='bright'] :is(.lec__hook, .feature__hook, .card__hook, .vc__hook
   font-weight: 500;
 }
 /* small muted labels lose the most to a light ground */
-html[data-theme='bright'] :is(.gloss, .card__meta, .vc__meta, .lec__meta dt) {
+html[data-theme='bright'] :is(.card__meta, .vc__meta, .lec__meta dt, .cmp__when) {
   font-weight: 450;
 }
