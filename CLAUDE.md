@@ -472,3 +472,17 @@ rather than subdividing them.
 
 Re-run `scripts/render-posters.mjs` after any geometry change, or the poster
 no longer matches the model it stands in for.
+
+
+## The bright palette's one known exception
+
+`--accent-block` is TED's #e62b1e because the owner asked for the brand red on
+filled blocks. White on it measures **4.44:1** against AA's 4.5 — a 1.3%
+shortfall, and unfixable while the fill stays that red, since white is already
+the lightest ink available. Two small labels are affected: the note panel's
+copy button and the browse page's filter chips.
+
+Text red is the darkened `--red-ink` (5.72:1) and passes everywhere. Do not
+"fix" the block red by darkening it — that was asked for and reverted once.
+If strict AA is wanted later, the lever is the label, not the colour: at
+18.66px bold the bar drops to 3:1.

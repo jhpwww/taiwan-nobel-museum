@@ -7,7 +7,7 @@ import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery } from '../i18n/routing';
-import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
+import { lectures, catName, catNameAlt, categoryList, introParts, INTRO } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -28,6 +28,7 @@ const [introA, introConj, introB] = introParts(lang);
 const cats = ORDER.map((key, i) => ({
   key,
   name: catName(key, lang),
+  nameAlt: catNameAlt(key, lang),
   n: counts[key] ?? 0,
   href: gallery(lang, key),
   depth: DEPTH[i],
@@ -92,6 +93,7 @@ const cats = ORDER.map((key, i) => ({
           </span>
         </span>
         <span class="plinth__name">{c.name}</span>
+          <span class="plinth__name-en">{c.nameAlt}</span>
         <span class="plinth__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
       </a>
     ))}
@@ -258,6 +260,23 @@ const cats = ORDER.map((key, i) => ({
     mask-image: linear-gradient(to top, transparent 8%, #000 78%);
     pointer-events: none;
   }
+
+  /* the other language, set under the first — the halls name a prize the
+
+     same way a lecture page names its laureate */
+
+  .plinth__name-en {
+
+    font-size: var(--step--2);
+
+    letter-spacing: 0.06em;
+
+    color: var(--muted);
+
+    margin-block-start: 0.1rem;
+
+  }
+
 
   .plinth__name {
     font-family: var(--font-han-serif);

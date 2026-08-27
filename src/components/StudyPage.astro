@@ -175,7 +175,7 @@ const index = lectures.map((l) => ({
   .spread { display: flex; flex-wrap: wrap; gap: .5rem; padding: 0; margin-block-start: 1rem; }
   .spread li {
     display: inline-flex; align-items: baseline; gap: .4rem;
-    border: 1px solid var(--line); border-radius: 999px;
+    border: 1px solid var(--line); border-radius: var(--radius-control);
     padding: .3rem .9rem; font-size: var(--step--1); color: var(--muted);
   }
   .spread li[data-has] { color: var(--cream); border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
@@ -277,14 +277,14 @@ const index = lectures.map((l) => ({
   .picks .tags { display: flex; gap: .35rem; margin-inline-start: auto; flex-wrap: wrap; }
   .picks .tag {
     font-size: .64rem; letter-spacing: .06em; padding: .12rem .5rem;
-    border-radius: 999px; border: 1px solid var(--line); color: var(--muted-dim);
+    border-radius: var(--radius-control); border: 1px solid var(--line); color: var(--muted-dim);
   }
   .picks .tag[data-on] { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
 
   .study__actions { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-block-start: 1rem; }
   .study button, .study__file span {
     font-size: var(--step--1); color: var(--on-accent); background: var(--gold);
-    border: 0; border-radius: 999px; padding: .42rem 1.05rem; cursor: pointer;
+    border: 0; border-radius: var(--radius-control); padding: .42rem 1.05rem; cursor: pointer;
     transition: filter .2s;
   }
   .study button:hover, .study__file span:hover { filter: brightness(1.1); }

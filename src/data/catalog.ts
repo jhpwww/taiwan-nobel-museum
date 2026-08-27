@@ -91,6 +91,13 @@ export const introParts = (lang: Lang): [string, string, string] =>
 /** Display name of a prize category in the given language. */
 export const catName = (key: GalleryKey, lang: Lang) =>
   key === INTRO ? intro[lang] : categories[key as CategoryKey][lang];
+/**
+ * The same category name in the other language, to sit under the first. The
+ * halls and the gallery headings carry both, the way the lecture titles do.
+ */
+export const catNameAlt = (key: GalleryKey, lang: Lang) =>
+  catName(key, lang === 'zh' ? 'en' : 'zh');
+
 /** Display name of a topic tag in the given language. */
 export const tagName = (key: string, lang: Lang) => tags[key]?.[lang] ?? key;
 

@@ -11,7 +11,7 @@ import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery } from '../i18n/routing';
-import { lectures, catName, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
+import { lectures, catName, catNameAlt, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -22,7 +22,8 @@ const counts = lectures.reduce<Record<string, number>>((a, l) => {
   a[l.prize.category] = (a[l.prize.category] ?? 0) + 1; return a;
 }, {});
 const cats = ORDER.map((key) => ({
-  key, name: catName(key, lang), n: counts[key] ?? 0, href: gallery(lang, key),
+  key, name: catName(key, lang), nameAlt: catNameAlt(key, lang),
+  n: counts[key] ?? 0, href: gallery(lang, key),
 }));
 const [introA, introConj, introB] = introParts(lang);
 
@@ -55,6 +56,7 @@ const stills = lectures
       <a class="tile" href={c.href} data-cat={c.key}>
         <span class="tile__art" aria-hidden="true"><Sculpture cat={c.key} size={72} plinth={false} /></span>
         <span class="tile__name">{c.name}</span>
+        <span class="tile__name-en">{c.nameAlt}</span>
         <span class="tile__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
       </a>
     ))}
@@ -149,6 +151,12 @@ const stills = lectures
   .tile__art { inline-size: clamp(28px, 3.2vw, 38px); opacity: .8; }
   .tile__art :global(svg) { inline-size: 100%; block-size: auto; }
   .tile__name { font-family: var(--font-han-serif); font-size: var(--step-0); color: var(--cream); margin-block-start: .3rem; text-align: center; }
+  /* the other language, set under the first */
+  .tile__name-en {
+    display: block; text-align: center;
+    font-size: var(--step--2); letter-spacing: .06em;
+    color: var(--muted); margin-block-start: .1rem;
+  }
   .tile:hover .tile__name { color: var(--accent); }
   .tile__n { font-size: var(--step--1); color: var(--muted-dim); }
 

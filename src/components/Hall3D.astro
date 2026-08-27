@@ -16,7 +16,7 @@ import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery } from '../i18n/routing';
-import { lectures, catName, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
+import { lectures, catName, catNameAlt, categoryList, introParts, INTRO, type CategoryKey } from '../data/catalog';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -29,7 +29,7 @@ const counts = lectures.reduce<Record<string, number>>((a, l) => {
 /** six plinths on an arc: the middle pair nearest the viewer */
 const ARC = [-38, -22, -7.5, 7.5, 22, 38];
 const cats = ORDER.map((key, i) => ({
-  key, name: catName(key, lang), n: counts[key] ?? 0,
+  key, name: catName(key, lang), nameAlt: catNameAlt(key, lang), n: counts[key] ?? 0,
   href: gallery(lang, key), deg: ARC[i],
 }));
 const [introA, introConj, introB] = introParts(lang);
@@ -113,6 +113,7 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
           </span>
         </span>
         <span class="plinth__name">{c.name}</span>
+          <span class="plinth__name-en">{c.nameAlt}</span>
         <span class="plinth__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
       </a>
     ))}
@@ -353,6 +354,15 @@ const panels = Array.from({ length: WALL }, (_, i) => ({
     .plinths:hover .plinth:not(:hover) { filter: brightness(.55) saturate(.6); }
   }
   .plinth__art { display: block; transform-style: preserve-3d; }
+  /* the other language, set under the first — the halls name a prize the
+     same way a lecture page names its laureate */
+  .plinth__name-en {
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-block-start: 0.1rem;
+  }
+
   .plinth__name {
     font-family: var(--font-han-serif); font-size: var(--step-0); color: var(--cream);
     letter-spacing: .06em; margin-block-start: .3rem; text-align: center;

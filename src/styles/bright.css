@@ -71,13 +71,15 @@ html[data-theme='bright'] {
   --c-peace: var(--red-ink);
   --c-economics: var(--red-ink);
   --c-nobel: var(--red-ink);
-  --c-chemistry-block: var(--red-deep);
-  --c-medicine-block: var(--red-deep);
+  --c-chemistry-block: var(--red);
+  --c-medicine-block: var(--red);
 
-  /* --accent paints text and strokes, --accent-block paints fills that carry
-     white type; they differ only where contrast demands it */
+  /* --accent paints text and strokes, --accent-block paints fills. Text takes
+     the darkened step, because red at brand strength is a hair under AA as
+     small type; a filled block takes TED's red itself, where the colour is the
+     point and the white on it is a label rather than a paragraph. */
   --accent: var(--red-ink);
-  --accent-block: var(--red-deep);
+  --accent-block: var(--red);
 
   --shadow-lift: 0 16px 40px -20px rgba(20, 18, 16, 0.45);
 }
@@ -117,7 +119,7 @@ html[data-theme='bright'] .mt {
 }
 html[data-theme='bright'] .sw__opt { color: var(--muted); }
 html[data-theme='bright'] .sw__opt:hover { color: var(--cream); background: var(--surface-hi); }
-html[data-theme='bright'] .sw__opt.is-on { background: var(--red-deep); color: #fff; }
+html[data-theme='bright'] .sw__opt.is-on { background: var(--red); color: #fff; }
 html[data-theme='bright'] .mt { color: var(--cream); }
 
 /* ---------- media ---------- */
@@ -149,8 +151,8 @@ html[data-theme='bright'] .pn__b {
 }
 html[data-theme='bright'] .pn__b:hover {
   color: #fff;
-  background: var(--red-deep);
-  border-color: var(--red-deep);
+  background: var(--red);
+  border-color: var(--red);
 }
 
 /* ---------- text on filled marks ----------
@@ -165,14 +167,14 @@ html[data-theme='bright'] {
   --kind-lecture: #8a5a10;
   --kind-record:  #7a4a2c;
 }
-html[data-theme='bright'] [data-cat] { --accent-block: var(--red-deep); }
+html[data-theme='bright'] [data-cat] { --accent-block: var(--red); }
 
 /* marks that keep a gold fill of their own in the dark theme */
 html[data-theme='bright'] .picks .tag[data-on],
 html[data-theme='bright'] .study button,
 html[data-theme='bright'] .study__file span {
-  background: var(--red-deep);
-  border-color: var(--red-deep);
+  background: var(--red);
+  border-color: var(--red);
 }
 
 /* a percentage is a figure, not a mark: it wants ink, not a fill */

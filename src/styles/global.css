@@ -86,6 +86,11 @@ a, button, label, summary, input, select, textarea, [role='button'] {
 
   --measure: 62ch;
   --radius: 3px;
+  /* Buttons, chips, tags and single-line inputs inside a page. A stadium end
+     reads as a floating affordance, which is right for the hall's switcher and
+     the standing controls but wrong for a form control sitting in a column of
+     text — those want a rectangle with its corners taken off. */
+  --radius-control: 5px;
   --shadow-lift: 0 18px 48px -18px rgba(0, 0, 0, 0.85);
   --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
 }

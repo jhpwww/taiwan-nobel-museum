@@ -30,7 +30,7 @@ import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
-import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
+import { lectures, catName, catNameAlt, categoryList, introParts, INTRO } from '../data/catalog';
 import credits from '../../data/model-credits.json';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
@@ -68,6 +68,7 @@ const cats = categoryList()
   .map((key) => ({
     key,
     name: catName(key, lang),
+    nameAlt: catNameAlt(key, lang),
     n: counts[key] ?? 0,
     href: gallery(lang, key),
     model: stamp(`assets/models/${key}.glb`),
@@ -140,6 +141,7 @@ const creditComment = (c: Credit) =>
           </span>
           <span class="case__plinth" aria-hidden="true"></span>
           <span class="case__name">{c.name}</span>
+          <span class="case__name-en">{c.nameAlt}</span>
           <span class="case__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
         </a>
       </Fragment>
@@ -285,6 +287,23 @@ const creditComment = (c: Credit) =>
       color-mix(in srgb, var(--accent) 26%, transparent), transparent);
     border-block-start: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
   }
+
+  /* the other language, set under the first — the halls name a prize the
+
+     same way a lecture page names its laureate */
+
+  .case__name-en {
+
+    font-size: var(--step--2);
+
+    letter-spacing: 0.06em;
+
+    color: var(--muted);
+
+    margin-block-start: 0.1rem;
+
+  }
+
 
   .case__name {
     font-family: var(--font-han-serif);

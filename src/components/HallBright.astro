@@ -21,7 +21,7 @@ import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
-import { lectures, catName, categoryList, introParts, INTRO } from '../data/catalog';
+import { lectures, catName, catNameAlt, categoryList, introParts, INTRO } from '../data/catalog';
 import credits from '../../data/model-credits.json';
 import clips from '../data/backdrop.json';
 
@@ -44,6 +44,7 @@ const cats = categoryList()
   .map((key) => ({
     key,
     name: catName(key, lang),
+    nameAlt: catNameAlt(key, lang),
     n: counts[key] ?? 0,
     href: gallery(lang, key),
     model: asset(`assets/models/gold/${key}.glb`),
@@ -175,6 +176,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
         </span>
         <span class="bh__plinth" aria-hidden="true"></span>
         <span class="bh__name">{c.name}</span>
+          <span class="bh__name-en">{c.nameAlt}</span>
         <span class="bh__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
       </a>
     ))}
@@ -367,6 +369,15 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     background: linear-gradient(to bottom, #ffffff, #e9e3d6 60%, #d8d0be);
     box-shadow: 0 6px 14px -6px rgba(60, 50, 34, 0.4);
   }
+  /* the other language, set under the first — the halls name a prize the
+     same way a lecture page names its laureate */
+  .bh__name-en {
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    margin-block-start: 0.1rem;
+  }
+
   .bh__name {
     font-family: var(--font-han-serif);
     font-size: var(--step-0); color: var(--cream);
