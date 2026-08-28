@@ -2,20 +2,34 @@
 /**
  * HallBright.astro — the bright museum's entrance.
  *
- * Two references, combined as asked: the neoclassical hall — white marble,
- * gold-edged coffers, a balustrade running round a mezzanine, a radial
- * medallion set into the floor — and the curved multi-row video wall, which
- * stands where that hall's far doorway was. Six gold pieces are set out in
- * front of it on plinths, in the row the objects hall already uses.
+ * A domed neoclassical rotunda — white marble, a glazed dome, a ring of arched
+ * windows, two red banners — with a curved video wall standing in the apse and
+ * six gold pieces set out on the floor in front of it.
  *
- * Built the way the room hall is built: real CSS 3D, one perspective, every
- * plane at a genuine Z. Nothing here is an image of a room; the coffers
- * recede because they are rotated, and the wall curves because each panel
- * is turned on its own axis.
+ * The hall is a photograph, so the wall's placement is measured, not guessed.
+ * It has to be: the wall is positioned in per cent of a plate that carries the
+ * picture's own aspect ratio, so picture and wall crop together and the wall
+ * never drifts off the architecture.
  *
- * No drifting embers. They belonged to a dark vault, and on marble they read
- * as dirt. What moves here is daylight: two slow shafts crossing the floor,
- * and dust visible only inside them.
+ * Finding the eye level took a second method. A Hough transform over every
+ * receding line — how the previous plate was measured — answers 43% here and
+ * is wrong: in a rotunda most of what it finds are dome ribs, and those
+ * converge on the dome's own axis rather than the room's horizon. But a
+ * rotunda gives up its horizon another way. Its 'horizontal' lines are
+ * circles, and a circle photographs as a straight line only when the camera's
+ * eye is at its height. Fit the rings — dome ring, entablature, step nosing,
+ * step foot — and read off where their curvature changes sign. The entablature
+ * dips in the middle (seen from below), the floor rises (seen from above), and
+ * between them the step nosing is dead flat. The eye is level with the top
+ * step, 68.6% down the plate. See scripts/crop-hall.py.
+ *
+ * So the wall stands on that top step, its base exactly on the horizon, rising
+ * to just under the doorway's arch — which is where a wall of screens would
+ * stand in this room, and leaves the colonnade and the dome above it intact.
+ *
+ * No drifting embers, and no dust either. Embers belonged to a dark vault and
+ * read as dirt on marble; motes are invisible against a hall this bright. The
+ * light in this room is the photograph's own.
  */
 import StyleSwitch from './StyleSwitch.astro';
 import MotionToggle from './MotionToggle.astro';
@@ -55,27 +69,57 @@ const cats = categoryList()
 const CAMERA = '35deg 70deg 2.2m';
 
 /*
- * The hall is the photograph, not a drawing of one. Its perspective was
- * measured rather than guessed: a Hough transform over the receding lines —
- * coffers, cornices, the floor medallion, the balustrades — and a
- * least-squares intersection of all 136 of them put the vanishing point at
- * 49.3% across and 58.6% down. That lands exactly on the far doorway, which
- * is where a wall of screens would stand.
- *
- * The wall is positioned in those same fractions, inside a plate that carries
- * the photograph's aspect ratio, so as the viewport crops the picture the two
- * crop together and the screens never drift off the doorway.
+ * The plate: the source render with the flat crown of the dome taken off the
+ * top and foreground marble off the bottom, both by scripts/crop-hall.py.
+ * Everything below is in per cent of it.
  */
-/* the picture with its ceiling cropped away — see scripts note in the commit;
-   the vanishing point moves with the crop, from 58.6% down to 48.2% */
-const PLATE = { w: 738, h: 326 };
-const VP = { x: 49.3, y: 48.2 };   // per cent of the plate
+const PLATE = { w: 836, h: 435 };
+const VP = { x: 50.1, y: 64.3 };   // the horizon, on the room's axis
 
-/* Nine columns at 13° wrap 104° — a good deal rounder than the 72° it had,
-   and matching how far the reference wall turns away at its ends. */
+/* The wall, built in container units of the plate rather than px — so it is
+   the same wall in the same place at every viewport, which a px perspective is
+   not. Nine columns 13° apart wrap 104°, matching how far the reference wall
+   turns away at its ends. */
 const COLS = 9;
 const ROWS = 4;
 const SPREAD = 13;
+const PERSP = 34;      // cqw. Short, because the photograph is a wide-angle shot
+const DEPTH = 35;      // cqw back from the eye
+/* the chord one 13° step subtends at that depth, less a bezel's worth, so the
+   panels meet edge to edge with daylight between them */
+const PANEL = 7.9;
+
+/* How far above the horizon the foot of the wall lands, in cqw.
+ *
+ * Nought would be the honest answer: the top step is at eye level, so a wall
+ * standing on it has its foot exactly on the horizon whatever its distance.
+ * But the statues and their labels are laid out by the page, not by the room,
+ * and they sit lower than the photograph's floor — a wall whose foot lands
+ * among them reads as a band ruled across the labels rather than as a wall
+ * behind objects. So it is raised, as a wall on a low stage would be, until it
+ * clears them; the perspective itself is untouched. */
+const RISE = 3.3;
+
+/* Scaling the panel, the depth and the perspective by one factor scales what
+   is drawn by exactly that factor and nothing else — same curve, same
+   foreshortening, same wall, smaller. Which is what a phone needs: the plate
+   has to be nearly three times the viewport's width to cover it, so a wall
+   that is a third of the plate runs off both edges of the screen. */
+function wall(k: number, rise: number) {
+  const panel = PANEL * k, depth = DEPTH * k, persp = PERSP * k;
+  const scale = persp / (persp + depth);        // how far off the eye shrinks it
+  const rowH = panel * (9 / 16) * 1.04;         // cqw between row centres
+  return {
+    panel: panel.toFixed(2),
+    z: (-depth).toFixed(2),
+    persp: persp.toFixed(2),
+    /* the rows are centred on the anchor; drop them by half the wall so its
+       foot lands on the horizon, then lift it by the rise */
+    lift: (-ROWS / 2 - rise / (rowH * scale)).toFixed(3),
+  };
+}
+const WIDE = wall(1, RISE);
+const NARROW = wall(0.62, 2.5);
 
 const stills = lectures
   .filter((l) => l.video.guide || l.video.lecture)
@@ -112,9 +156,15 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
              width={PLATE.w * 2} height={PLATE.h * 2} fetchpriority="high" decoding="async" />
       </picture>
 
-      {/* the curved wall, standing in the far doorway */}
-      <div class="bh__wallwrap">
-        <div class="bh__wall">
+      {/* the curved wall, standing on the top step */}
+      {/* both sets of numbers are handed to the stylesheet, which picks one by
+          width — an inline `--persp` could not be overridden by a media query */}
+      <div class="bh__wallwrap"
+           style={`--vp-x:${VP.x}%; --vp-y:${VP.y}%;
+                   --persp-w:${WIDE.persp}cqw; --persp-n:${NARROW.persp}cqw`}>
+        <div class="bh__wall"
+             style={`--panel-w:${WIDE.panel}cqw; --z-w:${WIDE.z}cqw; --lift-w:${WIDE.lift};
+                     --panel-n:${NARROW.panel}cqw; --z-n:${NARROW.z}cqw; --lift-n:${NARROW.lift}`}>
           {screens.map((s) => (
             <span class="bh__screen" style={`--deg:${s.deg}deg; --row:${s.row}; --delay:${s.delay}s`}>
               {s.clip ? (
@@ -132,13 +182,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
         <span class="bh__glow"></span>
       </div>
 
-      {/* dust in the daylight the hall already has — no shafts of my own, the
-          photograph brings its own light */}
-      <div class="bh__dust">
-        {Array.from({ length: 18 }, (_, i) => (
-          <span style={`--x:${(i * 37) % 100}%; --y:${(i * 53) % 74}%; --d:${16 + (i % 6) * 3}s; --s:${0.5 + (i % 4) * 0.3}`}></span>
-        ))}
-      </div>
     </div>
 
     <span class="bh__veil"></span>
@@ -218,8 +261,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     position: absolute;
     inset-inline-start: 50%; inset-block-start: 50%;
     translate: -50% -50%;
-    aspect-ratio: 738 / 326;
-    inline-size: max(100%, calc(100vh * 738 / 326));
+    aspect-ratio: 1672 / 871;
+    inline-size: max(100%, calc(100vh * 1672 / 871));
     block-size: auto;
     min-block-size: 100%;
   }
@@ -229,50 +272,60 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     object-fit: cover;
   }
 
-  /* white wash: the photograph is busier than a drawn room, and the type has
-     to sit on it */
+  /* A far lighter wash than the last plate wanted. That room needed knocking
+     back; this one is already close to white, and laying more white over the
+     dome only turns it to fog. What is left is the two places the page needs
+     help: the band of colonnade the statue labels sit against, and the foot,
+     where the picture has to become the page. */
   .bh__veil {
     position: absolute; inset: 0; pointer-events: none;
     background:
       linear-gradient(to bottom,
-        rgba(255, 255, 255, 0.62) 0%,
-        rgba(255, 255, 255, 0.30) 26%,
-        rgba(255, 255, 255, 0.34) 58%,
-        rgba(255, 255, 255, 0.86) 92%,
+        rgba(255, 255, 255, 0.16) 0%,
+        rgba(255, 255, 255, 0.08) 30%,
+        rgba(255, 255, 255, 0.40) 66%,
+        rgba(255, 255, 255, 0.88) 87%,
         var(--bg-0) 100%);
   }
 
-  /* the wall stands at the photograph's vanishing point */
+  /* The anchor is the measured horizon, and because the wrapper is a point
+     the perspective origin lands on it too — which is the whole trick. Every
+     panel is then drawn from the same eye the photograph was taken with. */
   .bh__wallwrap {
     position: absolute;
-    inset-inline-start: 49.3%;
-    /* The vanishing point is the wall's anchor, but a wall stands *on* the
-       floor rather than hanging centred on the horizon, so it is lifted by
-       half its own height — and further still, clear of the statues' heads.
-       Sitting level with them read as one flat band rather than as a wall
-       behind objects. */
-    inset-block-start: 40%;
-    perspective: 900px;
+    inset-inline-start: var(--vp-x);
+    inset-block-start: var(--vp-y);
+    perspective: var(--persp-w);
     transform: translate(-50%, -50%);
   }
   .bh__wall {
     position: relative; inline-size: 0; block-size: 0;
     transform-style: preserve-3d;
+    --panel: var(--panel-w);
+    --z: var(--z-w);
+    --lift: var(--lift-w);
   }
   .bh__screen {
     position: absolute;
     /* sized against the plate, not the viewport, so the wall keeps its place
        in the architecture at every crop */
-    inline-size: 6.5cqw;
+    inline-size: var(--panel);
     aspect-ratio: 16 / 9;
-    margin-inline-start: -3.25cqw;
-    margin-block-start: -1.83cqw;
-    transform: rotateY(var(--deg)) translateZ(-15.5cqw) translateY(calc(var(--row) * 104%));
+    margin-inline-start: calc(var(--panel) / -2);
+    margin-block-start: calc(var(--panel) * -9 / 32);
+    /* rotateY leaves the Y axis alone, so the lift is as true in the room as
+       the rows are — the wall drops, it does not tilt */
+    transform:
+      rotateY(var(--deg))
+      translateZ(var(--z))
+      translateY(calc((var(--row) + var(--lift)) * 104%));
     background: #0d1013;
     border: 1px solid #14181c;
     border-radius: 1px;
     overflow: hidden;
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+    /* white marble behind a black screen wants a hard edge, not a glow */
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.62),
+                0 1cqw 2cqw -0.6cqw rgba(52, 40, 24, 0.28);
   }
   .bh__screen img, .bh__vid {
     position: absolute; inset: 0;
@@ -281,34 +334,21 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   .bh__screen .b { opacity: 0; animation: bhswap 22s var(--delay) ease-in-out infinite; }
   @keyframes bhswap { 0%, 44% { opacity: 0 } 52%, 94% { opacity: 1 } 100% { opacity: 0 } }
 
-  /* the light the screens throw back into the hall */
+  /* The light the screens throw back. On a dark plate this could be strong and
+     blue; on white marble anything blue reads as a stain, so it is mostly the
+     shadow the wall casts down onto the top step, with only a trace of screen
+     light above it. Centred on the wall, which sits above the anchor. */
   .bh__glow {
-    position: absolute; inset-inline-start: 50%; inset-block-start: 50%;
-    inline-size: 46cqw; block-size: 26cqw;
+    position: absolute; inset-inline-start: 50%; inset-block-start: -6cqw;
+    inline-size: 62cqw; block-size: 30cqw;
     translate: -50% -50%;
-    background: radial-gradient(50% 50% at 50% 50%, rgba(150, 190, 235, 0.30), transparent 72%);
-    filter: blur(14px);
+    background:
+      radial-gradient(52% 56% at 50% 44%, rgba(126, 158, 196, 0.16), transparent 74%),
+      radial-gradient(46% 40% at 50% 96%, rgba(74, 58, 36, 0.20), transparent 76%);
+    filter: blur(10px);
     pointer-events: none;
   }
 
-  .bh__dust { position: absolute; inset: 0; pointer-events: none; }
-  .bh__dust span {
-    position: absolute;
-    inset-inline-start: var(--x); inset-block-start: var(--y);
-    inline-size: 4px; block-size: 4px; border-radius: 50%;
-    background: rgba(255, 253, 244, 0.9);
-    box-shadow: 0 0 7px 2px rgba(255, 246, 218, 0.55);
-    transform: scale(var(--s));
-    animation: bhdust var(--d) linear infinite;
-  }
-  @keyframes bhdust {
-    0%   { transform: translate3d(0, 0, 0) scale(var(--s)); opacity: 0 }
-    14%  { opacity: 0.8 }
-    86%  { opacity: 0.45 }
-    100% { transform: translate3d(26px, -130px, 0) scale(var(--s)); opacity: 0 }
-  }
-
-  :global(html[data-motion='off']) .bh__dust span,
   :global(html[data-motion='off']) .bh__screen .b { animation: none; }
 
   /* ---------- masthead ---------- */
@@ -359,6 +399,13 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     pointer-events: none;              /* the anchor owns every click */
     --poster-color: transparent;
     background: transparent;
+    /* model-viewer draws a loading bar across the top of its own box, and it
+       does not always clear itself once the model is in. Against a dark vault
+       that never showed; on white marble it is a grey rule ruled across all six
+       pieces. There is nothing for it to report anyway — the poster is already
+       on screen while the model loads. */
+    --progress-bar-height: 0px;
+    --progress-bar-color: transparent;
   }
   .bh__poster { inline-size: 100%; block-size: 100%; object-fit: contain; }
 
@@ -384,7 +431,14 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     margin-block-start: 0.55rem;
   }
   .bh__piece:hover .bh__name { color: var(--accent); }
-  .bh__n { font-size: var(--step--1); color: var(--muted); }
+  /* Two lines' worth whether it needs them or not. The pieces are bottom
+     aligned, so one column whose count wraps — 'No lectures in this category
+     yet' does, in English — lifts its whole column out of line with the other
+     five. Same reason .bh__name-en holds two lines. */
+  .bh__n {
+    font-size: var(--step--1); color: var(--muted);
+    min-block-size: 2lh;
+  }
 
   /* ---------- introduction ---------- */
   .bh__intro {
@@ -416,31 +470,21 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     /* On a phone the pieces stack three rows deep, so a room drawn over the
        whole column ends up with a video wall sitting across the labels. The
        architecture is held to the first screen and faded out below it. */
-    .bh__scene { block-size: 64svh; }
+    .bh__scene { block-size: 66svh; }
     .bh__scene::after {
       content: '';
       position: absolute; inset-inline: 0; inset-block-end: 0;
-      block-size: 38%;
+      block-size: 34%;
       background: linear-gradient(to bottom, transparent, var(--bg-0) 88%);
     }
-    /* two rows, not four: at this width a four-row wall reaches up into the
-       masthead and the title becomes unreadable over the screens */
-    .bh__screen:nth-child(-n + 9),
-    .bh__screen:nth-child(n + 28) { display: none; }
-    /* the panel clamp bottoms out at 88px, which is wider than this viewport
-       wants; below 48rem the wall is sized directly */
-    .bh__screen {
-      inline-size: 62px;
-      margin-inline-start: -31px;
-      margin-block-start: -17px;
-      transform: rotateY(var(--deg)) translateZ(-190px) translateY(calc(var(--row) * 104%));
-    }
-    /* set into the gap between the masthead and the first pieces, so it backs
-       the room without crossing the title */
-    .bh__wallwrap { inset-block-start: 50%; }
-    /* the wall is built for a wide room; on a phone only the middle is seen */
-    .bh__screen { inline-size: 116px; block-size: 65px; margin: -32px -58px; }
-    .bh__ceiling { grid-template-columns: repeat(4, 1fr); }
+    /* Size the plate to the scene, not to the viewport. 100vh on a tall phone
+       blows a 2.28:1 plate up to three times the width it needs and the crop
+       closes to a keyhole around the doorway. */
+    .bh__plate { inline-size: max(100%, calc(66svh * 1672 / 871)); }
+    /* The same wall at 0.62 — see the note by wall() for why the factor is
+       enough on its own. Nothing else about the wall changes. */
+    .bh__wallwrap { perspective: var(--persp-n); }
+    .bh__wall { --panel: var(--panel-n); --z: var(--z-n); --lift: var(--lift-n); }
     .bh__intro { flex-wrap: wrap; }
     .bh__cta { margin-inline-start: 0; }
   }
