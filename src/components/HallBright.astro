@@ -38,6 +38,8 @@ import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, catNameAlt, categoryList, introParts, INTRO } from '../data/catalog';
 import credits from '../../data/model-credits.json';
 import clips from '../data/backdrop.json';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -52,6 +54,20 @@ const [introA, introConj, introB] = introParts(lang);
 type Credit = { title: string; author: string; licence: string; page: string; source?: string };
 const credited = credits as Record<string, Credit>;
 
+/**
+ * Anything under public/ keeps its URL forever, so a redeployed model sits
+ * behind whatever the visitor already cached — GitHub Pages serves these with
+ * max-age=600, and a swapped piece simply does not appear. Astro fingerprints
+ * what it bundles; these it does not, so they are fingerprinted here, the same
+ * way the objects hall does it.
+ */
+const stamp = (rel: string) => {
+  const hash = createHash('sha256')
+    .update(readFileSync(new URL(`../../public/${rel}`, import.meta.url)))
+    .digest('hex').slice(0, 8);
+  return `${asset(rel)}?v=${hash}`;
+};
+
 const cats = categoryList()
   .map((c) => c.key)
   .filter((k) => k in credited)
@@ -61,8 +77,11 @@ const cats = categoryList()
     nameAlt: catNameAlt(key, lang),
     n: counts[key] ?? 0,
     href: gallery(lang, key),
-    model: asset(`assets/models/gold/${key}.glb`),
-    poster: asset(`assets/models/${key}.webp`),
+    model: stamp(`assets/models/gold/${key}.glb`),
+    /* the gold poster, not the other museum's. This hall showed the dark
+       museum's palette until its GLB decoded, and showed it for good to anyone
+       without WebGL. */
+    poster: stamp(`assets/models/gold/${key}.webp`),
     credit: credited[key],
   }));
 

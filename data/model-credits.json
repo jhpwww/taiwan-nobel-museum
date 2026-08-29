@@ -1,6 +1,6 @@
 {
   "physics": {
-    "id": "built:physics",
+    "id": "supplied:physics",
     "title": "Atom",
     "author": "Nobel Lecture Museum",
     "licence": "CC0",

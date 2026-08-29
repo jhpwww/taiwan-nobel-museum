@@ -53,7 +53,14 @@ const linear = (hex) =>
   });
 
 const ORIENT = {
-  physics: [0, 0, 0],
+  /* The supplied atom is modelled Z-up, standing on its base disc at z = 0,
+     and glTF is Y-up: a quarter turn back about X carries +Z onto +Y and the
+     base onto the floor. The 75° after it turns the piece to face the hall.
+     Its three shells are nearly coplanar, so at the hall's own camera the
+     unturned model presents them edge-on and reads as a bent wire; three
+     quarters of a turn opens them without flattening them into concentric
+     circles, which is what the last 30° would do. */
+  physics: [-Math.PI / 2, (75 * Math.PI) / 180, 0],
   chemistry: [0, 0, 0],
   medicine: [0, 0, 0],
   peace: [0, 0, 0],
@@ -280,8 +287,9 @@ function subdivide(doc) {
  * into visible cracks — the wing detaches from the body. Smooth normals alone
  * carry it well enough, which is what it gets.
  *
- * The atom and the balance are absent for the opposite reason: they are
- * generated, so they are simply built at a resolution that needs no help.
+ * The balance is absent for the opposite reason: it is generated, so it is
+ * simply built at a resolution that needs no help. The atom was supplied
+ * already smooth and already dense.
  */
 const SUBDIVIDE = new Set(['chemistry', 'medicine', 'literature']);
 

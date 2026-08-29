@@ -1,17 +1,17 @@
 /**
- * build-models.mjs — the two pieces this museum makes itself.
+ * build-models.mjs — the balance, which this museum makes itself.
  *
- * Poly Pizza has no balance scale worth using and nothing that reads as an
- * atom, and those are the two symbols these halls actually want: the site's
- * own economics sculpture has always been a balance, and a telescope narrows
- * physics to astronomy when this collection's physics is also graphene,
- * neutrinos and lasers.
+ * Poly Pizza has no balance scale worth using, and the site's flat and room
+ * halls have shown a balance for economics since the first version. So it is
+ * built here rather than borrowed. Flat-shaded low-poly, to sit beside the
+ * Poly models without looking like a different set — the facets are the point,
+ * not a shortcut. Output goes to assets-src/models/ and is then treated
+ * exactly like a downloaded one: normalise-models.mjs centres, scales and
+ * re-casts it in the hall's colour.
  *
- * So both are built here rather than borrowed. Flat-shaded low-poly, to sit
- * beside the four Poly models without looking like a different set — the
- * facets are the point, not a shortcut. Output goes to assets-src/models/ and
- * is then treated exactly like a downloaded one: normalise-models.mjs centres,
- * scales and re-casts it in the hall's colour.
+ * It built the atom too, until the project owner supplied a better one. That
+ * model now IS the source — assets-src/models/physics.glb — so nothing here
+ * may write to that name.
  *
  *   node scripts/build-models.mjs
  */
@@ -135,31 +135,6 @@ function balance() {
   }
 }
 
-/**
- * An atom: a nucleus of four nucleons and three electron shells crossing at
- * the centre. The classic Rutherford badge, which is what physics wants when
- * the hall holds graphene and neutrinos as well as exoplanets.
- */
-function atom() {
-  const NUC = 0.150;
-  const t = 0.093;
-  for (const c of [[t, t, t], [-t, -t, t], [-t, t, -t], [t, -t, -t]]) {
-    place(translate(c), () => sphere(NUC, 24, 18));
-  }
-
-  const R = 0.86;
-  const shells = [0, 1, 2].map((i) =>
-    chain(rotY((i * 2 * Math.PI) / 3), rotX(1.19)));  // ~68°, off vertical
-  shells.forEach((m, i) => {
-    place(m, () => torus(R, 0.030, 64, 16));
-    // the ring is built in the XZ plane, so an electron on it starts there too
-    // and is then carried by the shell's own transform
-    const a = (i / 3) * Math.PI * 2 + 0.5;
-    place(chain(m, translate([Math.cos(a) * R, 0, Math.sin(a) * R])),
-      () => sphere(0.075, 22, 16));
-  });
-}
-
 /* ── write ─────────────────────────────────────────────────────────────── */
 
 async function write(name, build) {
@@ -197,15 +172,14 @@ async function write(name, build) {
 
 fs.mkdirSync('assets-src/models', { recursive: true });
 await write('economics', balance);
-await write('physics', atom);
 
-/* These two are ours, so they carry their own credit line rather than a
-   borrowed one. Merged into the same file fetch-models.py writes, and neither
-   script may clobber the other's entries — running either alone must leave a
-   complete set of six. */
+/* This one is ours, so it carries its own credit line rather than a borrowed
+   one. Merged into the same file fetch-models.py writes, and neither script may
+   clobber the other's entries — running either alone must leave a complete set
+   of six. Physics is not listed: its credit is now hand-kept, because its model
+   is supplied rather than generated. */
 const CREDITS = {
   economics: { title: 'Balance scale', author: 'Nobel Lecture Museum' },
-  physics: { title: 'Atom', author: 'Nobel Lecture Museum' },
 };
 
 const file = 'data/model-credits.json';
