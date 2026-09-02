@@ -30,7 +30,7 @@ const SETS = [
   { dir: 'public/assets/models/gold', src: '/assets/models/gold' },
 ];
 /** must stay in step with the camera in HallModels.astro and HallBright.astro */
-const CAMERA = '35deg 88deg 1.55m';
+const CAMERA = '35deg 98deg 1.55m';
 const CAMERA_TARGET = '0m 0m 0m';
 const CAMERA_LIMIT = 'auto auto 1.55m';
 
