@@ -16,13 +16,49 @@
  * rendered result, not guessed.
  */
 import { NodeIO, getBounds } from '@gltf-transform/core';
-import { prune, dedup, weld, quantize } from '@gltf-transform/functions';
-import { KHRMeshQuantization } from '@gltf-transform/extensions';
+import { prune, dedup, weld, quantize, textureCompress, mergeDocuments } from '@gltf-transform/functions';
+import { KHRMeshQuantization, EXTTextureWebP } from '@gltf-transform/extensions';
+import sharp from 'sharp';
 import fs from 'node:fs';
 import path from 'node:path';
 
 const SRC = 'assets-src/models';
 const OUT = 'public/assets/models';
+
+/**
+ * Every piece stands on the same base.
+ *
+ * A white marble drum with a gold inlay ring round its top, from the project
+ * owner, and the thing that turns six borrowed objects into one set of awards.
+ * It is merged into each model rather than drawn as a second <model-viewer>:
+ * one element, one draw, and the piece's own shadow falls on its own plinth.
+ *
+ * Its gold ring is exempt from the recolouring below and stays gold in both
+ * museums, which is what makes the gold of the piece read as gold. The marble
+ * is re-cast the way everything else here is, because a drum this white is the
+ * brightest thing on the page in a dark vault and pulls the eye off the piece
+ * it is holding up: white in the daylit museum as authored, dark stone in the
+ * other. Its veining survives either way — the texture is untouched and only
+ * the factor it multiplies changes. The base's materials are renamed on the
+ * way in so the pass can tell them from the piece's own.
+ */
+const BASE = `${SRC}/_base.glb`;
+const BASE_PREFIX = 'base__';
+const BASE_TOP = 0.178;      // where the drum's top face sits, in its own units
+const BASE_MARBLE = `${BASE_PREFIX}white_marble`;
+const BASE_STONE_DARK = '#4a4137';   // the drum, for the dark vault
+
+/**
+ * The owner is modelling the six award sculptures one at a time, each drawn to
+ * stand on that drum. Those go on unchanged. The rest are the borrowed and
+ * built pieces still standing in for them, and they have to be sat on it:
+ * scaled to the height the first award came in at, and no wider than half
+ * again the drum, so a wide piece overhangs the way the reference sheet's
+ * quill and chart do without looking like it is sliding off.
+ */
+const ON_BASE = new Set(['physics']);
+const PERCH_H = 0.525;
+const PERCH_W = 0.302 * 1.25;
 
 /** radians about X, Y, Z, applied before centring */
 /**
@@ -53,14 +89,10 @@ const linear = (hex) =>
   });
 
 const ORIENT = {
-  /* The supplied atom is modelled Z-up, standing on its base disc at z = 0,
-     and glTF is Y-up: a quarter turn back about X carries +Z onto +Y and the
-     base onto the floor. The 75° after it turns the piece to face the hall.
-     Its three shells are nearly coplanar, so at the hall's own camera the
-     unturned model presents them edge-on and reads as a bent wire; three
-     quarters of a turn opens them without flattening them into concentric
-     circles, which is what the last 30° would do. */
-  physics: [-Math.PI / 2, (75 * Math.PI) / 180, 0],
+  /* The award sculptures arrive upright, in the drum's own units and already
+     facing forward; the earlier atom needed a quarter turn about X and 75°
+     about Y to get there. */
+  physics: [0, 0, 0],
   chemistry: [0, 0, 0],
   medicine: [0, 0, 0],
   peace: [0, 0, 0],
@@ -293,13 +325,37 @@ function subdivide(doc) {
  */
 const SUBDIVIDE = new Set(['chemistry', 'medicine', 'literature']);
 
+/** merge the drum into `doc` at its origin, its materials marked as the base's */
+async function addBase(doc, io) {
+  const base = await io.read(BASE);
+  for (const mat of base.getRoot().listMaterials()) {
+    mat.setName(BASE_PREFIX + (mat.getName() || 'material'));
+  }
+  mergeDocuments(doc, base);
+  const scene = doc.getRoot().getDefaultScene() ?? doc.getRoot().listScenes()[0];
+  // merge() brings the base's scenes in alongside ours; move their contents
+  // into the piece's scene and drop the empty shells
+  for (const s of doc.getRoot().listScenes()) {
+    if (s === scene) continue;
+    for (const child of s.listChildren()) { s.removeChild(child); scene.addChild(child); }
+    s.dispose();
+  }
+  // the base brought its own buffer, and a GLB may only carry one
+  const [keep, ...rest] = doc.getRoot().listBuffers();
+  for (const acc of doc.getRoot().listAccessors()) acc.setBuffer(keep);
+  for (const b of rest) b.dispose();
+}
+
 fs.mkdirSync(OUT, { recursive: true });
 fs.mkdirSync(OUT_GOLD, { recursive: true });
-// quantised accessors are only legal glTF if the extension is declared, and
-// gltf-transform will silently drop an unregistered extension on write
-const io = new NodeIO().registerExtensions([KHRMeshQuantization]);
+// Quantised accessors and a WebP texture are only legal glTF if their
+// extensions are declared, and gltf-transform drops an unregistered extension
+// on write with nothing but a line on stderr to say so — leaving a file that
+// still loads, wrongly.
+const io = new NodeIO().registerExtensions([KHRMeshQuantization, EXTTextureWebP]);
 
 for (const file of fs.readdirSync(SRC).sort()) {
+  if (file.startsWith('_')) continue;          // the base is merged, not published
   const cat = path.basename(file, '.glb');
   const doc = await io.read(path.join(SRC, file));
   await doc.transform(dedup(), prune());
@@ -327,23 +383,55 @@ for (const file of fs.readdirSync(SRC).sort()) {
   // measure only after the rotation, or the box describes the wrong pose
   const b = getBounds(scene);
   const size = b.max.map((v, i) => v - b.min[i]);
-  const longest = Math.max(...size) || 1;
-  const s = 1 / longest;
-  const centre = b.max.map((v, i) => (v + b.min[i]) / 2);
+
+  if (!ON_BASE.has(cat)) {
+    // sit the piece on the drum: centred on its axis, standing on its top face
+    const norm = 1 / (Math.max(...size) || 1);
+    const p = Math.min(PERCH_H / (size[1] * norm),
+                       PERCH_W / (Math.max(size[0], size[2]) * norm));
+    const s = norm * p;
+    const perch = doc.createNode(`${cat}__perch`)
+      .setScale([s, s, s])
+      .setTranslation([
+        -((b.max[0] + b.min[0]) / 2) * s,
+        BASE_TOP - b.min[1] * s,
+        -((b.max[2] + b.min[2]) / 2) * s,
+      ]);
+    scene.removeChild(spin);
+    perch.addChild(spin);
+    scene.addChild(perch);
+  }
+
+  await addBase(doc, io);
+
+  // and now frame the whole assembly the way every icon is framed: longest
+  // axis exactly one unit, centred on its own box
+  const w = getBounds(scene);
+  const wsize = w.max.map((v, i) => v - w.min[i]);
+  const s = 1 / (Math.max(...wsize) || 1);
+  const centre = w.max.map((v, i) => (v + w.min[i]) / 2);
 
   // glTF applies T · R · S, so the offset must already be in scaled units
   const fit = doc.createNode(`${cat}__fit`)
     .setScale([s, s, s])
     .setTranslation(centre.map((c) => -c * s));
-  scene.removeChild(spin);
-  fit.addChild(spin);
+  for (const child of [...scene.listChildren()]) { scene.removeChild(child); fit.addChild(child); }
   scene.addChild(fit);
 
   // one hall, one colour. Textures go with it — they only carried the old
   // palette, and the coin's dollar sign with it, which had no business on a
   // Swedish prize.
   const [r, g, bl] = linear(TINT[cat]);
+  const [dr, dg, db] = linear(BASE_STONE_DARK);
+  /* The gold cast is written from the same materials, after the dark one has
+     already been through them — so the marble's authored white has to be kept
+     here or the daylit museum inherits the dark vault's stone. */
+  const marble = root.listMaterials().find((m) => m.getName() === BASE_MARBLE);
+  const marbleWhite = marble ? [...marble.getBaseColorFactor()] : null;
   for (const mat of root.listMaterials()) {
+    const name = mat.getName() || '';
+    if (name === BASE_MARBLE) { mat.setBaseColorFactor([dr, dg, db, 1]); continue; }
+    if (name.startsWith(BASE_PREFIX)) continue;                    // the gold ring
     mat.setBaseColorFactor([r, g, bl, 1])
       .setBaseColorTexture(null)
       .setMetallicFactor(0.25)
@@ -357,13 +445,23 @@ for (const file of fs.readdirSync(SRC).sort()) {
      fewer bits gives most of it back — a 14-bit position is finer than
      anything visible on a piece an inch across — at the cost of requiring
      KHR_mesh_quantization, which model-viewer has supported for years. */
-  await doc.transform(quantize({ quantizePosition: 14, quantizeNormal: 10 }));
+  /* The drum's marble arrives as a 768x144 PNG, 170KB, and it is now carried
+     by all six models in both casts. At the size these render — a drum perhaps
+     fifty pixels tall — a quarter of that resolution in WebP is indistinguishable
+     and a twentieth of the weight. */
+  await doc.transform(
+    textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [384, 384], quality: 82 }),
+    quantize({ quantizePosition: 14, quantizeNormal: 10 }),
+  );
 
   await io.write(path.join(OUT, `${cat}.glb`), doc);
 
   // the same geometry again, cast in gold, for the bright museum
   const [gr, gg, gb] = linear(GOLD.hex);
   for (const mat of root.listMaterials()) {
+    const name = mat.getName() || '';
+    if (name === BASE_MARBLE) { if (marbleWhite) mat.setBaseColorFactor(marbleWhite); continue; }
+    if (name.startsWith(BASE_PREFIX)) continue;                    // the gold ring
     mat.setBaseColorFactor([gr, gg, gb, 1])
       .setMetallicFactor(GOLD.metallic)
       .setRoughnessFactor(GOLD.roughness);

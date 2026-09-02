@@ -77,7 +77,9 @@ const cats = categoryList()
   }));
 
 /** kept in step with scripts/render-posters.mjs, or the poster would jump */
-const CAMERA = '35deg 70deg 2.2m';
+/* 2.55m, not the 2.2m a bare piece took: standing on the drum, the assembly is
+   half again as tall as it was and the old distance cut its top off. */
+const CAMERA = '35deg 70deg 2.55m';
 
 /**
  * A real HTML comment, not a JSX one — `{/* … *\/}` is stripped at build and
@@ -139,7 +141,6 @@ const creditComment = (c: Credit) =>
               <img class="case__poster" slot="poster" src={c.poster} alt="" width="512" height="512" />
             </model-viewer>
           </span>
-          <span class="case__plinth" aria-hidden="true"></span>
           <span class="case__name">{c.name}</span>
           <span class="case__name-en">{c.nameAlt}</span>
           <span class="case__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
@@ -279,14 +280,7 @@ const creditComment = (c: Credit) =>
   }
   .case__poster { inline-size: 100%; block-size: 100%; object-fit: contain; }
 
-  .case__plinth {
-    inline-size: min(78%, 8.5rem);
-    block-size: 0.55rem;
-    border-radius: 2px 2px 0 0;
-    background: linear-gradient(to bottom,
-      color-mix(in srgb, var(--accent) 26%, transparent), transparent);
-    border-block-start: 1px solid color-mix(in srgb, var(--accent) 42%, transparent);
-  }
+  /* No CSS shelf any more: the piece brings its own plinth in the model. */
 
   /* the other language, set under the first — the halls name a prize the
 

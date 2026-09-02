@@ -30,7 +30,7 @@ const SETS = [
   { dir: 'public/assets/models/gold', src: '/assets/models/gold' },
 ];
 /** must stay in step with the camera-orbit in HallModels.astro */
-const CAMERA = '35deg 70deg 2.2m';
+const CAMERA = '35deg 70deg 2.55m';
 
 const TYPES = { '.js': 'text/javascript', '.glb': 'model/gltf-binary', '.html': 'text/html' };
 

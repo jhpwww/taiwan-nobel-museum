@@ -84,7 +84,9 @@ const cats = categoryList()
     credit: credited[key],
   }));
 
-const CAMERA = '35deg 70deg 2.2m';
+/* 2.55m, not the 2.2m a bare piece took: standing on the drum, the assembly is
+   half again as tall as it was and the old distance cut its top off. */
+const CAMERA = '35deg 70deg 2.55m';
 
 /*
  * The plate: the source render with the flat crown of the dome taken off the
@@ -234,7 +236,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
             <img class="bh__poster" slot="poster" src={c.poster} alt="" width="512" height="512" />
           </model-viewer>
         </span>
-        <span class="bh__plinth" aria-hidden="true"></span>
         <span class="bh__name">{c.name}</span>
           <span class="bh__name-en">{c.nameAlt}</span>
         <span class="bh__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
@@ -427,13 +428,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
   .bh__poster { inline-size: 100%; block-size: 100%; object-fit: contain; }
 
-  /* a marble pedestal, lit from the front */
-  .bh__plinth {
-    inline-size: min(72%, 8rem); block-size: 0.85rem;
-    border-radius: 3px 3px 1px 1px;
-    background: linear-gradient(to bottom, #ffffff, #e9e3d6 60%, #d8d0be);
-    box-shadow: 0 6px 14px -6px rgba(60, 50, 34, 0.4);
-  }
+  /* No CSS pedestal any more: every piece now carries its own, a marble drum
+     merged into the model itself. Drawing a second one under it made two. */
   /* the other language, set under the first — the halls name a prize the
      same way a lecture page names its laureate */
   .bh__name-en {
