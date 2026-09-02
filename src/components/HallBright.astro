@@ -251,9 +251,13 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
           >
             <img class="bh__poster" slot="poster" src={c.poster} alt="" width="640" height="1280" />
           </model-viewer>
+          {/* cut into the drum, where a museum puts the label — the plinth is
+              part of the model, so the type is laid over its face */}
+          <span class="bh__face">
+            <span class="bh__name">{c.name}</span>
+            <span class="bh__name-en">{c.nameAlt}</span>
+          </span>
         </span>
-        <span class="bh__name">{c.name}</span>
-          <span class="bh__name-en">{c.nameAlt}</span>
         <span class="bh__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
       </a>
     ))}
@@ -435,6 +439,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
        the piece, at the same column width. */
     inline-size: 100%; aspect-ratio: 1 / 2; max-inline-size: 15rem;
     display: grid; place-items: center; position: relative;
+    container-type: inline-size;      /* the label is sized against the drum */
   }
   .bh__mv {
     inline-size: 100%; block-size: 100%;
@@ -455,17 +460,44 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      merged into the model itself. Drawing a second one under it made two. */
   /* the other language, set under the first — the halls name a prize the
      same way a lecture page names its laureate */
-  .bh__name-en {
-    font-size: var(--step--2);
-    letter-spacing: 0.06em;
-    color: var(--muted);
-    margin-block-start: 0.1rem;
+  /* The label on the drum's face.
+   *
+   * Its box is measured off the model rather than guessed: at the hall's own
+   * camera the marble runs from 72% to 96% of the frame's height and from 16%
+   * to 84% of its width, and the middle of that is the part flat enough to
+   * carry type. So the block sits on the face's centre and keeps to the
+   * straight-on third; the rest is the cylinder turning away.
+   *
+   * It stays real text rather than being painted into the drum's texture.
+   * Baked lettering would need a model per language as well as per category —
+   * and it could not be selected, read aloud, or translated. */
+  .bh__face {
+    position: absolute;
+    inset-inline: 21%;
+    inset-block-start: 86.5%;
+    translate: 0 -50%;
+    display: grid;
+    justify-items: center;
+    gap: 0.06em;
+    text-align: center;
+    text-wrap: balance;
+    pointer-events: none;      /* the anchor owns every click */
   }
-
   .bh__name {
-    font-family: var(--font-han-serif);
-    font-size: var(--step-0); color: var(--cream);
-    margin-block-start: 0.55rem;
+    font-family: var(--font-display);
+    font-size: clamp(0.68rem, 6.6cqw, 1.05rem);
+    line-height: 1.25;
+    letter-spacing: 0.04em;
+    color: var(--cream);
+  }
+  .bh__name-en {
+    font-size: clamp(0.54rem, 4.7cqw, 0.82rem);
+    line-height: 1.2;
+    letter-spacing: 0.03em;
+    color: var(--muted);
+    /* one line or two, as the name needs — the two-line floor the halls use
+       elsewhere would push the type off the drum's face */
+    min-block-size: 0;
   }
   .bh__piece:hover .bh__name { color: var(--accent); }
   /* Two lines' worth whether it needs them or not. The pieces are bottom

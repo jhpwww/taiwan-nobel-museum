@@ -87,6 +87,24 @@ const LIGHT_LIFT = 1.06;       // brightest side
 const LIGHT_DROP = 0.62;       // and the shaded one
 
 /**
+ * A hair of daylight, so nothing fights for the same pixel.
+ *
+ * The award sculptures are drawn to stand exactly on the drum, so a piece's
+ * underside and the drum's top face are the same plane — and the drum's gold
+ * inlay ring is set into its wall within a thousandth of the marble's own
+ * radius. Two surfaces at one depth is a coin toss per pixel, and the marble
+ * kept winning patches of the gold: what looked like a bite taken out of the
+ * cap of the chemistry piece, and out of the physics one beside it, and a
+ * dashed inlay ring on all six.
+ *
+ * Both are separated by an amount that cannot be seen. The lift is four ten
+ * thousandths of the drum's own height; on a drum drawn 156px wide it is a
+ * twentieth of a pixel.
+ */
+const CLEAR_LIFT = 0.0005;     // the piece, off the drum's top face
+const CLEAR_RING = 1.006;     // the inlay ring, proud of the wall
+
+/**
  * The piece turns; the drum it stands on does not.
  *
  * model-viewer's auto-rotate turns the camera, so the whole assembly swings
@@ -394,10 +412,11 @@ function subdivide(doc) {
  * carry it well enough, which is what it gets.
  *
  * The balance is absent for the opposite reason: it is generated, so it is
- * simply built at a resolution that needs no help. The atom was supplied
- * already smooth and already dense.
+ * simply built at a resolution that needs no help — and so are the award
+ * sculptures, which arrive smooth, welded and dense. Nothing in ON_BASE
+ * belongs here.
  */
-const SUBDIVIDE = new Set(['chemistry', 'medicine', 'literature']);
+const SUBDIVIDE = new Set(['medicine', 'literature']);
 
 /** merge the drum into `doc` at its origin, its materials marked as the base's */
 async function addBase(doc, io, cat) {
@@ -419,6 +438,16 @@ async function addBase(doc, io, cat) {
     for (const child of s.listChildren()) { s.removeChild(child); scene.addChild(child); }
     s.dispose();
   }
+  /* and the inlay ring stands a hair proud of the wall it is set into */
+  const ring = [];
+  const findRing = (n) => { if ((n.getName() || '') === 'gold_inlay_ring') ring.push(n);
+                            n.listChildren().forEach(findRing); };
+  scene.listChildren().forEach(findRing);
+  for (const n of ring) {
+    const [x, y, z] = n.getScale();
+    n.setScale([x * CLEAR_RING, y, z * CLEAR_RING]);
+  }
+
   // the base brought its own buffer, and a GLB may only carry one
   const [keep, ...rest] = doc.getRoot().listBuffers();
   for (const acc of doc.getRoot().listAccessors()) acc.setBuffer(keep);
@@ -460,16 +489,31 @@ async function dressMarble(png, cat) {
  * measured effect was a field of view of 30.0° to 32.0° across the six and
  * drums between 117 and 140 pixels wide, from geometry that is identical in
  * every file. Pinning min/max-camera-orbit fixes the radius; nothing pins the
- * field of view. So the bounds themselves are made equal, with one degenerate
- * triangle spanning the box — two distinct corners and a repeat, which has no
- * area and draws nothing, but which every bounding box must contain.
+ * field of view. So the bounds themselves are made equal, with one triangle
+ * spanning the box — two distinct corners and a repeat — which every bounding
+ * box must contain.
+ *
+ * It carries a fully transparent material, and that is not belt and braces.
+ * The triangle is degenerate as authored and should rasterise to nothing, but
+ * quantization snaps its corners to the nearest grid point and the repeated one
+ * does not always land where its twin does. What comes out is a sliver with
+ * real area, in the default white, drawn straight across the piece: a hairline
+ * slit through the gold cap of the chemistry award and the physics one beside
+ * it, which read as the models themselves being broken.
  */
 const CAGE = [0.28, 0.5, 0.28];
+const CAGE_MAT = '__frame';
 
 function addCage(doc, scene) {
   const [cx, cy, cz] = CAGE;
   const pos = new Float32Array([-cx, -cy, -cz, cx, cy, cz, cx, cy, cz]);
+  const invisible = doc.createMaterial(CAGE_MAT)
+    .setBaseColorFactor([0, 0, 0, 0])
+    .setAlphaMode('BLEND')
+    .setMetallicFactor(0)
+    .setRoughnessFactor(1);
   const prim = doc.createPrimitive()
+    .setMaterial(invisible)
     .setAttribute('POSITION', doc.createAccessor()
       .setType('VEC3').setArray(pos).setBuffer(doc.getRoot().listBuffers()[0]))
     .setIndices(doc.createAccessor()
@@ -491,13 +535,20 @@ for (const file of fs.readdirSync(SRC).sort()) {
   const cat = path.basename(file, '.glb');
   const doc = await io.read(path.join(SRC, file));
   await doc.transform(dedup(), prune());
-  smoothNormals(doc);
-  // welding is worth doing only now: before smoothing every corner carried its
-  // own face normal and nothing could merge. Afterwards a sphere collapses from
-  // three vertices a triangle to one a lattice point.
-  await doc.transform(weld());
+  /* Only the pieces that arrived flat-shaded. The award sculptures come in
+     smooth and welded already, and re-deriving their normals is not free: at a
+     seam where the faces meeting a corner cancel, the sum is the zero vector
+     and the corner keeps a normal of no direction, which draws as a bright
+     slit. One ran down the front of the chemistry award's cap. */
+  if (!ON_BASE.has(cat)) {
+    smoothNormals(doc);
+    // welding is worth doing only now: before smoothing every corner carried
+    // its own face normal and nothing could merge. Afterwards a sphere
+    // collapses from three vertices a triangle to one a lattice point.
+    await doc.transform(weld());
+  }
 
-  if (SUBDIVIDE.has(cat)) {
+  if (SUBDIVIDE.has(cat) && !ON_BASE.has(cat)) {
     subdivide(doc);
     smoothNormals(doc);
     await doc.transform(weld());
@@ -536,7 +587,7 @@ for (const file of fs.readdirSync(SRC).sort()) {
 
   /* Everything in the scene at this point is the piece; wrap it in the
      turntable before the drum joins it as a sibling that does not turn. */
-  const turn = doc.createNode(`${cat}__turn`);
+  const turn = doc.createNode(`${cat}__turn`).setTranslation([0, CLEAR_LIFT, 0]);
   for (const child of [...scene.listChildren()]) { scene.removeChild(child); turn.addChild(child); }
   scene.addChild(turn);
   turntable(doc, turn, `${cat}__spin`);
@@ -577,6 +628,10 @@ for (const file of fs.readdirSync(SRC).sort()) {
   const marbleWhite = marble ? [...marble.getBaseColorFactor()] : null;
   for (const mat of root.listMaterials()) {
     const name = mat.getName() || '';
+    /* The cage must stay invisible. Its transparency is not enough on its own:
+       this pass would set its alpha back to 1 and paint it the hall's colour,
+       and what was drawn was a gold sliver across the piece. */
+    if (name === CAGE_MAT) continue;
     if (name === BASE_MARBLE) { mat.setBaseColorFactor([dr, dg, db, 1]); continue; }
     if (name.startsWith(BASE_PREFIX)) continue;                    // the gold ring
     mat.setBaseColorFactor([r, g, bl, 1])
@@ -608,6 +663,7 @@ for (const file of fs.readdirSync(SRC).sort()) {
   const [gr, gg, gb] = linear(GOLD.hex);
   for (const mat of root.listMaterials()) {
     const name = mat.getName() || '';
+    if (name === CAGE_MAT) continue;                               // stays invisible
     if (name === BASE_MARBLE) { if (marbleWhite) mat.setBaseColorFactor(marbleWhite); continue; }
     if (name.startsWith(BASE_PREFIX)) continue;                    // the gold ring
     mat.setBaseColorFactor([gr, gg, gb, 1])
