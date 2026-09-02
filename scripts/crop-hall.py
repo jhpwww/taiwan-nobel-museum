@@ -12,15 +12,23 @@ Where the horizon is, and how it was found
 ------------------------------------------
 This room is a rotunda, so its 'horizontal' lines are circles, and a circle
 photographs as a straight line only when the camera's eye is at its height.
-Fitting the rings — the dome ring, the entablature, the step nosing, the step
-foot — and reading off the height where their curvature changes sign puts the
-eye at y = 590 of 941, dead level with the top step. The step ring is visibly
-flat there while the entablature above dips in the middle and the floor below
-rises: the two signatures of being under and over eye level.
+So trace the rings and read off the height where their curvature changes sign.
+Six of them agree here:
 
-(A Hough-and-least-squares fit over every receding line, which is how the
-previous plate was measured, answers 43% here and is wrong. In a rotunda most
-of what it finds are dome ribs converging on the dome's own axis.)
+    balustrade ring   21.8%   dips in the middle — seen from below
+    entablature       32.5%   dips
+    window sill       64.9%   dips
+    column base       66.7%   dips
+    step foot         72.5%   rises — seen from above
+    floor ring        79.0%   rises
+
+The sign turns between the column base and the step foot, at y = 651 of 941.
+That lands on the foot of the colonnade, level with the door's threshold: the
+camera's eye is at the height of the top step.
+
+(A Hough-and-least-squares fit over every receding line — how the very first
+plate was measured — is wrong in a room like this. Most of what it finds are
+dome ribs, and those converge on the dome's own axis, not the room's horizon.)
 
     .venv-cv/bin/python scripts/crop-hall.py
 """
@@ -35,29 +43,37 @@ HERE = pathlib.Path(__file__).resolve().parent.parent
 SRC = HERE / 'assets-src/hall/bright-hall-source.png'
 OUT = HERE / 'public/media'
 
-#: A light trim only — the flat crown of the dome off the top, and foreground
-#: marble off the bottom that the page's own wash covers anyway.
+#: No crop at all, now that the plate is shown whole rather than covering the
+#: hero. Two reasons it earns none:
 #:
-#: The temptation is to crop much harder, to a letterbox like the previous
-#: plate. Don't. The plate is sized to cover the hero, so a wide plate on a
-#: 16:10 screen is blown up until only its middle third is visible — a 2.28:1
-#: crop came out 2056px wide inside a 1440px window, which magnifies the room
-#: until the video wall alone is most of the screen. Keeping the plate near the
-#: render's own 1.78 keeps the whole rotunda in frame.
-CROP_TOP = 30
-CROP_BOTTOM = 40
+#: The picture is already framed — dome to floor with nothing dead at either
+#: end — and the page's own join dissolves its last twelve per cent anyway.
+#:
+#: And a crop would cost more than it saves. A contained plate is letterboxed
+#: against a hero that is squarer than it is, so the taller the plate the more
+#: of the hero it fills: at 1440x900 the render's own 1.78 leaves a 90px band
+#: below it where the previous 1.92 crop left 150. Cropping the picture makes
+#: the picture smaller.
+CROP_TOP = 0
+CROP_BOTTOM = 0
 
 #: measured on the source, in source pixels — see the note above
-HORIZON = 590.0
-AXIS = 838.0
+HORIZON = 651.0
+AXIS = 836.0
 LANDMARKS = {
-    'dome ring': 117.5,
-    'entablature': 297.3,
-    'door arch': 400.0,
-    'horizon / platform': HORIZON,
-    'step foot': 637.4,
+    'balustrade ring': 204.7,
+    'entablature': 305.4,
+    'window sill': 610.7,
+    'horizon / column base': HORIZON,
+    'step foot': 681.9,
+    'floor ring': 743.6,
 }
 
+#: Nothing to take down in this plate — it arrived without the two red banners
+#: the previous one hung, so BANNERS is empty and take_down_the_banners() is a
+#: no-op. The machinery is kept because the note below is the reason a banner
+#: cannot simply be cropped around, and the next render may hang one again.
+#:
 #: The two red banners come out.
 #:
 #: Not a matter of taste. The plate is wider than the window it is shown in, so
@@ -80,7 +96,7 @@ LANDMARKS = {
 #:
 #: x0, y0, x1, y1 — the banner with its rod, its finials, its fringe, and the
 #: shadow it casts on the wall.
-BANNERS = [(70, 146, 229, 532), (1444, 146, 1603, 532)]
+BANNERS = []
 BANNER_PAD = 40          # rows of clean wall sampled above and below
 BANNER_FEATHER = 8       # px, so the patch has no seam
 

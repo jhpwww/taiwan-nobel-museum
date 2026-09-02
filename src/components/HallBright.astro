@@ -11,17 +11,16 @@
  * picture's own aspect ratio, so picture and wall crop together and the wall
  * never drifts off the architecture.
  *
- * Finding the eye level took a second method. A Hough transform over every
- * receding line — how the previous plate was measured — answers 43% here and
- * is wrong: in a rotunda most of what it finds are dome ribs, and those
- * converge on the dome's own axis rather than the room's horizon. But a
- * rotunda gives up its horizon another way. Its 'horizontal' lines are
- * circles, and a circle photographs as a straight line only when the camera's
- * eye is at its height. Fit the rings — dome ring, entablature, step nosing,
- * step foot — and read off where their curvature changes sign. The entablature
- * dips in the middle (seen from below), the floor rises (seen from above), and
- * between them the step nosing is dead flat. The eye is level with the top
- * step, 68.6% down the plate. See scripts/crop-hall.py.
+ * Finding the eye level takes a method a Hough transform cannot give. In a
+ * rotunda most of what such a fit finds are dome ribs, and those converge on
+ * the dome's own axis rather than the room's horizon. But a rotunda gives up
+ * its horizon another way: its 'horizontal' lines are circles, and a circle
+ * photographs as a straight line only when the camera's eye is at its height.
+ * Fit the rings and read off where their curvature changes sign. Six agree
+ * here — balustrade, entablature, window sill and column base all dip in the
+ * middle, the step foot and a floor ring both rise — and the turn falls at
+ * 69.2% of the plate, on the foot of the colonnade and level with the door's
+ * threshold. See scripts/crop-hall.py.
  *
  * So the wall stands on that top step, its base exactly on the horizon, rising
  * to just under the doorway's arch — which is where a wall of screens would
@@ -92,8 +91,8 @@ const CAMERA = '35deg 70deg 2.2m';
  * top and foreground marble off the bottom, both by scripts/crop-hall.py.
  * Everything below is in per cent of it.
  */
-const PLATE = { w: 836, h: 435 };
-const VP = { x: 50.1, y: 64.3 };   // the horizon, on the room's axis
+const PLATE = { w: 836, h: 470 };
+const VP = { x: 50.0, y: 69.2 };   // the horizon, on the room's axis
 
 /* The wall, built in container units of the plate rather than px — so it is
    the same wall in the same place at every viewport, which a px perspective is
@@ -117,7 +116,7 @@ const PANEL = 7.9;
  * among them reads as a band ruled across the labels rather than as a wall
  * behind objects. So it is raised, as a wall on a low stage would be, until it
  * clears them; the perspective itself is untouched. */
-const RISE = 3.3;
+const RISE = 7.2;
 
 /* Scaling the panel, the depth and the perspective by one factor scales what
    is drawn by exactly that factor and nothing else — same curve, same
@@ -284,8 +283,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     position: absolute;
     inset-inline-start: 50%; inset-block-start: 0;
     translate: -50% 0;
-    aspect-ratio: 1672 / 871;
-    inline-size: min(100%, calc(min(100svh, 62rem) * 1672 / 871));
+    aspect-ratio: 1672 / 941;
+    inline-size: min(100%, calc(min(100svh, 62rem) * 1672 / 941));
     block-size: auto;
   }
   /* The only wash left, and it is a join rather than a veil: the foot of the
@@ -489,10 +488,10 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     /* A 1.92:1 picture shown whole across a phone is a band, not a backdrop,
        so the scene is cut to exactly the height the picture needs and the page
        carries on below it. Nothing is cropped; there is simply less room. */
-    .bh__scene { block-size: calc(100vw * 871 / 1672); }
+    .bh__scene { block-size: calc(100vw * 941 / 1672); }
     .bh__plate { inline-size: 100%; }
     /* clear of it, or the masthead sits astride the picture's lower edge */
-    .bh { padding-block-start: calc(100vw * 871 / 1672 + 1.1rem); }
+    .bh { padding-block-start: calc(100vw * 941 / 1672 + 1.1rem); }
     /* The same wall at 0.62 — see the note by wall() for why the factor is
        enough on its own. Nothing else about the wall changes. */
     .bh__wallwrap { perspective: var(--persp-n); }
@@ -503,7 +502,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   @media (max-width: 34rem) {
     /* the switch and the motion toggle stack at this width, so the picture
        alone is no longer the taller of the two */
-    .bh { padding-block-start: max(8.7rem, calc(100vw * 871 / 1672 + 1.1rem)); }
+    .bh { padding-block-start: max(8.7rem, calc(100vw * 941 / 1672 + 1.1rem)); }
   }
 </style>
 
