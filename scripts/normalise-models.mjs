@@ -49,6 +49,55 @@ const BASE_MARBLE = `${BASE_PREFIX}white_marble`;
 const BASE_STONE_DARK = '#4a4137';   // the drum, for the dark vault
 
 /**
+ * The marble's veins are there in the texture and invisible on screen: the
+ * whole image lives between 197 and 253, and lit at this exposure the drum
+ * renders across 232–249. A seven per cent spread reads as blank white.
+ *
+ * So the histogram is stretched before the texture is encoded — the darkest
+ * vein down to VEIN_FLOOR, the lit marble left where it is. It is the same
+ * stone, just legible; push it much further and it stops being marble and
+ * starts being granite.
+ */
+const VEIN_IN = [197, 253];          // where the source's ink actually sits
+const VEIN_FLOOR = 158;
+
+/**
+ * The piece turns; the drum it stands on does not.
+ *
+ * model-viewer's auto-rotate turns the camera, so the whole assembly swings
+ * together and the plinth looks as though it is on a lazy Susan. What is wanted
+ * is a turntable under the piece alone, and that has to be a rotation baked
+ * into the model — one node above the piece and below the drum, with an
+ * animation on it that the halls autoplay.
+ *
+ * Six keyframes rather than two: slerp takes the shorter arc between
+ * quaternions, so a half turn is ambiguous and a full one is a no-op. Sixty
+ * degrees a hop leaves no doubt about the direction. The last keyframe is the
+ * first rotation again, so the loop closes without a jump.
+ */
+const TURN_SECONDS = 26;
+const TURN_STEPS = 6;
+
+function turntable(doc, node, name) {
+  const buffer = doc.getRoot().listBuffers()[0] ?? doc.createBuffer();
+  const times = new Float32Array(TURN_STEPS + 1);
+  const quats = new Float32Array((TURN_STEPS + 1) * 4);
+  for (let i = 0; i <= TURN_STEPS; i++) {
+    const t = i / TURN_STEPS;
+    times[i] = t * TURN_SECONDS;
+    const a = t * Math.PI * 2;
+    quats.set([0, Math.sin(a / 2), 0, Math.cos(a / 2)], i * 4);
+  }
+  const sampler = doc.createAnimationSampler()
+    .setInput(doc.createAccessor().setType('SCALAR').setArray(times).setBuffer(buffer))
+    .setOutput(doc.createAccessor().setType('VEC4').setArray(quats).setBuffer(buffer))
+    .setInterpolation('LINEAR');
+  const channel = doc.createAnimationChannel()
+    .setTargetNode(node).setTargetPath('rotation').setSampler(sampler);
+  doc.createAnimation(name).addSampler(sampler).addChannel(channel);
+}
+
+/**
  * The owner is modelling the six award sculptures one at a time, each drawn to
  * stand on that drum. Those go on unchanged. The rest are the borrowed and
  * built pieces still standing in for them, and they have to be sat on it:
@@ -331,6 +380,17 @@ async function addBase(doc, io) {
   for (const mat of base.getRoot().listMaterials()) {
     mat.setName(BASE_PREFIX + (mat.getName() || 'material'));
   }
+  /* Before the merge, not after: mergeDocuments copies, so anything done to
+     the source document afterwards is done to the copy that gets thrown away. */
+  for (const tex of base.getRoot().listTextures()) {
+    const [lo, hi] = VEIN_IN;
+    const a = (hi - VEIN_FLOOR) / (hi - lo);
+    tex.setImage(await sharp(tex.getImage())
+      .removeAlpha()                       // the marble is opaque; the channel is dead weight
+      .linear(a, hi - a * hi)
+      .png().toBuffer())
+      .setMimeType('image/png');
+  }
   mergeDocuments(doc, base);
   const scene = doc.getRoot().getDefaultScene() ?? doc.getRoot().listScenes()[0];
   // merge() brings the base's scenes in alongside ours; move their contents
@@ -401,6 +461,13 @@ for (const file of fs.readdirSync(SRC).sort()) {
     perch.addChild(spin);
     scene.addChild(perch);
   }
+
+  /* Everything in the scene at this point is the piece; wrap it in the
+     turntable before the drum joins it as a sibling that does not turn. */
+  const turn = doc.createNode(`${cat}__turn`);
+  for (const child of [...scene.listChildren()]) { scene.removeChild(child); turn.addChild(child); }
+  scene.addChild(turn);
+  turntable(doc, turn, `${cat}__spin`);
 
   await addBase(doc, io);
 

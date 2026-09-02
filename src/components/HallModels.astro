@@ -146,9 +146,7 @@ const creditComment = (c: Credit) =>
               environment-image="neutral"
               exposure="1.15"
               shadow-intensity="0"
-              auto-rotate
-              auto-rotate-delay="0"
-              rotation-per-second="14deg"
+              autoplay
             >
               {/* the only thing a browser without the custom element renders */}
               <img class="case__poster" slot="poster" src={c.poster} alt="" width="512" height="512" />
@@ -400,15 +398,18 @@ const creditComment = (c: Credit) =>
 
   /* The site's own motion switch is the authority, not the media query alone —
      the OS preference is only its default, and a visitor who turned motion
-     back on expects the pieces to turn. */
+     back on expects the pieces to turn.
+     The turn is an animation in the model now rather than auto-rotate, which
+     moves the camera and would swing each piece's plinth round with it. */
   function applyRotation() {
     const on = motionOn();
-    for (const v of viewers) {
-      if (on) v.setAttribute('auto-rotate', '');
-      else v.removeAttribute('auto-rotate');
+    for (const v of viewers as (HTMLElement & { play?: () => void; pause?: () => void })[]) {
+      if (on) { v.setAttribute('autoplay', ''); v.play?.(); }
+      else { v.removeAttribute('autoplay'); v.pause?.(); }
     }
   }
 
   applyRotation();
   addEventListener('motionpref', applyRotation);
+  for (const v of viewers) v.addEventListener('load', applyRotation);
 </script>

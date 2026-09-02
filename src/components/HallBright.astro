@@ -242,9 +242,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
             exposure="1.35"
             shadow-intensity="0.55"
             shadow-softness="0.9"
-            auto-rotate
-            auto-rotate-delay="0"
-            rotation-per-second="14deg"
+            autoplay
           >
             <img class="bh__poster" slot="poster" src={c.poster} alt="" width="512" height="512" />
           </model-viewer>
@@ -426,7 +424,11 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   :global(html[data-motion='off']) .bh__piece:hover { transform: none; }
 
   .bh__art {
-    inline-size: 100%; aspect-ratio: 1; max-inline-size: 15rem;
+    /* Portrait, not square. The piece is a tall thing in a wide box: at a
+       vertical field of view the frame's height is what sets how big it draws,
+       and a square box spent most of its width on air. Twice as tall is twice
+       the piece, at the same column width. */
+    inline-size: 100%; aspect-ratio: 1 / 2; max-inline-size: 15rem;
     display: grid; place-items: center; position: relative;
   }
   .bh__mv {
@@ -522,15 +524,23 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   import { motionOn } from '../scripts/motion';
   import '../../vendor/model-viewer.min.js';
 
-  const viewers = [...document.querySelectorAll<HTMLElement>('.bh__mv')];
+  /* The turn is an animation in the model now, not auto-rotate — auto-rotate
+     moves the camera, which swings the plinth round with the piece. So the
+     motion switch plays and pauses rather than adding and removing it. */
+  const viewers = [...document.querySelectorAll<HTMLElement & {
+    play?: () => void; pause?: () => void;
+  }>('.bh__mv')];
   function applyRotation() {
+    const on = motionOn();
     for (const v of viewers) {
-      if (motionOn()) v.setAttribute('auto-rotate', '');
-      else v.removeAttribute('auto-rotate');
+      if (on) { v.setAttribute('autoplay', ''); v.play?.(); }
+      else { v.removeAttribute('autoplay'); v.pause?.(); }
     }
   }
   applyRotation();
   addEventListener('motionpref', applyRotation);
+  /* model-viewer has no animation to play until the GLB is in */
+  for (const v of viewers) v.addEventListener('load', applyRotation);
 
   /* Only the middle of the wall gets a decoder if clips ever land — thirty-six
      simultaneous videos is not a backdrop, it is a stress test. */
