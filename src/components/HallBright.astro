@@ -84,9 +84,21 @@ const cats = categoryList()
     credit: credited[key],
   }));
 
-/* 2.55m, not the 2.2m a bare piece took: standing on the drum, the assembly is
-   half again as tall as it was and the old distance cut its top off. */
-const CAMERA = '35deg 70deg 2.55m';
+/* Level with the piece, not looking down on it.
+ *
+ * 70° put the eye twenty degrees above the horizontal, so every drum showed its
+ * top face like something on a table — while the hall behind is photographed
+ * from the height of its own top step, near enough level. The two perspectives
+ * did not belong to the same room. 86° is horizontal but for a few degrees,
+ * enough to keep the drum reading as a cylinder rather than a rectangle.
+ *
+ * And 2.6m rather than 2.2: at eye level the assembly is at its tallest on
+ * screen, and anything nearer cuts the foot of the drum off. */
+const CAMERA = '35deg 86deg 2.6m';
+/* The six no longer share a bounding box — a short piece makes a short
+   assembly — so the camera is pinned to the origin instead of framing each box
+   in turn. Every drum then sits on the same line, at the same size. */
+const CAMERA_TARGET = '0m 0m 0m';
 
 /*
  * The plate: the source render with the flat crown of the dome taken off the
@@ -222,6 +234,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
             poster={c.poster}
             loading="lazy"
             camera-orbit={CAMERA}
+            camera-target={CAMERA_TARGET}
             field-of-view="30deg"
             interaction-prompt="none"
             disable-zoom
@@ -388,12 +401,15 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
 
   /* ---------- the pieces ---------- */
+  /* Wider, and barely spaced. These are the hall's exhibits, so they want to
+     read as one row of six rather than six cards that happen to be adjacent —
+     which means the pieces take the width and the gaps give it up. */
   .bh__plinths {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
-    gap: clamp(0.6rem, 2vw, 1.4rem);
+    gap: clamp(0.15rem, 0.5vw, 0.5rem);
     align-items: end;
-    inline-size: min(100% - 2rem, 80rem);
+    inline-size: min(100% - 1.5rem, 88rem);
     margin: clamp(1.2rem, 3.5vh, 2.6rem) auto 0;
     position: relative;
   }
@@ -410,7 +426,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   :global(html[data-motion='off']) .bh__piece:hover { transform: none; }
 
   .bh__art {
-    inline-size: 100%; aspect-ratio: 1; max-inline-size: 11rem;
+    inline-size: 100%; aspect-ratio: 1; max-inline-size: 15rem;
     display: grid; place-items: center; position: relative;
   }
   .bh__mv {

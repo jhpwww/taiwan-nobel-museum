@@ -29,8 +29,9 @@ const SETS = [
   { dir: 'public/assets/models', src: '/assets/models' },
   { dir: 'public/assets/models/gold', src: '/assets/models/gold' },
 ];
-/** must stay in step with the camera-orbit in HallModels.astro */
-const CAMERA = '35deg 70deg 2.55m';
+/** must stay in step with the camera in HallModels.astro and HallBright.astro */
+const CAMERA = '35deg 86deg 2.6m';
+const CAMERA_TARGET = '0m 0m 0m';
 
 const TYPES = { '.js': 'text/javascript', '.glb': 'model/gltf-binary', '.html': 'text/html' };
 
@@ -49,7 +50,7 @@ fs.writeFileSync(`${ROOT}/__poster.html`, `<!doctype html><meta charset="utf-8">
 <style>html,body{margin:0;background:transparent}
 model-viewer{width:512px;height:512px;background:transparent;--poster-color:transparent}</style>
 <script type="module" src="/vendor/model-viewer.min.js"></script>
-<model-viewer id="m" alt="" camera-orbit="${CAMERA}" field-of-view="30deg"
+<model-viewer id="m" alt="" camera-orbit="${CAMERA}" camera-target="${CAMERA_TARGET}" field-of-view="30deg"
   interaction-prompt="none" environment-image="neutral" exposure="1.15"
   shadow-intensity="0"></model-viewer>
 <script>{const q = new URLSearchParams(location.search);

@@ -404,17 +404,24 @@ for (const file of fs.readdirSync(SRC).sort()) {
 
   await addBase(doc, io);
 
-  // and now frame the whole assembly the way every icon is framed: longest
-  // axis exactly one unit, centred on its own box
-  const w = getBounds(scene);
-  const wsize = w.max.map((v, i) => v - w.min[i]);
-  const s = 1 / (Math.max(...wsize) || 1);
-  const centre = w.max.map((v, i) => (v + w.min[i]) / 2);
-
-  // glTF applies T · R · S, so the offset must already be in scaled units
+  /* One scale for all six, and one ground line.
+   *
+   * Fitting each assembly to its own bounding box — which is how the bare
+   * pieces were framed — makes the drum a different size in every frame, because
+   * a short piece leaves a short assembly and the whole thing is then scaled up
+   * further to fill the box. The drum has to be the same drum in all six. So the
+   * factor is fixed: the tallest an assembly can be is the drum plus a piece at
+   * PERCH_H, and that is what maps to one unit. Shorter pieces simply reach less
+   * far up the frame, which is what the reference sheet shows.
+   *
+   * The drum's foot goes to the bottom of that unit box rather than its centre,
+   * so all six stand on the same line. Their frames only agree if the camera
+   * stops framing each box in turn, so the halls pin camera-target to the origin.
+   */
+  const s = 1 / (BASE_TOP + PERCH_H);
   const fit = doc.createNode(`${cat}__fit`)
     .setScale([s, s, s])
-    .setTranslation(centre.map((c) => -c * s));
+    .setTranslation([0, -0.5, 0]);
   for (const child of [...scene.listChildren()]) { scene.removeChild(child); fit.addChild(child); }
   scene.addChild(fit);
 
@@ -446,11 +453,12 @@ for (const file of fs.readdirSync(SRC).sort()) {
      anything visible on a piece an inch across — at the cost of requiring
      KHR_mesh_quantization, which model-viewer has supported for years. */
   /* The drum's marble arrives as a 768x144 PNG, 170KB, and it is now carried
-     by all six models in both casts. At the size these render — a drum perhaps
-     fifty pixels tall — a quarter of that resolution in WebP is indistinguishable
-     and a twentieth of the weight. */
+     by all six models in both casts, so it is worth re-encoding — but at its
+     own size. Its veins are one and two pixels wide, and halving the
+     resolution washed them out completely: the drum came back a blank white
+     cylinder. WebP at full size keeps them and still costs a tenth of the PNG. */
   await doc.transform(
-    textureCompress({ encoder: sharp, targetFormat: 'webp', resize: [384, 384], quality: 82 }),
+    textureCompress({ encoder: sharp, targetFormat: 'webp', quality: 92 }),
     quantize({ quantizePosition: 14, quantizeNormal: 10 }),
   );
 
