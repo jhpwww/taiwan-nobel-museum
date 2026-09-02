@@ -59,7 +59,32 @@ const BASE_STONE_DARK = '#4a4137';   // the drum, for the dark vault
  * starts being granite.
  */
 const VEIN_IN = [197, 253];          // where the source's ink actually sits
-const VEIN_FLOOR = 158;
+const VEIN_FLOOR = 118;
+
+/**
+ * Six drums, six faces of the same stone.
+ *
+ * The texture wraps the cylinder once, so rolling it sideways turns the drum
+ * without turning anything else: each hall gets a different sixth of the
+ * marble facing the room and the row stops looking like one plinth copied six
+ * times. Nothing about the geometry moves — the drums stay identical, which is
+ * the point of them.
+ */
+const VEIN_TURN = { physics: 0, chemistry: 1, medicine: 2, peace: 3, economics: 4, literature: 5 };
+
+/**
+ * And a key light from the right, baked in.
+ *
+ * A cylinder under an even environment has no side to it — the marble reads as
+ * a flat white band. model-viewer takes no lights of its own, only an
+ * environment, so the fall-off is painted into the drum's own colour: brightest
+ * a little right of front, deepest on the left. LIGHT_PHASE is where in the
+ * texture the front of the drum lands, which is a property of how the cylinder
+ * was unwrapped and was found by looking.
+ */
+const LIGHT_PHASE = 0.30;      // fraction of the texture's width facing the camera
+const LIGHT_LIFT = 1.06;       // brightest side
+const LIGHT_DROP = 0.62;       // and the shaded one
 
 /**
  * The piece turns; the drum it stands on does not.
@@ -105,7 +130,7 @@ function turntable(doc, node, name) {
  * again the drum, so a wide piece overhangs the way the reference sheet's
  * quill and chart do without looking like it is sliding off.
  */
-const ON_BASE = new Set(['physics']);
+const ON_BASE = new Set(['physics', 'chemistry']);
 const PERCH_H = 0.525;
 const PERCH_W = 0.302 * 1.25;
 
@@ -375,7 +400,7 @@ function subdivide(doc) {
 const SUBDIVIDE = new Set(['chemistry', 'medicine', 'literature']);
 
 /** merge the drum into `doc` at its origin, its materials marked as the base's */
-async function addBase(doc, io) {
+async function addBase(doc, io, cat) {
   const base = await io.read(BASE);
   for (const mat of base.getRoot().listMaterials()) {
     mat.setName(BASE_PREFIX + (mat.getName() || 'material'));
@@ -383,13 +408,7 @@ async function addBase(doc, io) {
   /* Before the merge, not after: mergeDocuments copies, so anything done to
      the source document afterwards is done to the copy that gets thrown away. */
   for (const tex of base.getRoot().listTextures()) {
-    const [lo, hi] = VEIN_IN;
-    const a = (hi - VEIN_FLOOR) / (hi - lo);
-    tex.setImage(await sharp(tex.getImage())
-      .removeAlpha()                       // the marble is opaque; the channel is dead weight
-      .linear(a, hi - a * hi)
-      .png().toBuffer())
-      .setMimeType('image/png');
+    tex.setImage(await dressMarble(tex.getImage(), cat)).setMimeType('image/png');
   }
   mergeDocuments(doc, base);
   const scene = doc.getRoot().getDefaultScene() ?? doc.getRoot().listScenes()[0];
@@ -404,6 +423,59 @@ async function addBase(doc, io) {
   const [keep, ...rest] = doc.getRoot().listBuffers();
   for (const acc of doc.getRoot().listAccessors()) acc.setBuffer(keep);
   for (const b of rest) b.dispose();
+}
+
+/** roll the marble round, stretch its veins, and light it from the right */
+async function dressMarble(png, cat) {
+  const img = sharp(png).removeAlpha();
+  const { width, height } = await img.metadata();
+  const [lo, hi] = VEIN_IN;
+  const a = (hi - VEIN_FLOOR) / (hi - lo);
+  const stretched = await img.linear(a, hi - a * hi).raw().toBuffer();
+
+  const roll = Math.round(((VEIN_TURN[cat] ?? 0) / 6) * width);
+  const out = Buffer.alloc(stretched.length);
+  for (let x = 0; x < width; x++) {
+    /* where this column sits round the drum, 0 at the face nearest the camera */
+    const around = ((x / width) - LIGHT_PHASE + 1) % 1;
+    // cosine fall-off, peaking a little to the right of front
+    const k = LIGHT_DROP + (LIGHT_LIFT - LIGHT_DROP)
+            * (0.5 + 0.5 * Math.cos((around - 0.12) * 2 * Math.PI));
+    const src = (x + roll) % width;
+    for (let y = 0; y < height; y++) {
+      const s = (y * width + src) * 3;
+      const d = (y * width + x) * 3;
+      for (let c = 0; c < 3; c++) out[d + c] = Math.min(255, Math.round(stretched[s + c] * k));
+    }
+  }
+  return sharp(out, { raw: { width, height, channels: 3 } }).png().toBuffer();
+}
+
+/**
+ * A cage the size of the canonical box, so all six frame alike.
+ *
+ * model-viewer will not simply take the camera it is given: it clamps the
+ * orbit radius and the field of view against the model's own bounds so the
+ * thing always fits, and a short piece therefore comes out drawn larger. The
+ * measured effect was a field of view of 30.0° to 32.0° across the six and
+ * drums between 117 and 140 pixels wide, from geometry that is identical in
+ * every file. Pinning min/max-camera-orbit fixes the radius; nothing pins the
+ * field of view. So the bounds themselves are made equal, with one degenerate
+ * triangle spanning the box — two distinct corners and a repeat, which has no
+ * area and draws nothing, but which every bounding box must contain.
+ */
+const CAGE = [0.28, 0.5, 0.28];
+
+function addCage(doc, scene) {
+  const [cx, cy, cz] = CAGE;
+  const pos = new Float32Array([-cx, -cy, -cz, cx, cy, cz, cx, cy, cz]);
+  const prim = doc.createPrimitive()
+    .setAttribute('POSITION', doc.createAccessor()
+      .setType('VEC3').setArray(pos).setBuffer(doc.getRoot().listBuffers()[0]))
+    .setIndices(doc.createAccessor()
+      .setType('SCALAR').setArray(new Uint16Array([0, 1, 2]))
+      .setBuffer(doc.getRoot().listBuffers()[0]));
+  scene.addChild(doc.createNode('__frame').setMesh(doc.createMesh('__frame').addPrimitive(prim)));
 }
 
 fs.mkdirSync(OUT, { recursive: true });
@@ -469,7 +541,7 @@ for (const file of fs.readdirSync(SRC).sort()) {
   scene.addChild(turn);
   turntable(doc, turn, `${cat}__spin`);
 
-  await addBase(doc, io);
+  await addBase(doc, io, cat);
 
   /* One scale for all six, and one ground line.
    *
@@ -491,6 +563,7 @@ for (const file of fs.readdirSync(SRC).sort()) {
     .setTranslation([0, -0.5, 0]);
   for (const child of [...scene.listChildren()]) { scene.removeChild(child); fit.addChild(child); }
   scene.addChild(fit);
+  addCage(doc, scene);
 
   // one hall, one colour. Textures go with it — they only carried the old
   // palette, and the coin's dollar sign with it, which had no business on a

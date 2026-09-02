@@ -94,11 +94,14 @@ const cats = categoryList()
  *
  * And 2.6m rather than 2.2: at eye level the assembly is at its tallest on
  * screen, and anything nearer cuts the foot of the drum off. */
-const CAMERA = '35deg 86deg 2.6m';
-/* The six no longer share a bounding box — a short piece makes a short
-   assembly — so the camera is pinned to the origin instead of framing each box
-   in turn. Every drum then sits on the same line, at the same size. */
+const CAMERA = '35deg 86deg 1.55m';
+/* The camera is pinned to the origin rather than framing each model's own box,
+   so every drum sits on the same line. And the radius is pinned at both ends,
+   because model-viewer will not simply take the camera it is given: left to
+   itself it clamps the orbit against the model's bounds — a requested 2.6m came
+   back as 2.208m — so the two limits have to agree with it. */
 const CAMERA_TARGET = '0m 0m 0m';
+const CAMERA_LIMIT = 'auto auto 1.55m';
 
 /*
  * The plate: the source render with the flat crown of the dome taken off the
@@ -235,6 +238,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
             loading="lazy"
             camera-orbit={CAMERA}
             camera-target={CAMERA_TARGET}
+            min-camera-orbit={CAMERA_LIMIT}
+            max-camera-orbit={CAMERA_LIMIT}
             field-of-view="30deg"
             interaction-prompt="none"
             disable-zoom
@@ -244,7 +249,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
             shadow-softness="0.9"
             autoplay
           >
-            <img class="bh__poster" slot="poster" src={c.poster} alt="" width="512" height="512" />
+            <img class="bh__poster" slot="poster" src={c.poster} alt="" width="640" height="1280" />
           </model-viewer>
         </span>
         <span class="bh__name">{c.name}</span>

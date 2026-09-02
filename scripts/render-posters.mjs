@@ -30,8 +30,9 @@ const SETS = [
   { dir: 'public/assets/models/gold', src: '/assets/models/gold' },
 ];
 /** must stay in step with the camera in HallModels.astro and HallBright.astro */
-const CAMERA = '35deg 86deg 2.6m';
+const CAMERA = '35deg 86deg 1.55m';
 const CAMERA_TARGET = '0m 0m 0m';
+const CAMERA_LIMIT = 'auto auto 1.55m';
 
 const TYPES = { '.js': 'text/javascript', '.glb': 'model/gltf-binary', '.html': 'text/html' };
 
@@ -48,9 +49,9 @@ const origin = `http://127.0.0.1:${server.address().port}`;
 
 fs.writeFileSync(`${ROOT}/__poster.html`, `<!doctype html><meta charset="utf-8">
 <style>html,body{margin:0;background:transparent}
-model-viewer{width:512px;height:512px;background:transparent;--poster-color:transparent}</style>
+model-viewer{width:320px;height:640px;background:transparent;--poster-color:transparent}</style>
 <script type="module" src="/vendor/model-viewer.min.js"></script>
-<model-viewer id="m" alt="" camera-orbit="${CAMERA}" camera-target="${CAMERA_TARGET}" field-of-view="30deg"
+<model-viewer id="m" alt="" camera-orbit="${CAMERA}" camera-target="${CAMERA_TARGET}" min-camera-orbit="${CAMERA_LIMIT}" max-camera-orbit="${CAMERA_LIMIT}" field-of-view="30deg"
   interaction-prompt="none" environment-image="neutral" exposure="1.15"
   shadow-intensity="0"></model-viewer>
 <script>{const q = new URLSearchParams(location.search);
@@ -59,7 +60,7 @@ model-viewer{width:512px;height:512px;background:transparent;--poster-color:tran
 const browser = await chromium.launch({
   args: ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader'],
 });
-const page = await browser.newPage({ viewport: { width: 512, height: 512 }, deviceScaleFactor: 2 });
+const page = await browser.newPage({ viewport: { width: 320, height: 640 }, deviceScaleFactor: 2 });
 
 for (const { dir, src } of SETS) {
  fs.mkdirSync(dir, { recursive: true });
@@ -72,7 +73,7 @@ for (const { dir, src } of SETS) {
   // WebP, because these are smooth shaded gradients on transparency — the coin
   // alone costs 159KB as PNG and a fifth of that as WebP, at 512px for a frame
   // that is never wider than 200
-  const webp = await sharp(png).resize(512, 512, { fit: 'inside' })
+  const webp = await sharp(png).resize(640, 1280, { fit: 'inside' })
     .webp({ quality: 86, alphaQuality: 90, effort: 6 }).toBuffer();
   fs.writeFileSync(`${dir}/${cat}.webp`, webp);
   console.log(`${src.padEnd(26)} ${cat.padEnd(11)} png ${(png.length / 1024).toFixed(0).padStart(4)}KB` +
