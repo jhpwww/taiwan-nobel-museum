@@ -8,26 +8,20 @@
     "source": "original"
   },
   "chemistry": {
-    "id": "eqIGxcsBe1V",
-    "title": "Erlenmeyer flask",
-    "author": "Poly by Google",
-    "licence": "CC-BY",
-    "glb": "https://static.poly.pizza/0ec46b5b-d7ee-48f5-a06d-4274db0dfb1e.glb",
-    "page": "https://poly.pizza/m/eqIGxcsBe1V",
-    "tris": "712",
-    "bytes": 44616,
-    "source": "poly"
+    "id": "supplied:chemistry",
+    "title": "Molecule",
+    "author": "Nobel Lecture Museum",
+    "licence": "CC0",
+    "page": "",
+    "source": "original"
   },
   "medicine": {
-    "id": "0e5xgkdcuEW",
-    "title": "DNA",
-    "author": "Zoe XR",
-    "licence": "CC-BY",
-    "glb": "https://static.poly.pizza/3bd92894-a0a4-4cc5-ad02-29d29341944f.glb",
-    "page": "https://poly.pizza/m/0e5xgkdcuEW",
-    "tris": "1.1k",
-    "bytes": 158960,
-    "source": "poly"
+    "id": "supplied:medicine",
+    "title": "DNA double helix",
+    "author": "Nobel Lecture Museum",
+    "licence": "CC0",
+    "page": "",
+    "source": "original"
   },
   "peace": {
     "id": "2jmH3trzPFf",

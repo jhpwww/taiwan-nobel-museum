@@ -148,7 +148,7 @@ function turntable(doc, node, name) {
  * again the drum, so a wide piece overhangs the way the reference sheet's
  * quill and chart do without looking like it is sliding off.
  */
-const ON_BASE = new Set(['physics', 'chemistry']);
+const ON_BASE = new Set(['physics', 'chemistry', 'medicine']);
 const PERCH_H = 0.525;
 const PERCH_W = 0.302 * 1.25;
 

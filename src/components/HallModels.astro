@@ -107,6 +107,11 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
  * would leave the credit in the source only. Anyone reading the page source to
  * find out where a model came from should find the answer next to it.
  */
+/* Counted, not claimed. The note used to say four were borrowed and two built,
+   and went on saying it after the owner's own awards replaced the flask and the
+   DNA — crediting Poly Pizza for pieces that were no longer on the page. */
+const borrowedCount = cats.filter((c) => c.credit.source !== 'original').length;
+
 const creditComment = (c: Credit) =>
   `<!-- model: ${[c.title, c.author, c.licence, c.page || 'original work']
     .map((v) => String(v).replace(/[<>]/g, '').replace(/--+/g, '-'))
@@ -185,7 +190,7 @@ const creditComment = (c: Credit) =>
 
   <aside class="mh__credit">
     <h2>{t('models.creditTitle')}</h2>
-    <p>{t('models.creditNote')}</p>
+    <p>{t('models.creditNote', { borrowed: borrowedCount, own: cats.length - borrowedCount })}</p>
     <ul role="list">
       {cats.map((c) => (
         <li>

@@ -31,6 +31,7 @@
  * light in this room is the photograph's own.
  */
 import StyleSwitch from './StyleSwitch.astro';
+import PrizeMark from './PrizeMark.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
@@ -260,6 +261,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
           {/* cut into the drum, where a museum puts the label — the plinth is
               part of the model, so the type is laid over its face */}
           <span class="bh__face">
+            <PrizeMark cat={c.key} class="bh__mark" />
             <span class="bh__name">{c.name}</span>
             <span class="bh__name-en">{c.nameAlt}</span>
           </span>
@@ -492,8 +494,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * and it could not be selected, read aloud, or translated. */
   .bh__face {
     position: absolute;
-    inset-inline: 21%;
-    inset-block-start: 86.5%;
+    inset-inline: 17%;
+    inset-block-start: 87%;
     translate: 0 -50%;
     display: grid;
     justify-items: center;
@@ -502,17 +504,27 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     text-wrap: balance;
     pointer-events: none;      /* the anchor owns every click */
   }
+  /* The device above the name, in the gold the hall keeps for ornament.
+     :global because the mark is drawn by another component, and Astro's scope
+     attribute stops at this file — a plain .bh__mark rule matches nothing and
+     the SVG comes out at its natural size, filling the whole plinth. */
+  .bh__face :global(.bh__mark) {
+    inline-size: clamp(1.05rem, 11.6cqw, 1.85rem);
+    block-size: auto;
+    color: var(--gold);
+    margin-block-end: 0.16em;
+  }
   .bh__name {
     font-family: var(--font-display);
-    font-size: clamp(0.68rem, 6.6cqw, 1.05rem);
-    line-height: 1.25;
+    font-size: clamp(0.78rem, 8cqw, 1.25rem);
+    line-height: 1.2;
     letter-spacing: 0.04em;
     color: var(--cream);
   }
   .bh__name-en {
-    font-size: clamp(0.54rem, 4.7cqw, 0.82rem);
-    line-height: 1.2;
-    letter-spacing: 0.03em;
+    font-size: clamp(0.6rem, 5.5cqw, 0.95rem);
+    line-height: 1.18;
+    letter-spacing: 0.02em;
     color: var(--muted);
     /* one line or two, as the name needs — the two-line floor the halls use
        elsewhere would push the type off the drum's face */

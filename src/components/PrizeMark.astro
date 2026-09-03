@@ -1,0 +1,127 @@
+---
+/**
+ * PrizeMark.astro — the small gold device cut into each plinth.
+ *
+ * Six marks, one per prize, drawn from the reference sheet the project owner
+ * made: an atom, a molecule, a caduceus, an open book, two laurel branches,
+ * and a rising bar chart.
+ *
+ * Inline SVG rather than an image. They are drawn at about eighteen pixels on
+ * a plinth that is a hundred and forty wide, so a raster would be soft on any
+ * screen that is not exactly the size it was cut for — and this way the mark
+ * takes its colour from the type it sits above, which is what makes it read as
+ * engraved rather than pasted on.
+ *
+ * `currentColor` throughout: the caller sets the gold.
+ */
+interface Props { cat: string; class?: string }
+const { cat, class: cls } = Astro.props;
+
+/* one line weight for all six, so the row reads as one set of marks */
+const S = { fill: 'none', stroke: 'currentColor', 'stroke-width': '1.35',
+            'stroke-linecap': 'round', 'stroke-linejoin': 'round' } as const;
+
+/**
+ * A laurel branch: one stem, and leaves sampled off the stem itself.
+ *
+ * Placed by eye they drift off the curve and bunch at the foot — which is what
+ * happened first. So the stem is a quadratic Bézier, the leaves are points on
+ * it, and each leaf is turned to the tangent there.
+ */
+const P0 = [12, 20.6], C = [7.2, 15.6], P1 = [3.4, 4.6];
+const at = (t: number, i: number) =>
+  (1 - t) ** 2 * P0[i] + 2 * (1 - t) * t * C[i] + t ** 2 * P1[i];
+const slope = (t: number, i: number) =>
+  2 * (1 - t) * (C[i] - P0[i]) + 2 * t * (P1[i] - C[i]);
+
+const stem = `M${P0[0]} ${P0[1]}Q${C[0]} ${C[1]} ${P1[0]} ${P1[1]}`;
+const mirror = `M${24 - P0[0]} ${P0[1]}Q${24 - C[0]} ${C[1]} ${24 - P1[0]} ${P1[1]}`;
+
+const leaves = (dir: 1 | -1) =>
+  [0.2, 0.44, 0.68, 0.9].map((t) => {
+    const bx = at(t, 0), by = at(t, 1);
+    const x = dir > 0 ? 24 - bx : bx;
+    const y = by;
+    /* the leaf lies across the stem, not along it */
+    const ang = (Math.atan2(slope(t, 1), slope(t, 0)) * 180) / Math.PI;
+    /* along the branch, splayed out and up the way a laurel leaf sits */
+    const rot = (dir > 0 ? 180 - ang : ang) + 30 * dir;
+    const nx = x + dir * 2.0, ny = y - 1.1;
+    return { x: nx, y: ny, rot };
+  });
+---
+
+{cat === 'physics' && (
+  <svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="1.85" fill="currentColor" />
+    <g {...S}>
+      <ellipse cx="12" cy="12" rx="9.4" ry="3.8" />
+      <ellipse cx="12" cy="12" rx="9.4" ry="3.8" transform="rotate(60 12 12)" />
+      <ellipse cx="12" cy="12" rx="9.4" ry="3.8" transform="rotate(120 12 12)" />
+    </g>
+  </svg>
+)}
+
+{cat === 'chemistry' && (
+  <svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <g {...S}>
+      <circle cx="12" cy="7.2" r="4" />
+      <circle cx="8.2" cy="14.4" r="4" />
+      <circle cx="15.8" cy="14.4" r="4" />
+    </g>
+  </svg>
+)}
+
+{cat === 'medicine' && (
+  <svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <g {...S}>
+      {/* the staff, and the ball at its head */}
+      <path d="M12 8.6v10.8" />
+      <circle cx="12" cy="5.9" r="1.45" />
+      {/* two wings, swept up and out */}
+      <path d="M11 9.5C8.9 7.6 5.9 6.6 3.3 6.9c.6 2.9 3.5 5 6.8 5.1" />
+      <path d="M13 9.5c2.1-1.9 5.1-2.9 7.7-2.6-.6 2.9-3.5 5-6.8 5.1" />
+      {/* the two turns of the serpents, kept as bands */}
+      <path d="M10.3 14.2h3.4" />
+      <path d="M10.9 16.9h2.2" />
+    </g>
+  </svg>
+)}
+
+{cat === 'literature' && (
+  <svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <g {...S}>
+      <path d="M12 7.7C10.1 6.4 7.3 5.8 3.7 6v11.5c3.6-.2 6.4.4 8.3 1.7" />
+      <path d="M12 7.7c1.9-1.3 4.7-1.9 8.3-1.7v11.5c-3.6-.2-6.4.4-8.3 1.7" />
+      <path d="M12 7.7v11.5" />
+    </g>
+  </svg>
+)}
+
+{cat === 'peace' && (
+  <svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <g {...S} stroke-width="1.15">
+      <path d={stem} />
+      <path d={mirror} />
+      {leaves(1).map((l) => (
+        <ellipse cx={l.x} cy={l.y} rx="2.7" ry="1.2"
+                 transform={`rotate(${l.rot} ${l.x} ${l.y})`} />
+      ))}
+      {leaves(-1).map((l) => (
+        <ellipse cx={l.x} cy={l.y} rx="2.7" ry="1.2"
+                 transform={`rotate(${l.rot} ${l.x} ${l.y})`} />
+      ))}
+    </g>
+  </svg>
+)}
+
+{cat === 'economics' && (
+  <svg class={cls} viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <g fill="currentColor">
+      <rect x="3.2" y="14.6" width="3.5" height="5.4" rx="0.7" />
+      <rect x="8.2" y="11.2" width="3.5" height="8.8" rx="0.7" />
+      <rect x="13.2" y="7.8" width="3.5" height="12.2" rx="0.7" />
+      <rect x="18.2" y="4.4" width="3.5" height="15.6" rx="0.7" />
+    </g>
+  </svg>
+)}
