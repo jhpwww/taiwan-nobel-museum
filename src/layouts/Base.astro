@@ -9,6 +9,7 @@ const bright = process.env.THEME === 'bright';
 /** this museum's faces: names, hashed URLs, and its own stylesheet */
 const face: Record<string, string> = bright ? fontsBright : fonts;
 import PageNav from '../components/PageNav.astro';
+import LangFlag from '../components/LangFlag.astro';
 import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
 import { home, browse, about, learn, asset, otherLang } from '../i18n/routing';
 
@@ -29,7 +30,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 ---
 
 <!doctype html>
-<html lang={HTML_LANG[lang]} data-theme={bright ? 'bright' : undefined}>
+<!-- The glass rim is a picture and bright.css is a plain stylesheet, so the
+     one thing in it that needs to know where the site is mounted is handed in
+     here rather than hard-coded. See scripts/build-glass-frame.py. -->
+<html lang={HTML_LANG[lang]} data-theme={bright ? 'bright' : undefined}
+      style={bright ? `--glass-frame: url('${asset('assets/ui/glass-frame.webp')}')` : undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -88,8 +93,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             <a href={browse(lang)}>{t('nav.all')}</a>
             <a href={learn(lang)}>{t('nav.learn')}</a>
             <a href={about(lang)}>{t('nav.about')}</a>
-            <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}>
-              {LANG_LABEL[other.lang]}
+            <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
+               aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
+              <LangFlag to={other.lang} />
             </a>
           </nav>
         </div>
@@ -111,8 +117,9 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             <a href={browse(lang)}>{t('nav.all')}</a>
             <a href={learn(lang)}>{t('nav.learn')}</a>
             <a href={about(lang)}>{t('nav.about')}</a>
-            <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}>
-              {LANG_LABEL[other.lang]}
+            <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
+               aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
+              <LangFlag to={other.lang} />
             </a>
           </nav>
         </div>
@@ -208,10 +215,15 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         transition: color 0.25s var(--ease), border-color 0.25s var(--ease);
       }
       .topbar__nav a:hover { color: var(--gold-bright); border-block-end-color: var(--gold); }
+      /* The flag is the button; the words stay for anyone who cannot see it,
+         and are shown outright wherever there is room for them. */
       .topbar__lang {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.42rem;
         border: 1px solid var(--line) !important;
         border-radius: 999px;
-        padding: 0.22rem 0.85rem !important;
+        padding: 0.3rem 0.55rem !important;
         color: var(--gold) !important;
       }
       .topbar__lang:hover { background: var(--surface-hi); }

@@ -1,0 +1,56 @@
+---
+/**
+ * LangFlag.astro — the language switch, as the flag of the language it leads to.
+ *
+ * Flags for languages is a habit worth being uneasy about — a flag names a
+ * country, not a tongue, and English is not Britain's alone. It is here because
+ * it was asked for, and because on a bilingual Taiwanese site the pair reads
+ * unambiguously to the people who use it. The link still carries its accessible
+ * name in words, and `lang` on the anchor still tells a screen reader which
+ * language it is announcing, so nothing is riding on the picture.
+ *
+ * Both are drawn rather than fetched: two small paths beat two image requests,
+ * they stay sharp at any size, and neither can arrive late or fail to load.
+ */
+interface Props { to: 'zh' | 'en'; }
+const { to } = Astro.props;
+---
+{to === 'zh' ? (
+  /* 中華民國國旗 — 青天、白日、滿地紅. The sun's twelve rays stand for the
+     twelve double-hours of the day; they are drawn as a true twelve-point
+     star rather than suggested, because at this size a wrong count reads. */
+  <svg class="flag" viewBox="0 0 60 40" role="img" aria-hidden="true" focusable="false">
+    <rect width="60" height="40" fill="#fe0000" />
+    <rect width="30" height="20" fill="#000095" />
+    <path fill="#fff" d="M15.00,3.40L15.92,6.57L18.30,4.28L17.51,7.49L20.72,6.70L18.43,9.08L21.60,10.00L18.43,10.92L20.72,13.30L17.51,12.51L18.30,15.72L15.92,13.43L15.00,16.60L14.08,13.43L11.70,15.72L12.49,12.51L9.28,13.30L11.57,10.92L8.40,10.00L11.57,9.08L9.28,6.70L12.49,7.49L11.70,4.28L14.08,6.57Z" />
+    <circle cx="15" cy="10" r="3.1" fill="#000095" />
+    <circle cx="15" cy="10" r="2.5" fill="#fff" />
+  </svg>
+) : (
+  /* the Union Flag. The red saltire is counterchanged — offset within the
+     white one rather than centred on it — which is the detail that separates
+     a drawn Union Flag from a guessed one. */
+  <svg class="flag" viewBox="0 0 60 30" role="img" aria-hidden="true" focusable="false">
+    <clipPath id="uj-cut">
+      <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" />
+    </clipPath>
+    <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
+    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
+    <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uj-cut)" stroke="#c8102e" stroke-width="4" />
+    <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10" />
+    <path d="M30,0 v30 M0,15 h60" stroke="#c8102e" stroke-width="6" />
+  </svg>
+)}
+
+<style>
+  .flag {
+    display: block;
+    inline-size: 1.45rem;
+    block-size: auto;
+    border-radius: 2px;
+    /* a flag is a piece of cloth, not a glyph: a hairline and a shadow keep a
+       white field from dissolving into a white bar */
+    box-shadow: 0 0 0 0.5px rgba(40, 46, 58, 0.35),
+                0 1px 2px rgba(30, 40, 60, 0.28);
+  }
+</style>

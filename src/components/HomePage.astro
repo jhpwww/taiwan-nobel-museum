@@ -41,16 +41,12 @@ const nVideos = totalVideos();
    : style === 'models' ? <HallModels lang={lang} />
    : <Hall lang={lang} />}
 
-  {/* Everything under the hall travels together, and in the bright museum it
-      travels as one pane of glass. The hall is pinned for the whole document
-      now, so this is what is in front of it the rest of the way down: a single
-      frosted sheet with the room behind it. One blur, on this element — the
-      sections and cards inside only tint what it has already frosted, which is
-      both cheaper and more like glass than seven separate panes.
-      A runway used to stand between the two, a screenful of white to walk the
-      pieces across. The retreat is one second on a cue now, not a walk, and
-      the runway was just an empty screen. */}
-  <div class="after">
+  {/* Everything under the hall travels together. In the bright museum it
+      travels over an open room: this carries no ground of its own, so the
+      strip, the cards and the video panes are what is seen, and the hall is
+      seen between them. It is also where the cue at the foot of the hall
+      leads. */}
+  <div class="after" id="more">
   <section class="strip">
     <div class="wrap">
       <dl class="stats">
@@ -116,7 +112,7 @@ const nVideos = totalVideos();
 
 <style>
   /* opaque on the dark site, where there is nothing behind it; the bright
-     museum makes this glass — see 'the sheet over the hall' in bright.css */
+     museum takes the ground away entirely — see bright.css */
   .after { position: relative; z-index: 1; background: var(--bg-0); }
   .strip { border-block: 1px solid var(--line); background: var(--bg-1); }
   .stats {

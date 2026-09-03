@@ -230,15 +230,27 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
 
   </div>
 
-  <div class="bh__masthead">
+  {/* Everything the hall stands still with, on one fixed layer.
+      Fixed, not held by script: a transform applied on a scroll event lands a
+      frame after the compositor has already moved the page, and the row of
+      pieces shivered against the room all the way down. Nothing here moves at
+      all now, so there is nothing left to shiver. */}
+  {/* The name stands over the page, not behind it — a museum's name is the one
+      thing that is never obscured by what is on show. Everything else on the
+      stage stands behind. */}
+  <header class="bh__lockup">
+    <span class="bh__lock-rule" aria-hidden="true"></span>
+    <span class="bh__uni">{t('site.university')}</span>
     <h1 id="hall-title" class="bh__title">{t('site.tagline')}</h1>
-  </div>
+    <span class="bh__title-en" lang="en">{lang === 'zh' ? 'Nobel Lecture Museum' : '諾貝爾講座博物館'}</span>
+  </header>
 
+  <div class="bh__stage">
   {/* Each piece is named outright rather than left to be assembled from what
       is inside it. The label's characters are split into their own elements so
       each can be turned onto the drum, and inline-block spans are a known way
       to get a name read out one letter at a time. */}
-  <nav class="bh__plinths" aria-label={t('hall.enter')}>
+    <nav class="bh__plinths" aria-label={t('hall.enter')} data-state="in">
     {cats.map((c) => (
       <a class="bh__piece" href={c.href} data-cat={c.key} aria-label={c.label}>
         <span class="bh__art">
@@ -275,38 +287,77 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
             <span class="bh__name-en">{c.nameAlt}</span>
           </span>
         </span>
-        <span class="bh__n">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
+        {/* On a phone the name is read here rather than off the drum — see
+            the note in the media query. */}
+        <span class="bh__n">
+          <span class="bh__cap">{c.name}</span>
+          <span class="bh__count">{c.n > 0 ? t('hall.count', { n: c.n }) : t('hall.soon')}</span>
+        </span>
       </a>
     ))}
-  </nav>
+    </nav>
 
-  <a class="bh__intro" href={gallery(lang, INTRO)} data-cat={INTRO}>
-    <span class="bh__intro-txt">
-      <span class="bh__eyebrow">{t('hall.nobelRoom')}</span>
-      <span class="bh__intro-title">{introA}<span class="conj">{introConj}</span>{introB}</span>
-      <span class="bh__intro-desc">{t('hall.introDesc')}</span>
-    </span>
-    <span class="bh__cta" aria-hidden="true">{t('hall.introCta')} →</span>
-  </a>
+    <div class="bh__foot">
+      <a class="bh__intro" href={gallery(lang, INTRO)} data-cat={INTRO}>
+        <span class="bh__intro-txt">
+          <span class="bh__eyebrow">{t('hall.nobelRoom')}</span>
+          <span class="bh__intro-title">{introA}<span class="conj">{introConj}</span>{introB}</span>
+          <span class="bh__intro-desc">{t('hall.introDesc')}</span>
+        </span>
+        <span class="bh__cta" aria-hidden="true">{t('hall.introCta')} →</span>
+      </a>
+
+      {/* The way on. A mouse with a rolling wheel is the usual drawing and it
+          belongs to a different kind of site; this is the room's own idiom — a
+          gold hairline with a bead of light running down it, under an arch cut
+          from the same stroke as the windows behind it. */}
+      <a class="bh__cue" href="#more" aria-label={t('hall.scroll')}>
+        <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
+        <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
+          <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
+        </svg>
+        <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
+      </a>
+    </div>
+  </div>
 </section>
 
 <style>
+  /* ---------- the hall's own measurements ----------
+   *
+   * Everything below is placed off these rather than off the flow, because the
+   * flow was placing the pieces by accident: their feet landed on the room's
+   * top step because the masthead above them happened to be the height it was.
+   * Move the title to the corner or put a scroll cue under the row, and six
+   * gold objects float an inch above a marble floor.
+   *
+   * So the row is anchored to the photograph. The plate is contained, so its
+   * height is whichever of the two limits binds; the horizon is the measured
+   * 69.2% of it; and the drum's foot is 95.7% of the way down its own frame.
+   * Put those together and the pieces stand on the step at every window size,
+   * whatever else is on the screen.
+   */
   .bh {
+    --plate-h: min(calc(100vw * 941 / 1672), min(100svh, 62rem));
+    --horizon: calc(var(--plate-h) * 0.692);
+    --pad: 0.4rem;
+    --row-w: calc((100vw - 4.068 * var(--pad)) / 1.161);
+    --frame-w: min(24rem, calc(var(--row-w) / 6 - 2 * var(--pad)));
+    --frame-h: calc(var(--frame-w) * 2);
+
     position: relative;
     min-block-size: min(100svh, 62rem);
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    align-content: start;
-    padding-block: max(clamp(1.5rem, 4vh, 3.5rem), 4.4rem) clamp(2rem, 5vh, 4rem);
-    /* Not hidden. The row is held still against the scroll and outlives this
-       section by the whole document; clipping to the section cut it away
+    /* Not hidden. The room and its furniture are fixed and outlive this
+       section by the whole document; clipping to the section cut them away
        within a screenful. The scene clips its own plate, so nothing needs
-       clipping here, and the glass below covers what is left. */
+       clipping here. */
     overflow: visible;
-    isolation: isolate;
-    /* flat, and exactly the colour the plate's own edges fade into — a
-       gradient here reappears as a band under the photograph */
-    background: var(--bg-0);
+    /* No stacking context, and no ground of its own — the body already carries
+       the page's white. Both used to be here, and both had to go so that the
+       three layers could be ordered against the page rather than against each
+       other: the room and the pieces below what is being read (z-index 0), the
+       page over them (1), and the museum's name over that (2). Isolating this
+       section capped every one of them inside it. */
   }
 
   /* ---------- the room ---------- */
@@ -319,7 +370,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      content and under the sheet below; and .bh sets no transform or filter, so
      nothing steals the containing block back off the viewport. */
   .bh__scene {
-    position: fixed; inset: 0; z-index: -1; overflow: hidden;
+    position: fixed; inset: 0; z-index: 0; overflow: hidden;
   }
 
   /* The plate is the photograph's own frame, and everything in the hall is
@@ -421,14 +472,126 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
 
   :global(html[data-motion='off']) .bh__screen .b { animation: none; }
 
-  /* ---------- masthead ---------- */
-  .bh__masthead { text-align: center; padding-inline: 1rem; position: relative; }
+  /* ---------- the stage ----------
+     The same box the hall used to be, but out of the flow, so the name, the
+     pieces, the introduction and the cue all stand exactly still. It lets
+     everything through except the three things that are meant to be clicked. */
+  .bh__stage {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-start: 0;
+    z-index: 0;
+    block-size: min(100svh, 62rem);
+    pointer-events: none;
+  }
+  .bh__stage > * { pointer-events: auto; }
+
+  /* ---------- the name ----------
+   *
+   * A museum's name is cut into the wall by the door, not floated over the
+   * middle of the room. So it is a lockup in the corner: a gold rule, the
+   * university above in small caps, the name in the Han serif, the English
+   * under it — the order a chiselled inscription uses, and the order the
+   * printed matter of this project already uses.
+   *
+   * It never moves and never leaves, which is what makes the halo necessary
+   * rather than decorative: the page runs under it for the whole document, so
+   * the type has to hold against marble, against gold and against whatever
+   * paragraph is passing. The halo is light rather than a panel — a panel in
+   * the corner of a photograph reads as a sticker. */
+  .bh__lockup {
+    position: fixed;
+    z-index: 2;
+    inset-block-start: clamp(4.6rem, 9vh, 7rem);
+    inset-inline-start: clamp(1.1rem, 4.2vw, 3.4rem);
+    display: grid;
+    justify-items: start;
+    gap: 0.16rem;
+    padding: 0.7rem 1.5rem 0.9rem 0;
+    isolation: isolate;
+    border-radius: 0.42rem;
+    transition: inset-block-start 0.55s var(--ease), inset-inline-start 0.55s var(--ease),
+                padding 0.55s var(--ease), background 0.4s var(--ease),
+                box-shadow 0.4s var(--ease);
+  }
+  .bh__lockup::before { transition: opacity 0.4s var(--ease); }
+  .bh__lock-rule, .bh__uni, .bh__title-en, .bh__title {
+    transition: opacity 0.35s var(--ease), block-size 0.5s var(--ease),
+                margin 0.5s var(--ease), font-size 0.5s var(--ease);
+  }
+
+  /* Condensed, once the hall has been left behind.
+   *
+   * It does not scroll — it never moves with the page — but it cannot stay a
+   * display headline either: the page below carries no ground of its own, so
+   * everything that comes up passes straight under it, and 本館推薦 was landing
+   * inside 諾貝爾講座博物館. So the inscription becomes a mark: the rule, the
+   * university and the English line fold away, the name shrinks, and it takes
+   * the same frosted tablet the bar's keys wear, level with them. Coming back
+   * up the page opens it out again. */
+  .bh__lockup[data-small] {
+    inset-block-start: 0.62rem;
+    inset-inline-start: clamp(0.7rem, 2.2vw, 1.6rem);
+    padding: 0.34rem 0.85rem;
+    background: rgba(255, 255, 255, 0.42);
+    backdrop-filter: blur(14px) saturate(1.5);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+      0 1px 2px rgba(46, 58, 78, 0.06),
+      0 8px 20px -14px rgba(46, 58, 78, 0.5);
+  }
+  .bh__lockup[data-small]::before { opacity: 0; }
+  .bh__lockup[data-small] :is(.bh__lock-rule, .bh__uni, .bh__title-en) {
+    block-size: 0; opacity: 0; margin-block: 0; overflow: hidden;
+  }
+  .bh__lockup[data-small] .bh__title {
+    font-size: var(--step-0);
+    letter-spacing: 0.07em;
+    text-indent: 0.07em;
+    text-shadow: none;
+  }
+  .bh__lockup::before {
+    content: '';
+    position: absolute;
+    inset: -1.4rem -3rem -1.6rem -2.4rem;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(58% 62% at 34% 50%,
+      rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.5) 46%, transparent 78%);
+  }
+  /* the rule the inscription hangs from */
+  .bh__lock-rule {
+    inline-size: clamp(2.6rem, 7vw, 4.4rem);
+    block-size: 2px;
+    margin-block-end: 0.5rem;
+    background: linear-gradient(to right, var(--gold-orn, #b8862a), rgba(184, 134, 42, 0.15));
+  }
+  .bh__uni {
+    font-size: var(--step--2);
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;          /* letter-spacing pads the right; give it back */
+    color: var(--gold-orn, #b8862a);
+    text-transform: uppercase;
+  }
   .bh__title {
     font-family: var(--font-han-serif);
-    font-size: var(--step-4);
+    font-size: clamp(1.72rem, 3.5vw, 3rem);
+    line-height: 1.12;
     color: var(--cream);
-    letter-spacing: 0.04em;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
+    /* Wide for a display line, because the name is the one place the hall can
+       afford the air — and because letterspaced Han is what a carved lintel
+       looks like. */
+    letter-spacing: 0.1em;
+    text-indent: 0.1em;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+  }
+  .bh__title-en {
+    font-size: var(--step--1);
+    letter-spacing: 0.24em;
+    text-indent: 0.24em;
+    color: var(--muted);
+    margin-block-start: 0.28rem;
   }
 
   /* ---------- the pieces ---------- */
@@ -448,22 +611,21 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * below. Leaving the padding out of it — the first attempt — lands at 1.81
    * to 1.87 rather than 2. */
   .bh__plinths {
-    /* Two transforms with two different jobs, so they are two properties.
-       `translate` cancels the scroll every frame and must not lag; `transform`
-       carries the one-second retreat and must. They compose translate · scale,
-       in that order, which is the order that keeps the pin unscaled — the same
-       pair written into `transform` alone would multiply the hold by the
-       scale and the row would drift as it shrank. */
-    will-change: transform, translate;
-    transition: transform 1s var(--ease);
+    /* Placed off the photograph rather than off the flow — see the note by
+       .bh. The frame's foot is 95.7% of the way down it, so lifting the row by
+       that much from the horizon stands the drums on the top step; the piece's
+       own half-rem of padding comes off as well. */
+    position: absolute;
+    inset-inline: 0;
+    margin-inline: auto;
+    inset-block-start: calc(var(--horizon) - 0.957 * var(--frame-h) - 0.5rem);
+    inline-size: var(--row-w);
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    grid-template-columns: repeat(6, 1fr);
     gap: 0;
     align-items: end;
-    --pad: 0.4rem;
-    inline-size: calc((100% - 4.068 * var(--pad)) / 1.161);
-    margin: clamp(1.2rem, 3.5vh, 2.6rem) auto 0;
-    position: relative;
+    will-change: transform;
+    transition: transform 1s var(--ease), opacity 0.6s var(--ease);
   }
   .bh__piece {
     display: grid; justify-items: center; gap: 0.1rem;
@@ -478,7 +640,33 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   :global(html[data-motion='off']) .bh__piece:hover { transform: none; }
   /* the room still stands still — that is the page's ground, not motion — but
      the retreat arrives rather than travels */
-  :global(html[data-motion='off']) .bh__plinths { transition: none; }
+  :global(html[data-motion='off']) .bh__plinths,
+  :global(html[data-motion='off']) .bh__piece { transition: none; }
+
+  /* Both the arrival and the retreat turn about the room's own vanishing
+     point, and neither needs measuring: the row is anchored to the horizon, so
+     where the horizon falls inside it is known in advance — 95.7% of the frame
+     plus the piece's padding, the same line the drums stand on. Which means no
+     script has to run before the pieces are in the right place, and none has
+     to run again when the window changes. */
+  .bh__plinths { transform-origin: 50% calc(0.957 * var(--frame-h) + 0.5rem); }
+
+  /* Coming in: far off and small when the page opens, walking up to their
+     places over a second. It is a CSS animation rather than a scripted one so
+     that it cannot flash a screenful of full-size pieces before the script
+     runs, and so that it still happens with no script at all. `backwards`
+     rather than `forwards`: a filled animation goes on overriding the inline
+     transform afterwards, and the retreat would never take. */
+  .bh__plinths { animation: bh-arrive 1s var(--ease) backwards; }
+  @keyframes bh-arrive {
+    from { transform: scale(0.34); opacity: 0; }
+    to   { transform: none; opacity: 1; }
+  }
+  :global(html[data-motion='off']) .bh__plinths { animation: none; }
+
+  /* Gone back. On a desktop that is one scale about the vanishing point, which
+     in a one-point perspective is exactly what walking away does. */
+  .bh__plinths[data-state='back'] { transform: scale(0.5); }
 
   .bh__art {
     /* Portrait, not square. The piece is a tall thing in a wide box: at a
@@ -630,10 +818,23 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     font-size: var(--step--1); color: var(--muted);
     min-block-size: 2lh;
   }
+  .bh__count { display: block; }
+  /* the drum carries the name at this size; below, it cannot */
+  .bh__cap { display: none; }
 
-  /* ---------- introduction ---------- */
-  /* This is the line the retreat waits for, so it scrolls while the room and
-     the pieces hold — it passes up over them, which is why it is glass. */
+  /* ---------- the foot: the introduction, and the way on ---------- */
+  .bh__foot {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: clamp(0.7rem, 2vh, 1.5rem);
+    display: grid;
+    justify-items: center;
+    gap: clamp(0.5rem, 1.4vh, 0.95rem);
+    /* both of these belong to the hall's first screen and go when it does */
+    transition: opacity 0.55s var(--ease), visibility 0.55s var(--ease);
+  }
+  .bh__foot[data-gone] { opacity: 0; visibility: hidden; }
+
   .bh__intro {
     position: relative;
     display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.8rem);
@@ -658,28 +859,160 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   .bh__intro-desc { font-size: var(--step--1); color: var(--muted); }
   .bh__cta { margin-inline-start: auto; color: var(--accent); font-size: var(--step--1); white-space: nowrap; }
 
-  @media (max-width: 48rem) {
-    .bh__plinths { grid-template-columns: repeat(2, 1fr); }
+  /* ---------- the way on ----------
+     A hairline, a bead of light running down it, one chevron and a word. The
+     bead is what carries the meaning — a mark that travels downward is read as
+     'downward' before it is read as anything else — and the hairline is the
+     same gold as the rule under the name, so the two ends of the screen belong
+     to each other. */
+  .bh__cue {
+    display: grid;
+    justify-items: center;
+    gap: 0.3rem;
+    text-decoration: none;
+    padding: 0.2rem 1rem 0;
+    border-radius: var(--radius);
+  }
+  .bh__cue-rule {
+    position: relative;
+    inline-size: 1px;
+    block-size: clamp(1.5rem, 3.4vh, 2.3rem);
+    background: linear-gradient(to bottom,
+      transparent, rgba(184, 134, 42, 0.55) 30%, rgba(184, 134, 42, 0.55) 70%, transparent);
+  }
+  .bh__cue-rule i {
+    position: absolute;
+    inset-inline-start: 50%;
+    inline-size: 4px; block-size: 4px;
+    margin-inline-start: -2px;
+    border-radius: 50%;
+    background: var(--gold-bright, #d8a63c);
+    box-shadow: 0 0 6px 1px rgba(216, 166, 60, 0.75);
+    animation: bh-bead 2.6s var(--ease) infinite;
+  }
+  @keyframes bh-bead {
+    0%   { inset-block-start: 0;    opacity: 0; }
+    18%  { opacity: 1; }
+    72%  { opacity: 1; }
+    100% { inset-block-start: 100%; opacity: 0; }
+  }
+  .bh__cue-chev {
+    inline-size: 1.05rem; block-size: auto;
+    fill: none;
+    stroke: var(--gold-orn, #b8862a);
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0.85;
+  }
+  .bh__cue-txt {
+    font-size: var(--step--2);
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;
+    color: var(--gold-orn, #b8862a);
+    text-transform: uppercase;
+  }
+  .bh__cue:hover .bh__cue-chev { opacity: 1; translate: 0 2px; }
+  .bh__cue-chev { transition: opacity 0.3s var(--ease), translate 0.3s var(--ease); }
+  :global(html[data-motion='off']) .bh__cue-rule i { animation: none; inset-block-start: 40%; }
 
-    /* A 1.92:1 picture shown whole across a phone is a band, not a backdrop,
-       so the scene is cut to exactly the height the picture needs and the page
-       carries on below it. Nothing is cropped; there is simply less room. */
-    .bh__scene { block-size: calc(100vw * 941 / 1672); }
+  /* ---------- the phone ----------
+   *
+   * Three abreast and two deep, and the whole hall inside one screen — which
+   * is an arithmetic problem, not a layout one. A 1.92:1 picture shown whole
+   * across a phone is a band 220px tall; the introduction and the cue want
+   * another 150; the two rows of labels another 70. What is left over is what
+   * the sculptures get, and on a short phone that is not much. So the frame's
+   * height is that leftover, divided by two, rather than an aspect ratio —
+   * a ratio would have been correct and would not have fitted.
+   *
+   * Nothing is cropped: the picture is still whole, there is simply less room
+   * around it. */
+  @media (max-width: 48rem) {
+    .bh {
+      --band: calc(100vw * 941 / 1672);
+      --foot-h: 11.4rem;       /* the introduction and the cue, measured */
+      --label-h: 2.4rem;       /* the count under each piece, with its padding */
+      --art-h: max(5.2rem, calc((min(100svh, 62rem) - var(--band)
+               - var(--foot-h) - 2 * var(--label-h) - 1.5rem) / 2));
+      padding-block: 0;
+      min-block-size: 100svh;
+    }
+    .bh__scene { block-size: var(--band); }
     .bh__plate { inline-size: 100%; }
-    /* clear of it, or the masthead sits astride the picture's lower edge */
-    .bh { padding-block-start: calc(100vw * 941 / 1672 + 1.1rem); }
+
+    /* the name sits over the picture's top-left corner, where the room is
+       empty wall; the bar's keys stack down the opposite corner */
+    .bh__lockup {
+      inset-block-start: 0.7rem;
+      inset-inline-start: 0.85rem;
+      padding-block: 0.4rem 0.5rem;
+    }
+    .bh__lock-rule { margin-block-end: 0.34rem; }
+    .bh__title { font-size: clamp(1.32rem, 7.4vw, 1.9rem); }
+    .bh__title-en { font-size: 0.62rem; letter-spacing: 0.16em; text-indent: 0.16em; }
+
+    .bh__plinths {
+      inset-block-start: calc(var(--band) + 0.5rem);
+      inline-size: min(100% - 0.9rem, 30rem);
+      grid-template-columns: repeat(3, 1fr);
+      row-gap: 0.25rem;
+      transform-origin: 50% 0;
+    }
+    /* The frame keeps its 1:2 — it is narrowed to the height it is allowed,
+       rather than squashed into the column. Everything on the drum's face is
+       sized in container units of this box, and those units assume the piece
+       fills a frame twice as tall as it is wide; let the box go squat and
+       model-viewer fits the model to the height instead, the drum draws
+       narrower than the label expects, and 生理學或醫學 runs off both sides
+       of its own plinth. */
+    .bh__art { inline-size: min(100%, calc(var(--art-h) / 2)); }
+    .bh__piece { padding: 0.25rem var(--pad) 0.35rem; }
+
+    /* The name comes off the drum and stands under the piece.
+     *
+     * Everything on the drum's face is sized in container units of the frame,
+     * with a floor to keep it legible on a narrow desktop — and on a phone the
+     * frame is half the size, so the floor binds and the type is 58% too big
+     * for the drum it is cut into: 生理學或醫學 ran off both sides of its own
+     * plinth and into the line below. Sized properly it would be nine pixels,
+     * which is not a label, it is a texture.
+     *
+     * So at this size the drum keeps its device and its rings — enough to know
+     * which piece is which — and the name is set underneath where it can
+     * actually be read. It is the same name; only the surface changes. */
+    .bh__face .bh__name, .bh__face .bh__name-en { display: none; }
+    .bh__mark { inline-size: 17cqw; margin-block-end: 0; }
+    .bh__n { font-size: var(--step--2); line-height: 1.3; min-block-size: 0; }
+    .bh__cap { display: block; color: var(--cream); font-weight: 500; }
+
+    /* Gone back, on a phone: one line of six rather than the same six further
+       off. Six across a 390px screen is 64px each, at which a name cut into a
+       drum is a smudge — so the labels and the rings go with the distance,
+       which is what distance does to lettering anyway. */
+    .bh__plinths[data-state='back'] {
+      transform: none;
+      grid-template-columns: repeat(6, 1fr);
+      inline-size: min(100% - 0.5rem, 34rem);
+    }
+    .bh__plinths[data-state='back'] .bh__art { inline-size: min(100%, calc(var(--art-h) * 0.26)); }
+    .bh__plinths[data-state='back'] .bh__n { display: none; }
+    .bh__plinths[data-state='back'] .bh__face,
+    .bh__plinths[data-state='back'] .bh__rings { opacity: 0; transition: opacity 0.5s var(--ease); }
+
     /* The same wall at 0.62 — see the note by wall() for why the factor is
        enough on its own. Nothing else about the wall changes. */
     .bh__wallwrap { perspective: var(--persp-n); }
     .bh__wall { --panel: var(--panel-n); --z: var(--z-n); --lift: var(--lift-n); }
-    .bh__intro { flex-wrap: wrap; }
-    .bh__cta { margin-inline-start: 0; }
-  }
-  @media (max-width: 34rem) {
-    /* The floor here used to be 8.7rem, to clear the style switch and the
-       motion toggle where they stack. With those gone the picture is the only
-       thing to clear, and the rule above already does it. */
-    .bh { padding-block-start: calc(100vw * 941 / 1672 + 1.1rem); }
+
+    .bh__foot { gap: 0.45rem; inset-block-end: 0.6rem; }
+    .bh__intro {
+      inline-size: min(100% - 1rem, 30rem);
+      padding: 0.6rem 0.9rem;
+      gap: 0.5rem;
+    }
+    .bh__intro-desc { display: none; }   /* the title and the call are enough here */
+    .bh__cue-txt { display: none; }
   }
 </style>
 
@@ -713,16 +1046,42 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * at the ends and the slight loss of size with depth are what sell it, and
    * neither is drawn by hand.
    *
-   * The angle is asin(x / R) rather than x / R, which is the difference
-   * between projecting the label onto the cylinder and wrapping it round by
-   * arc length. Projecting keeps every character exactly where the layout put
-   * it — the label holds the width it was designed to, and nothing reflows.
+   * The angle is x / R — arc length — and not asin(x / R). That is the
+   * difference between wrapping the label round the cylinder and projecting it
+   * onto one, and it is the whole of what was wrong with 生理學或醫學.
    *
-   * Both figures are measured off the model rather than chosen: at the label's
-   * height the drum draws 144px across a 190px frame, and the camera sits about
-   * 8° under the label. That is enough — the outermost character of the longest
-   * name draws at about seven tenths of its width and the line bows a couple of
-   * pixels, which reads.
+   * Projecting leaves each character where the layout put it and shrinks it
+   * about its own centre. Two neighbours therefore both pull away from the
+   * line between them, and a gap opens — w(1 − (cos θᵢ + cos θᵢ₊₁)/2) wide,
+   * which at the ends of a six-character name is a fifth of a character. The
+   * label stopped reading as a curve and started reading as squashed letters
+   * with holes between them, worst exactly where the name is longest.
+   *
+   * Wrapping by arc length puts the right-hand edge of one character and the
+   * left-hand edge of the next at the same arc position — but only if the
+   * character is moved to where that arc position projects. Turning it in
+   * place is not enough: the layout puts its centre at the arc length rθ and
+   * the cylinder puts it at the chord r·sin θ, and the difference is exactly
+   * the gap. So each character is also slid inward by r·sin θ − rθ, which is
+   * three pixels at the ends of the longest name and nothing in the middle.
+   * The line contracts by that much — 6% at this width, which is what a label
+   * wrapped round a drum actually does — and it is continuous.
+   *
+   * The radius is measured off the model: at the label's height the drum draws
+   * 144px across a 190px frame.
+   *
+   * How much of that depth reads as height is NOT a separate figure, and
+   * treating it as one is what bent 生理學或醫學 the wrong amount. It was a
+   * guessed 8° of camera tilt, which lifted the outer characters 2.2px while
+   * the gold rings — drawn on the very same drum, from measured constants —
+   * rise only 1.35px across the same span. The line therefore sat on a tighter
+   * cylinder than the drum it is cut into, bowed two thirds too hard, and
+   * kinked at the ends where the foreshortening is strongest.
+   *
+   * So it comes from the rings instead. A horizontal circle at height y draws
+   * as an ellipse b deep, and b/R is exactly how much a unit of depth rises on
+   * screen. Same two constants, same drum, by construction rather than by
+   * agreement.
    *
    * They were briefly set to 0.30 and 18° on the belief that the true figures
    * were invisible. They were not invisible; they were not being applied at all,
@@ -734,7 +1093,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * Progressive: if this never runs, the labels are simply flat.
    */
   const DRUM_R = 0.379;        // of the frame's width, measured
-  const VIEW_TILT = 8;         // degrees the camera sits under the label
   /* No character turns further than this. The type is set with a clamp, so at
      narrow widths its floor binds while the frame goes on shrinking and the
      line takes a larger share of the drum: at 1120px the ends were turning 71°
@@ -743,113 +1101,92 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   const MAX_TURN = (55 * Math.PI) / 180;
 
   /**
-   * The hall stays. The pieces step back into it, once.
+   * The pieces step back, once.
    *
-   * The room is pinned by the stylesheet — `position: fixed`, for the whole
-   * document — so everything here is about the row of six.
+   * Everything about where they stand is in the stylesheet — the row is
+   * anchored to the photograph's own horizon and turns about its vanishing
+   * point, so nothing here has to measure anything, and nothing has to run
+   * again when the window changes. What is left for a script is the cue: at
+   * what point on the page the six withdraw.
    *
-   * The row is pinned too, but by cancelling the scroll on it rather than by
-   * taking it out of the flow: it keeps its place in the grid, so the title
-   * above it and the introduction below it still sit where they always did,
-   * and still travel. That travel is what drives this. 關於這座獎 is the last
-   * line of the hall; when it reaches the top of the window the hall has
-   * finished being the page's subject, and the pieces withdraw — all six at
-   * once, over a second, and not again.
+   * A desktop's is two notches of a wheel. A wheel notch is 100px nearly
+   * everywhere, so it is 200px — far enough that a nudge does not fire it, and
+   * near enough that it happens while the hall is still the thing being looked
+   * at. A phone has no wheel and a much shorter screen, so it is a fifth of the
+   * window instead.
    *
-   * They withdraw by scaling about the hall's own vanishing point. In a
-   * one-point perspective that is not an approximation of walking away, it is
-   * exactly what walking away does: every piece slides toward the far doorway
-   * and shrinks in proportion, so the spacing, the plinths and the type recede
-   * together instead of each shrinking where it stands.
-   *
-   * The pin and the retreat are kept in two different CSS properties on
-   * purpose — see the note by .bh__plinths. Scrolling back above the line
-   * brings them forward again, by the same second.
+   * And what they withdraw *to* differs. On a desktop the six stay a row of
+   * six and simply go further off. On a phone they are three abreast and two
+   * deep, and the far version is a single line of six — a different grid, not
+   * a smaller one, which no property can tween. So the pieces are carried from
+   * where they were to where they now are: measure, relayout, put each one
+   * back where it started, then let go. The browser animates the rest.
    */
-  const RECEDE_TO = 0.5;
+  const ROOM = matchMedia('(min-width: 48rem)');
+  const WHEEL = 200;          // two notches
+  const SHARE = 0.2;          // or a fifth of a phone's screen
 
   const plinths = document.querySelector<HTMLElement>('.bh__plinths');
-  const plate = document.querySelector<HTMLElement>('.bh__plate');
-  const intro = document.querySelector<HTMLElement>('.bh__intro');
-  const bar = document.querySelector<HTMLElement>('.topbar');
+  const foot = document.querySelector<HTMLElement>('.bh__foot');
+  const lockup = document.querySelector<HTMLElement>('.bh__lockup');
+  const pieces = [...document.querySelectorAll<HTMLElement>('.bh__piece')];
 
-  let trigger = Infinity;
-  /* How far the page scrolls before the row locks.
-   *
-   * Nought on any screen the row fits on, which is every desktop — it locks
-   * from the top and never moves. On a phone it does not fit: the six stand
-   * two abreast and the last pair is a screen and a half down, so a row pinned
-   * from the top would hold 經濟學 and 文學 below the fold permanently and
-   * neither could ever be reached from the hall. So the row is held from the
-   * moment it has finished being revealed, which on a desktop is immediately
-   * and on a phone is once its last piece has come up. The room itself is
-   * pinned from the start either way; this is only about the six.
-   */
-  let pinFrom = 0;
   let back: boolean | null = null;
 
-  function anchor() {
-    if (!plinths || !plate || !intro) return;
-    /* measure with both transforms off, or the anchor drifts by whatever the
-       row is already carrying — and without the transition, or clearing them
-       animates */
-    const held = plinths.style.transform;
-    plinths.style.transition = 'none';
-    plinths.style.transform = '';
-    plinths.style.translate = '';
-
-    const pr = plate.getBoundingClientRect();
-    const gr = plinths.getBoundingClientRect();
-    const top = gr.top + scrollY;                        // the row, unheld
-    pinFrom = Math.max(0, top + gr.height - innerHeight);
-
-    /* The vanishing point in the row's own coordinates — the far doorway the
-       pieces are walking toward. The plate is fixed, so its rectangle is
-       already where it will be on screen for ever; the row will be, once it is
-       held, `pinFrom` higher than where it is measured. Leaving that term out
-       is what would send the phone's pieces off toward a doorway a screen and
-       a half above the one in the picture. */
-    const vpX = pr.left + (pr.width * Number(plate.dataset.vpX ?? 50)) / 100;
-    const vpY = pr.top + (pr.height * Number(plate.dataset.vpY ?? 65)) / 100;
-    plinths.style.transformOrigin =
-      `${(vpX - gr.left).toFixed(1)}px ${(vpY - top + pinFrom).toFixed(1)}px`;
-
-    /* under the bar, not under the window's edge: the bar is fixed over the
-       hall, so a line level with the very top has not arrived, it is hidden */
-    trigger = intro.getBoundingClientRect().top + scrollY - (bar?.offsetHeight ?? 0);
-
-    plinths.style.transform = held;
-    void plinths.offsetWidth;
-    plinths.style.transition = '';
-  }
-
-  function pin() {
-    if (plinths) plinths.style.translate = `0 ${Math.max(0, Math.round(scrollY - pinFrom))}px`;
+  /** carry each piece from where it was to where it now is */
+  function flip(before: DOMRect[]) {
+    const after = pieces.map((p) => p.getBoundingClientRect());
+    pieces.forEach((p, i) => {
+      const dx = before[i].left - after[i].left;
+      const dy = before[i].top - after[i].top;
+      const k = after[i].width ? before[i].width / after[i].width : 1;
+      p.style.transition = 'none';
+      p.style.transformOrigin = 'top left';
+      p.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px) scale(${k.toFixed(4)})`;
+    });
+    void plinths!.offsetWidth;
+    for (const p of pieces) {
+      p.style.transition = 'transform 1s var(--ease)';
+      p.style.transform = '';
+    }
+    /* hand the piece back to the stylesheet, or the hover lift inherits this
+       transition and takes a second to happen */
+    setTimeout(() => {
+      for (const p of pieces) { p.style.transition = ''; p.style.transformOrigin = ''; }
+    }, 1050);
   }
 
   function setBack(v: boolean, animate: boolean) {
     if (!plinths || v === back) return;
+    const wide = ROOM.matches;
+    const before = animate && !wide ? pieces.map((p) => p.getBoundingClientRect()) : null;
     back = v;
-    if (!animate) plinths.style.transition = 'none';
-    plinths.style.transform = v ? `scale(${RECEDE_TO})` : 'scale(1)';
-    if (!animate) { void plinths.offsetWidth; plinths.style.transition = ''; }
+    plinths.dataset.state = v ? 'back' : 'in';
+    foot?.toggleAttribute('data-gone', v);
+    lockup?.toggleAttribute('data-small', v);
+    if (before) flip(before);
+  }
+
+  function step(animate = true) {
+    setBack(scrollY >= (ROOM.matches ? WHEEL : innerHeight * SHARE), animate);
   }
 
   if (plinths) {
-    anchor();
-    pin();
-    /* whatever the page was restored at, the first state is simply the state —
-       a reload halfway down should not play the retreat at the reader */
-    setBack(scrollY >= trigger, false);
-
+    /* whatever the page was restored at, the first state is simply the state */
+    step(false);
     let ticking = false;
     addEventListener('scroll', () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => { pin(); setBack(scrollY >= trigger, true); ticking = false; });
+      requestAnimationFrame(() => { step(); ticking = false; });
     }, { passive: true });
-    addEventListener('resize', () => {
-      anchor(); pin(); setBack(scrollY >= trigger, false);
+    /* crossing the width changes both the cue and the shape of the far state,
+       so the row is put back and re-decided from scratch */
+    ROOM.addEventListener('change', () => {
+      for (const p of pieces) { p.style.transition = 'none'; p.style.transform = ''; }
+      back = null;
+      step(false);
+      requestAnimationFrame(() => { for (const p of pieces) p.style.transition = ''; });
     });
   }
 
@@ -958,7 +1295,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     for (const face of faces) {
       const frame = face.parentElement;
       if (!frame) continue;
-      const R = frame.getBoundingClientRect().width * DRUM_R;
+      const fr = frame.getBoundingClientRect();
+      const R = fr.width * DRUM_R;
       if (!(R > 0)) continue;
       drawRings(face, frame);
       for (const line of face.querySelectorAll<HTMLElement>('.bh__name, .bh__name-en')) {
@@ -979,16 +1317,24 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
         });
 
         const reach = Math.max(...dx.map(Math.abs), 1);
-        const r = Math.max(R, reach / Math.sin(MAX_TURN));
+        const r = Math.max(R, reach / MAX_TURN);
+
+        /* How steeply this line's own circle opens, in the ring's own terms:
+           b at this height, over the radius it is worked on. At the Han name's
+           height that is about 0.085 — under 5°, not the 8° that was assumed. */
+        const b = Math.max(0, (mid.top + mid.height / 2 - fr.top - fr.height * EYE) * ELLIPSE);
+        const rise = b / r;
 
         chars.forEach((ch, i) => {
-          const th = Math.asin(Math.max(-1, Math.min(1, dx[i] / r)));
+          const th = dx[i] / r;          // arc length, not projection
           /* how far the surface falls away behind the label's own plane */
           const back = r * (1 - Math.cos(th));
-          /* and, seen from below, that depth reads as a little height */
-          const lift = back * Math.sin((VIEW_TILT * Math.PI) / 180);
+          /* and that depth reads on screen as exactly the sag the rings have */
+          const lift = back * rise;
+          /* arc length in, chord out — the slide that keeps the line closed */
+          const slide = r * Math.sin(th) - dx[i];
           ch.style.transform =
-            `translate3d(0, ${-lift.toFixed(2)}px, ${-back.toFixed(2)}px) ` +
+            `translate3d(${slide.toFixed(2)}px, ${-lift.toFixed(2)}px, ${-back.toFixed(2)}px) ` +
             `rotateY(${((th * 180) / Math.PI).toFixed(2)}deg)`;
         });
       }
