@@ -263,6 +263,9 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
           </model-viewer>
           {/* cut into the drum, where a museum puts the label — the plinth is
               part of the model, so the type is laid over its face */}
+          {/* three gold rings round the drum, drawn to the logo's own height —
+              filled in by the script, since only it knows where that is */}
+          <svg class="bh__rings" aria-hidden="true" focusable="false"></svg>
           <span class="bh__face" aria-hidden="true">
             <img class="bh__mark" src={c.mark} alt="" width="192" height="192"
                  loading="lazy" decoding="async" />
@@ -544,6 +547,21 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      object, so it is an image rather than a glyph — and one sized by area
      rather than by width, or the tall caduceus and the wide book would carry
      quite different weight in the row. See scripts/build-marks.py. */
+  /* The rings sit on the drum, under the type. Gold, and thin: the one they
+     replace was a single pixel of the model. */
+  .bh__rings {
+    position: absolute; inset: 0;
+    inline-size: 100%; block-size: 100%;
+    pointer-events: none;
+    fill: none;
+    stroke: var(--gold-orn, #b8862a);
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    /* the outer tenth of each end fades, so the ring goes round the drum
+       rather than stopping dead on its edge */
+    mask-image: linear-gradient(to right,
+      transparent 0%, #000 9%, #000 91%, transparent 100%);
+  }
   .bh__mark {
     inline-size: clamp(1.4rem, 15.85cqw, 2.62rem);
     block-size: auto;
@@ -715,12 +733,78 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     }));
   }
 
+  /**
+   * Three gold rings round the drum, set to the logo rather than to the model.
+   *
+   * They replace the single ring the base model carried, which sat under the
+   * cap and had no relation to anything on the plinth. These take their height
+   * from the logo itself — one on its centre line and one a quarter of its
+   * height above and below — so they cannot drift when the type is resized.
+   *
+   * Each is a horizontal circle on the drum, so it draws as an ellipse: full
+   * width across the drum, and as deep as its distance below the eye.
+   *
+   * Both constants are solved from two of the drum's own ellipses rather than
+   * guessed at one. Its foot is 13.8px deep at 95.7% of the frame; its top
+   * circle, four times nearer the eye in the model, is 3.4px deep at 72.4%.
+   * Two depths at two heights give the slope, 0.1168, and where the ellipse
+   * would close, 0.646. Reading the eye off the foot alone put it at 0.726 and
+   * the rings came out half as deep as they should be.
+   *
+   * And each is broken where the logo crosses it, by 140% of the logo's width,
+   * so the mark sits in a clearing rather than on top of a line.
+   */
+  const EYE = 0.646;           // of the frame's height, where the drum is edge-on
+  const ELLIPSE = 0.1168;      // how fast the ellipse opens below that
+  /* the arcs stop just short of the silhouette and fade into it — a ring runs
+     out of drum there, and a stroke ending on the edge looks like it overshoots */
+  const RING_REACH = 0.985;
+  const RING_GAP = 1.4;        // of the logo's width
+  const RING_STEP = 0.25;      // of the logo's height, between the rings
+
+  function drawRings(face: HTMLElement, frame: HTMLElement) {
+    const svg = frame.querySelector<SVGSVGElement>('.bh__rings');
+    const mark = face.querySelector<HTMLElement>('.bh__mark');
+    if (!svg || !mark) return;
+    const f = frame.getBoundingClientRect();
+    const m = mark.getBoundingClientRect();
+    if (!f.width || !m.height) return;
+
+    svg.setAttribute('viewBox', `0 0 ${f.width} ${f.height}`);
+    const cx = f.width / 2;
+    const R = f.width * DRUM_R;
+    const half = (m.width * RING_GAP) / 2;
+    const mid = m.top + m.height / 2 - f.top;
+    const step = m.height * RING_STEP;
+
+    /* where the gap's edge meets the ellipse, as a fraction of its depth */
+    const k = half < R ? Math.sqrt(1 - (half / R) ** 2) : 0;
+
+    const d: string[] = [];
+    for (const y of [mid - step, mid, mid + step]) {
+      const b = Math.max(0.2, (y - f.height * EYE) * ELLIPSE);
+      const drop = b * k;
+      const reach = R * RING_REACH;
+      const edge = y + b * Math.sqrt(Math.max(0, 1 - RING_REACH ** 2));
+      d.push(`M${(cx - reach).toFixed(1)} ${edge.toFixed(1)}`
+           + `A${R.toFixed(1)} ${b.toFixed(2)} 0 0 0 ${(cx - half).toFixed(1)} ${(y + drop).toFixed(1)}`);
+      d.push(`M${(cx + half).toFixed(1)} ${(y + drop).toFixed(1)}`
+           + `A${R.toFixed(1)} ${b.toFixed(2)} 0 0 0 ${(cx + reach).toFixed(1)} ${edge.toFixed(1)}`);
+    }
+    svg.replaceChildren(...d.map((path) => {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      el.setAttribute('d', path);
+      return el;
+    }));
+  }
+
   function curve() {
     for (const face of faces) {
       const frame = face.parentElement;
       if (!frame) continue;
       const R = frame.getBoundingClientRect().width * DRUM_R;
       if (!(R > 0)) continue;
+      drawRings(face, frame);
       for (const line of face.querySelectorAll<HTMLElement>('.bh__name, .bh__name-en')) {
         split(line);
         const chars = [...line.querySelectorAll<HTMLElement>('.bh__ch')];

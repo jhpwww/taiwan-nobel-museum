@@ -477,13 +477,11 @@ async function addBase(doc, io, cat) {
   wrap(parts.get('marble_column'),
        [1, 1 - DRUM_TRIM, 1], BASE_TOP * DRUM_TRIM);
 
+  /* The drum's own ring is dropped: the hall draws three in its place, and
+     they have to line up with the logo on the plinth, which is laid out by the
+     page rather than by the model. See .bh__rings in HallBright. */
   const ringEntry = parts.get('gold_inlay_ring');
-  if (ringEntry) {
-    const b = getBounds(ringEntry[0]);
-    const mid = (b.min[1] + b.max[1]) / 2;
-    /* up under the top face, and still a hair proud of the wall it is set into */
-    wrap(ringEntry, [CLEAR_RING, 1, CLEAR_RING], (BASE_TOP - mid) * (1 - RING_RAISE));
-  }
+  if (ringEntry) ringEntry[1].removeChild(ringEntry[0]);
 
   // the base brought its own buffer, and a GLB may only carry one
   const [keep, ...rest] = doc.getRoot().listBuffers();
