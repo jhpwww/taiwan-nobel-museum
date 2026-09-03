@@ -230,7 +230,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
 
   <div class="bh__masthead">
     <h1 id="hall-title" class="bh__title">{t('site.tagline')}</h1>
-    <p class="bh__hint">{t('hall.hint')}</p>
   </div>
 
   {/* Each piece is named outright rather than left to be assembled from what
@@ -411,13 +410,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     color: var(--cream);
     letter-spacing: 0.04em;
     text-shadow: 0 1px 0 rgba(255, 255, 255, 0.85);
-  }
-  .bh__hint {
-    font-size: var(--step--1); color: var(--muted);
-    margin: 0.5rem auto 0; max-inline-size: none;
-    /* the wall can end up behind this line at narrow widths; the halo keeps it
-       legible whatever it lands on */
-    text-shadow: 0 0 6px #fff, 0 0 12px #fff;
   }
 
   /* ---------- the pieces ---------- */
