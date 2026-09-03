@@ -31,7 +31,6 @@
  * light in this room is the photograph's own.
  */
 import StyleSwitch from './StyleSwitch.astro';
-import PrizeMark from './PrizeMark.astro';
 import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
@@ -82,6 +81,7 @@ const cats = categoryList()
        museum's palette until its GLB decoded, and showed it for good to anyone
        without WebGL. */
     poster: stamp(`assets/models/gold/${key}.webp`),
+    mark: stamp(`assets/marks/${key}.webp`),
     credit: credited[key],
   }));
 
@@ -261,7 +261,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
           {/* cut into the drum, where a museum puts the label — the plinth is
               part of the model, so the type is laid over its face */}
           <span class="bh__face">
-            <PrizeMark cat={c.key} class="bh__mark" />
+            <img class="bh__mark" src={c.mark} alt="" width="192" height="192"
+                 loading="lazy" decoding="async" />
             <span class="bh__name">{c.name}</span>
             <span class="bh__name-en">{c.nameAlt}</span>
           </span>
@@ -495,11 +496,18 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   .bh__face {
     position: absolute;
     inset-inline: 17%;
-    inset-block-start: 87%;
-    translate: 0 -50%;
+    /* Measured on the page, at the hall's own camera: the drum's gold line
+       crosses the frame at 72.4% and its front face ends at 92%, so the label
+       has that fifth of the frame to sit in.
+       (Worth measuring twice — the first two readings caught the gold cap's
+       rim and then the statue itself, and put the line at 54% and at 45%.)
+       Hung from its top rather than centred on the face, because two of the
+       English names take two lines and a centred block grows upward as well as
+       down: 'Physiology or Medicine' put its mark back on the gold line. */
+    inset-block-start: 73.6%;
     display: grid;
     justify-items: center;
-    gap: 0.06em;
+    gap: 0.02em;
     text-align: center;
     text-wrap: balance;
     pointer-events: none;      /* the anchor owns every click */
@@ -508,22 +516,28 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      :global because the mark is drawn by another component, and Astro's scope
      attribute stops at this file — a plain .bh__mark rule matches nothing and
      the SVG comes out at its natural size, filling the whole plinth. */
-  .bh__face :global(.bh__mark) {
-    inline-size: clamp(1.05rem, 11.6cqw, 1.85rem);
+  /* The device above the name. Drawn by the project owner as a lit gold
+     object, so it is an image rather than a glyph — and one sized by area
+     rather than by width, or the tall caduceus and the wide book would carry
+     quite different weight in the row. See scripts/build-marks.py. */
+  .bh__mark {
+    inline-size: clamp(1.05rem, 11.8cqw, 1.95rem);
     block-size: auto;
-    color: var(--gold);
-    margin-block-end: 0.16em;
+    margin-block-end: 0.1em;
   }
   .bh__name {
     font-family: var(--font-display);
     font-size: clamp(0.78rem, 8cqw, 1.25rem);
-    line-height: 1.2;
+    line-height: 1.14;
     letter-spacing: 0.04em;
     color: var(--cream);
   }
   .bh__name-en {
-    font-size: clamp(0.6rem, 5.5cqw, 0.95rem);
-    line-height: 1.18;
+    /* The second line is the one that wraps — 'Physiology or Medicine' and
+       'Economic Sciences' both take two — so it carries the compromise, and
+       the name above it keeps its size. */
+    font-size: clamp(0.56rem, 4.8cqw, 0.86rem);
+    line-height: 1.05;
     letter-spacing: 0.02em;
     color: var(--muted);
     /* one line or two, as the name needs — the two-line floor the halls use
