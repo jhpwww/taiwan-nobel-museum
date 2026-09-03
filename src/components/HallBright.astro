@@ -30,8 +30,6 @@
  * read as dirt on marble; motes are invisible against a hall this bright. The
  * light in this room is the photograph's own.
  */
-import StyleSwitch from './StyleSwitch.astro';
-import MotionToggle from './MotionToggle.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, catNameAlt, categoryList, introParts, INTRO } from '../data/catalog';
@@ -190,9 +188,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
 ---
 
 <section class="bh" aria-labelledby="hall-title">
-  <StyleSwitch lang={lang} current="bright" />
-  <MotionToggle lang={lang} />
-
   <div class="bh__scene" aria-hidden="true">
     {/* the plate holds the photograph's own aspect ratio; everything inside is
         placed in per cent of it, so a crop moves picture and screens together */}
@@ -641,9 +636,10 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     .bh__cta { margin-inline-start: 0; }
   }
   @media (max-width: 34rem) {
-    /* the switch and the motion toggle stack at this width, so the picture
-       alone is no longer the taller of the two */
-    .bh { padding-block-start: max(8.7rem, calc(100vw * 941 / 1672 + 1.1rem)); }
+    /* The floor here used to be 8.7rem, to clear the style switch and the
+       motion toggle where they stack. With those gone the picture is the only
+       thing to clear, and the rule above already does it. */
+    .bh { padding-block-start: calc(100vw * 941 / 1672 + 1.1rem); }
   }
 </style>
 
