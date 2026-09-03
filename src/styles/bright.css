@@ -142,7 +142,7 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a {
   border-block-end: 0;
   color: var(--cream);
   background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(14px) saturate(1.5);
+  backdrop-filter: blur(6px) saturate(1.5);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.95),
     inset 0 0 0 1px rgba(255, 255, 255, 0.55),
@@ -163,11 +163,54 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a:focus-visible {
     0 10px 24px -14px rgba(46, 58, 78, 0.6);
   color: var(--accent);
 }
-/* the flag sits in a tablet of its own, the same material as its neighbours */
-html[data-theme='bright'] .topbar--ghost .topbar__lang {
+/* The flag stands on its own, with no tablet under it.
+   Which leaves it having to look pressable by itself, and a picture with no
+   frame reads as decoration. So it is given the two things that make a small
+   object read as a control rather than an ornament: it is raised — a real
+   shadow, not a glow — and it carries a gold hairline under it, the same rule
+   that is under the museum's name. On approach it lifts and the rule fills. */
+html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang {
+  position: relative;
   border: 0 !important;
-  border-radius: 0.42rem;
-  padding: 0.3rem 0.5rem !important;
+  border-radius: 0;
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
+  padding: 0.2rem 0.1rem 0.46rem !important;
+}
+html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang::after {
+  content: '';
+  position: absolute;
+  inset-block-end: 0.08rem;
+  inset-inline: 0;
+  block-size: 2px;
+  border-radius: 1px;
+  background: linear-gradient(to right,
+    rgba(184, 134, 42, 0.55), var(--gold-orn, #b8862a) 45%, rgba(184, 134, 42, 0.55));
+  transition: background 0.28s var(--ease);
+}
+html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang .flag {
+  inline-size: 1.62rem;
+  /* raised off the page rather than glowing on it */
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 0 0 1.6px rgba(52, 60, 74, 0.28),
+    0 2px 3px rgba(30, 40, 60, 0.3),
+    0 5px 10px -4px rgba(30, 40, 60, 0.34);
+  transition: transform 0.28s var(--ease), box-shadow 0.28s var(--ease);
+}
+html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:hover .flag,
+html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visible .flag {
+  transform: translateY(-1.5px);
+  box-shadow:
+    0 0 0 1px #fff,
+    0 0 0 1.6px rgba(52, 60, 74, 0.4),
+    0 3px 5px rgba(30, 40, 60, 0.32),
+    0 9px 16px -5px rgba(30, 40, 60, 0.4);
+}
+html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:hover::after,
+html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visible::after {
+  background: var(--gold-bright, #d8a63c);
 }
 
 /* On a phone the bar is stacked down the right instead of laid across the
@@ -185,9 +228,17 @@ html[data-theme='bright'] .topbar--ghost .topbar__lang {
   html[data-theme='bright'] .topbar--ghost .topbar__nav {
     flex-direction: column;
     align-items: flex-end;
-    row-gap: 0.34rem;
+    row-gap: 0.26rem;
     column-gap: 0;
   }
+  /* A column of four is as tall as the room behind it. Compacted, it clears
+     the pieces when they withdraw onto the hall's floor. */
+  html[data-theme='bright'] .topbar--ghost .topbar__nav a {
+    padding-inline: 0.6rem;
+    padding-block: 0.26rem;
+    font-size: var(--step--2);
+  }
+  html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang { padding: 0.15rem 0.1rem 0.3rem !important; }
 }
 
 /* the dark hall needed a scrim to keep the controls legible; a white one
@@ -428,9 +479,11 @@ html[data-theme='bright'] .vf {
   border-image: var(--glass-frame) 30 / 1 / 0 stretch;
   border-radius: calc(var(--rim) * 0.867);
   background: rgba(255, 255, 255, 0.10);
-  /* Liquid glass is not frosted glass: what is behind it stays legible. Five
-     pixels, not twenty. */
-  backdrop-filter: blur(5px) saturate(1.9) brightness(1.03);
+  /* Liquid glass is not frosted glass: what is behind it stays legible. Two
+     pixels, not twenty — enough that the pane is a pane and the picture behind
+     it softens, and no more. The gathering of light at the rim is what says
+     'glass'; the blur was only ever there to keep it from saying 'window'. */
+  backdrop-filter: blur(2px) saturate(1.9) brightness(1.03);
   box-shadow:
     /* the pane's thickness, lit from above, answering cooler from below */
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
@@ -544,7 +597,7 @@ html[data-theme='bright'] .after .feature__text {
   border-image: var(--glass-frame) 30 / 1 / 0 stretch;
   border-radius: calc(var(--rim) * 0.867);
   background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(7px) saturate(1.5);
+  backdrop-filter: blur(3px) saturate(1.5);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     inset 0 -1px 0 rgba(184, 220, 255, 0.6),
@@ -557,7 +610,7 @@ html[data-theme='bright'] .after .feature__text {
 html[data-theme='bright'] .bh__intro {
   background: rgba(255, 255, 255, 0.5);
   border-color: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(10px) saturate(1.6);
+  backdrop-filter: blur(4px) saturate(1.6);
   box-shadow:
     inset 0 0 0 1px rgba(255, 255, 255, 0.7),
     inset 0 1.5px 0 -0.5px rgba(255, 255, 255, 1),

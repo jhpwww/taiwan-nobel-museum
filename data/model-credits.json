@@ -24,15 +24,12 @@
     "source": "original"
   },
   "peace": {
-    "id": "2jmH3trzPFf",
-    "title": "Dove",
-    "author": "Poly by Google",
-    "licence": "CC-BY",
-    "glb": "https://static.poly.pizza/7ef274a4-4d73-4eee-96e4-209ba68a3146.glb",
-    "page": "https://poly.pizza/m/2jmH3trzPFf",
-    "tris": "690",
-    "bytes": 47524,
-    "source": "poly"
+    "id": "supplied:peace",
+    "title": "Dove and ring",
+    "author": "Nobel Lecture Museum",
+    "licence": "CC0",
+    "page": "",
+    "source": "original"
   },
   "economics": {
     "id": "built:economics",

@@ -16,7 +16,7 @@ export const ui = {
 
     'nav.hall': '博物館大廳',
     'nav.all': '所有講座',
-    'nav.about': '關於',
+    'nav.about': '關於本館',
     'nav.skip': '跳到主要內容',
     'nav.toTop': '回到最上方',
     'nav.back': '回到前一頁',

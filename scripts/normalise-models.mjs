@@ -160,7 +160,22 @@ function turntable(doc, node, name) {
  * again the drum, so a wide piece overhangs the way the reference sheet's
  * quill and chart do without looking like it is sliding off.
  */
-const ON_BASE = new Set(['physics', 'chemistry', 'medicine']);
+const ON_BASE = new Set(['physics', 'chemistry', 'medicine', 'peace']);
+
+/**
+ * Which parts of an award sculpture are meant to be re-shaded, and which are
+ * meant to keep their facets.
+ *
+ * The award models arrive shaded as their author intended, so by default none
+ * of them is touched. The dove is the exception the owner asked for: its body
+ * is to read as one polished cast surface, the way the borrowed dove it
+ * replaces did, while the ring it stands in keeps every facet it was built
+ * with. Selecting by node name rather than by mesh, because these files name
+ * their parts and do not name their meshes.
+ */
+const SMOOTH_PARTS = {
+  peace: ['dove'],          // dove_body and both wings hang under this
+};
 const PERCH_H = 0.525;
 const PERCH_W = 0.302 * 1.25;
 
@@ -242,8 +257,31 @@ const OUT_GOLD = 'public/assets/models/gold';
  */
 const CREASE = Math.cos((60 * Math.PI) / 180);
 
-function smoothNormals(doc) {
+/**
+ * Every node name on the path down to each mesh, so a mesh can be picked out
+ * by the name of the part it belongs to — the meshes themselves are unnamed.
+ */
+function meshOwners(doc) {
+  const owners = new Map();
+  const walk = (node, trail) => {
+    const here = node.getName() ? [...trail, node.getName()] : trail;
+    const mesh = node.getMesh();
+    if (mesh) {
+      const set = owners.get(mesh) ?? new Set();
+      for (const name of here) set.add(name);
+      owners.set(mesh, set);
+    }
+    for (const child of node.listChildren()) walk(child, here);
+  };
+  for (const scene of doc.getRoot().listScenes()) {
+    for (const node of scene.listChildren()) walk(node, []);
+  }
+  return owners;
+}
+
+function smoothNormals(doc, pick = () => true) {
   for (const mesh of doc.getRoot().listMeshes()) {
+    if (!pick(mesh)) continue;
     for (const prim of mesh.listPrimitives()) {
       const posAcc = prim.getAttribute('POSITION');
       const nrmAcc = prim.getAttribute('NORMAL');
@@ -295,10 +333,16 @@ function smoothNormals(doc) {
             if (nx * gx + ny * gy + nz * gz < CREASE) continue;   // across a crease
             sx += fn[g * 3]; sy += fn[g * 3 + 1]; sz += fn[g * 3 + 2];
           }
-          const l = Math.hypot(sx, sy, sz) || 1;
-          out[corner * 3] = sx / l;
-          out[corner * 3 + 1] = sy / l;
-          out[corner * 3 + 2] = sz / l;
+          /* At a seam the faces meeting a corner can cancel exactly, and a
+             corner with a normal of no direction draws as a bright slit — one
+             ran down the front of the chemistry award's cap. Fall back to this
+             face's own normal, which is always a direction. */
+          const l = Math.hypot(sx, sy, sz);
+          if (l < 1e-9) { sx = nx; sy = ny; sz = nz; }
+          const d = l < 1e-9 ? 1 : l;
+          out[corner * 3] = sx / d;
+          out[corner * 3 + 1] = sy / d;
+          out[corner * 3 + 2] = sz / d;
         }
       }
       nrmAcc.setArray(out);
@@ -581,6 +625,16 @@ for (const file of fs.readdirSync(SRC).sort()) {
     // its own face normal and nothing could merge. Afterwards a sphere
     // collapses from three vertices a triangle to one a lattice point.
     await doc.transform(weld());
+  } else if (SMOOTH_PARTS[cat]) {
+    /* Named parts of an award, and only those — see SMOOTH_PARTS. The names
+       have to be read before anything else touches the hierarchy, because the
+       orientation wrapper and the perch below rearrange it. */
+    const owners = meshOwners(doc);
+    const wanted = SMOOTH_PARTS[cat];
+    smoothNormals(doc, (mesh) => {
+      const names = owners.get(mesh);
+      return !!names && wanted.some((n) => names.has(n));
+    });
   }
 
   if (SUBDIVIDE.has(cat) && !ON_BASE.has(cat)) {
