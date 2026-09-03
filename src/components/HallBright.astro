@@ -531,7 +531,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      rather than by width, or the tall caduceus and the wide book would carry
      quite different weight in the row. See scripts/build-marks.py. */
   .bh__mark {
-    inline-size: clamp(1.17rem, 13.2cqw, 2.18rem);
+    inline-size: clamp(1.4rem, 15.85cqw, 2.62rem);
     block-size: auto;
     margin-block-end: 0.1em;
   }
@@ -553,6 +553,14 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     /* one line or two, as the name needs — the two-line floor the halls use
        elsewhere would push the type off the drum's face */
     min-block-size: 0;
+  }
+  /* Latin set smaller than Han, which is ordinary bilingual typography rather
+     than a concession: a Han character at 18px carries the weight of Latin at
+     about 16. It also buys the room the two long English names need — with the
+     mark a fifth larger, 'Physiology or Medicine' and 'Economic Sciences' take
+     two lines that would otherwise hang three pixels past the drum's foot. */
+  :global(html[lang='en']) .bh__name {
+    font-size: clamp(0.82rem, 8.35cqw, 1.3rem);
   }
   .bh__piece:hover .bh__name { color: var(--accent); }
   /* Two lines' worth whether it needs them or not. The pieces are bottom
