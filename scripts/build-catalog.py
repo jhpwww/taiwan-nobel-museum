@@ -49,7 +49,10 @@ cat["tags"] = {k: {"zh": v[0], "en": v[1]} for k, v in copy.TAGS.items()}
 # than leaving a gap mid-row. `nobel` is not a prize category — it is the
 # introduction room, and the hall presents it separately.
 cat["categories"] = {
-    "physics":    {"zh": "物理學",      "en": "Physics",                "order": 1},
+    # The label is the short form; the prize keeps its own name, which is
+    # 諾貝爾物理學獎 and not 諾貝爾物理獎.
+    "physics":    {"zh": "物理", "prize_zh": "物理學",
+                                   "en": "Physics",                "order": 1},
     "chemistry":  {"zh": "化學",        "en": "Chemistry",              "order": 2},
     "medicine":   {"zh": "生理學或醫學",  "en": "Physiology or Medicine", "order": 3},
     "peace":      {"zh": "和平",        "en": "Peace",                  "order": 4},

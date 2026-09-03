@@ -9,7 +9,7 @@ import LectureCard from './LectureCard.astro';
 import VideoFacade from './VideoFacade.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { browse, lecture as lectureUrl } from '../i18n/routing';
-import { lectures, byDateDesc, catName, totalVideos, nextUpcoming, recommended, localDate } from '../data/catalog';
+import { lectures, byDateDesc, catName, totalVideos, nextUpcoming, recommended, localDate, catPrizeName } from '../data/catalog';
 
 interface Props { lang: Lang; style?: 'flat' | 'room' | 'gl' | 'models' }
 const { lang, style = 'flat' } = Astro.props;
@@ -27,6 +27,7 @@ const upcoming = nextUpcoming(today);
 const featured = upcoming ?? recommended();
 const latest = byDate.filter((l) => l.id !== featured.id).slice(0, 6);
 const featuredCat = catName(featured.prize.category, lang);
+const featuredPrize = catPrizeName(featured.prize.category, lang);
 const featuredDate = localDate(featured.event.date, lang, true);
 const featuredHost = lang === 'zh' ? featured.event.host_zh : featured.event.host_en;
 
@@ -73,7 +74,7 @@ const nVideos = totalVideos();
       )}
 
       <div class="feature__text stack">
-        <p class="eyebrow">{t('lec.prize', { year: featured.prize.year, category: featuredCat })}</p>
+        <p class="eyebrow">{t('lec.prize', { year: featured.prize.year, category: featuredPrize })}</p>
         <h3 class="feature__who">{featured.laureate.en}</h3>
         {lang === 'zh' && <p class="gloss">{featured.laureate.zh}</p>}
         <p class="feature__hook">{featured.hook[lang]}</p>

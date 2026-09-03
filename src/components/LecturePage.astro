@@ -8,7 +8,7 @@ import StudyPanel from './StudyPanel.astro';
 import CompareBlock from './CompareBlock.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery } from '../i18n/routing';
-import { catName, tagName, relatedTo, localDate, type Lecture } from '../data/catalog';
+import { catName, tagName, relatedTo, localDate, type Lecture, catPrizeName } from '../data/catalog';
 
 interface Props { lang: Lang; rec: Lecture }
 const { lang, rec } = Astro.props;
@@ -16,6 +16,7 @@ const t = useT(lang);
 
 const cat: CategoryKey = rec.prize.category;
 const catLabel = catName(cat, lang);
+const catPrize = catPrizeName(cat, lang);
 const date = localDate(rec.event.date, lang, true);
 const host = lang === 'zh' ? rec.event.host_zh : rec.event.host_en;
 /* English is primary for names, as it is for the lecture titles; the Chinese
@@ -41,7 +42,7 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
         <div class="lec__crest" aria-hidden="true"><Sculpture cat={cat} size={110} id={`lec-${rec.id}`} /></div>
         <div class="lec__id">
           <p class="eyebrow lec__prize">
-            <a href={gallery(lang, cat)}>{t('lec.prize', { year: rec.prize.year, category: catLabel })}</a>
+            <a href={gallery(lang, cat)}>{t('lec.prize', { year: rec.prize.year, category: catPrize })}</a>
           </p>
           <h1 class="lec__who">{rec.laureate.en}</h1>
           {lang === 'zh' && <p class="gloss lec__who-zh">{rec.laureate.zh}</p>}

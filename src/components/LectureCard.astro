@@ -1,7 +1,7 @@
 ---
 import { useT, type Lang } from '../i18n/ui';
 import { lecture as lectureUrl } from '../i18n/routing';
-import { catName, videoCount, localDate, type Lecture } from '../data/catalog';
+import { catName, videoCount, localDate, type Lecture, catPrizeName } from '../data/catalog';
 import posters from '../data/posters.json';
 
 interface Props { lang: Lang; rec: Lecture; featured?: boolean }
@@ -10,6 +10,7 @@ const t = useT(lang);
 
 const cat = rec.prize.category;
 const catLabel = catName(cat, lang);
+const catPrize = catPrizeName(cat, lang);
 /*
  * The card always shows the Taiwan lecture, never the 導讀, and the frame is
  * one the laureate's face was actually recognised in — see
@@ -37,7 +38,7 @@ const nVideos = videoCount(rec);
   </span>
 
   <span class="card__body">
-    <span class="card__prize">{t('lec.prize', { year: rec.prize.year, category: catLabel })}</span>
+    <span class="card__prize">{t('lec.prize', { year: rec.prize.year, category: catPrize })}</span>
     <span class="card__who">{rec.laureate.en}</span>
     {lang === 'zh' && <span class="card__who-zh gloss">{rec.laureate.zh}</span>}
     <span class="card__hook">{rec.hook[lang]}</span>

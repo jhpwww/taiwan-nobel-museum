@@ -42,6 +42,11 @@ export interface Lecture {
 export interface Stat { key: string; value: number; zh: string; en: string }
 export interface MaterialLink { url: string; zh: string; en: string; dzh: string; den: string }
 export interface CategoryMeta extends Bilingual {
+  /**
+   * The name the prize itself takes, where that is not the label. Physics is
+   * shown as 物理 but the prize is 諾貝爾物理學獎, never 諾貝爾物理獎.
+   */
+  prize_zh?: string;
   order: number;
   intro: Bilingual;
   history: Bilingual;
@@ -97,6 +102,15 @@ export const catName = (key: GalleryKey, lang: Lang) =>
  */
 export const catNameAlt = (key: GalleryKey, lang: Lang) =>
   catName(key, lang === 'zh' ? 'en' : 'zh');
+
+/**
+ * The category as the prize is named — '{year} 年諾貝爾{category}獎得主' is
+ * built from this, not from the label, because the two are not always the same
+ * word. Only Chinese distinguishes them so far.
+ */
+export const catPrizeName = (key: GalleryKey, lang: Lang) =>
+  (lang === 'zh' && key !== INTRO && categories[key as CategoryKey].prize_zh)
+    || catName(key, lang);
 
 /** Display name of a topic tag in the given language. */
 export const tagName = (key: string, lang: Lang) => tags[key]?.[lang] ?? key;

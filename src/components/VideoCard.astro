@@ -8,7 +8,7 @@
  */
 import { useT, type Lang } from '../i18n/ui';
 import { lecture as lectureUrl } from '../i18n/routing';
-import { catName, localDate, type VideoItem } from '../data/catalog';
+import { catName, localDate, type VideoItem, catPrizeName } from '../data/catalog';
 
 interface Props { lang: Lang; v: VideoItem }
 const { lang, v } = Astro.props;
@@ -51,7 +51,7 @@ const sub = v.lecture
   <span class="vc__body">
     {v.lecture && (
       <span class="vc__prize">
-        {t('lec.prize', { year: v.lecture.prize.year, category: catName(v.lecture.prize.category, lang) })}
+        {t('lec.prize', { year: v.lecture.prize.year, category: catPrizeName(v.lecture.prize.category, lang) })}
       </span>
     )}
     {source && <span class="vc__prize vc__prize--src">{source}</span>}

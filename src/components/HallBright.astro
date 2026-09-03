@@ -538,9 +538,17 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     transform-style: preserve-3d;
   }
   .bh__name, .bh__name-en { transform-style: preserve-3d; }
-  /* each word stays whole; only the characters inside it are turned */
-  .bh__word { display: inline-block; white-space: nowrap; transform-style: preserve-3d; }
-  .bh__ch { display: inline-block; will-change: transform; }
+  /* Each word stays whole; only the characters inside it are turned.
+     :global because the script builds these spans at runtime, so they never
+     carry Astro's scope attribute and a plain rule matches nothing. Which is
+     not cosmetic here: without `display: inline-block` they stay inline, and
+     transform does not apply to a non-replaced inline element — the style is
+     set, and nothing moves. Measure the rendered width, not the style string.
+     Same trap as .bh__mark above. */
+  .bh__face :global(.bh__word) {
+    display: inline-block; white-space: nowrap; transform-style: preserve-3d;
+  }
+  .bh__face :global(.bh__ch) { display: inline-block; will-change: transform; }
   /* The device above the name, in the gold the hall keeps for ornament.
      :global because the mark is drawn by another component, and Astro's scope
      attribute stops at this file — a plain .bh__mark rule matches nothing and
@@ -674,23 +682,29 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * arc length. Projecting keeps every character exactly where the layout put
    * it — the label holds the width it was designed to, and nothing reflows.
    *
-   * Both figures are drawn tighter than the drum actually is, and deliberately.
-   * Measured, the drum's radius is 0.379 of the frame and the camera sits 8°
-   * under the label — and at that setting the effect is real but invisible: the
-   * label reaches only two thirds of the way round the visible surface, so the
-   * outermost character loses a quarter of its width and the line bows by two
-   * pixels. (The drum's own foot bows by fourteen, but that is measured across
-   * its whole width, where the surface has fallen right away.)
+   * Both figures are measured off the model rather than chosen: at the label's
+   * height the drum draws 144px across a 190px frame, and the camera sits about
+   * 8° under the label. That is enough — the outermost character of the longest
+   * name draws at about seven tenths of its width and the line bows a couple of
+   * pixels, which reads.
    *
-   * So the curve is worked at about four fifths of the true radius and a little
-   * over twice the true tilt, which reads as a cylinder at the size this
-   * actually draws. Tighter than 0.28 and the end characters turn past edge-on
-   * and vanish.
+   * They were briefly set to 0.30 and 18° on the belief that the true figures
+   * were invisible. They were not invisible; they were not being applied at all,
+   * because the spans this script creates never carry Astro's scope attribute
+   * and so never got `display: inline-block` — and transform does nothing to a
+   * non-replaced inline element. Tune against the rendered width, never against
+   * the style string.
    *
    * Progressive: if this never runs, the labels are simply flat.
    */
-  const DRUM_R = 0.30;         // of the frame's width; measured, it is 0.379
-  const VIEW_TILT = 18;        // degrees; measured at the label, about 8
+  const DRUM_R = 0.379;        // of the frame's width, measured
+  const VIEW_TILT = 8;         // degrees the camera sits under the label
+  /* No character turns further than this. The type is set with a clamp, so at
+     narrow widths its floor binds while the frame goes on shrinking and the
+     line takes a larger share of the drum: at 1120px the ends were turning 71°
+     and drawing at a third of their width. Where a line would overrun, the
+     curve is worked on a wider radius instead — the same shape, opened out. */
+  const MAX_TURN = (55 * Math.PI) / 180;
 
   const faces = [...document.querySelectorAll<HTMLElement>('.bh__face')];
 
@@ -721,21 +735,34 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
       if (!(R > 0)) continue;
       for (const line of face.querySelectorAll<HTMLElement>('.bh__name, .bh__name-en')) {
         split(line);
+        const chars = [...line.querySelectorAll<HTMLElement>('.bh__ch')];
+        if (!chars.length) continue;
+
+        /* Clear every one before measuring any. A transformed element reports
+           its transformed box, so measuring as we go made each character's
+           angle depend on the ones already turned — wrong the second time this
+           runs, which is after the fonts land. */
+        for (const ch of chars) ch.style.transform = '';
         const mid = line.getBoundingClientRect();
         const cx = mid.left + mid.width / 2;
-        for (const ch of line.querySelectorAll<HTMLElement>('.bh__ch')) {
-          ch.style.transform = '';
+        const dx = chars.map((ch) => {
           const b = ch.getBoundingClientRect();
-          const dx = b.left + b.width / 2 - cx;
-          const th = Math.asin(Math.max(-1, Math.min(1, dx / R)));
+          return b.left + b.width / 2 - cx;
+        });
+
+        const reach = Math.max(...dx.map(Math.abs), 1);
+        const r = Math.max(R, reach / Math.sin(MAX_TURN));
+
+        chars.forEach((ch, i) => {
+          const th = Math.asin(Math.max(-1, Math.min(1, dx[i] / r)));
           /* how far the surface falls away behind the label's own plane */
-          const back = R * (1 - Math.cos(th));
+          const back = r * (1 - Math.cos(th));
           /* and, seen from below, that depth reads as a little height */
           const lift = back * Math.sin((VIEW_TILT * Math.PI) / 180);
           ch.style.transform =
             `translate3d(0, ${-lift.toFixed(2)}px, ${-back.toFixed(2)}px) ` +
             `rotateY(${((th * 180) / Math.PI).toFixed(2)}deg)`;
-        }
+        });
       }
     }
   }

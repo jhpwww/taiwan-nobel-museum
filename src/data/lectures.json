@@ -2005,8 +2005,9 @@
   },
   "categories": {
     "physics": {
-      "zh": "物理學",
+      "zh": "物理",
       "en": "Physics",
+      "prize_zh": "物理學",
       "order": 1,
       "intro": {
         "zh": "諾貝爾物理學獎表彰「對人類帶來最大貢獻」的物理發現或發明。名單起自 X 光（X-ray）與放射性（radioactivity），經過量子力學（quantum mechanics），延伸至宇宙加速膨脹與重力波（gravitational waves）。一個世紀的物理學，大致都在其中。",
