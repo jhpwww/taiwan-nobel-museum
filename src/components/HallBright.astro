@@ -674,13 +674,23 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * arc length. Projecting keeps every character exactly where the layout put
    * it — the label holds the width it was designed to, and nothing reflows.
    *
-   * R is measured off the model: at the label's height the drum draws 144px
-   * across a 190px frame, so its radius is 0.379 of the frame.
+   * Both figures are drawn tighter than the drum actually is, and deliberately.
+   * Measured, the drum's radius is 0.379 of the frame and the camera sits 8°
+   * under the label — and at that setting the effect is real but invisible: the
+   * label reaches only two thirds of the way round the visible surface, so the
+   * outermost character loses a quarter of its width and the line bows by two
+   * pixels. (The drum's own foot bows by fourteen, but that is measured across
+   * its whole width, where the surface has fallen right away.)
+   *
+   * So the curve is worked at about four fifths of the true radius and a little
+   * over twice the true tilt, which reads as a cylinder at the size this
+   * actually draws. Tighter than 0.28 and the end characters turn past edge-on
+   * and vanish.
    *
    * Progressive: if this never runs, the labels are simply flat.
    */
-  const DRUM_R = 0.379;        // of the frame's width
-  const VIEW_TILT = 8;         // degrees the camera sits below the drum's level
+  const DRUM_R = 0.30;         // of the frame's width; measured, it is 0.379
+  const VIEW_TILT = 18;        // degrees; measured at the label, about 8
 
   const faces = [...document.querySelectorAll<HTMLElement>('.bh__face')];
 
