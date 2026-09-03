@@ -191,7 +191,9 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   <div class="bh__scene" aria-hidden="true">
     {/* the plate holds the photograph's own aspect ratio; everything inside is
         placed in per cent of it, so a crop moves picture and screens together */}
-    <div class="bh__plate">
+    {/* the vanishing point travels to the script here — frontmatter constants
+        do not reach a client module */}
+    <div class="bh__plate" data-vp-x={VP.x} data-vp-y={VP.y}>
       <picture>
         <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
         <img class="bh__photo" src={asset('media/bright-hall.jpg')} alt=""
@@ -296,7 +298,12 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     grid-template-rows: auto 1fr auto;
     align-content: start;
     padding-block: max(clamp(1.5rem, 4vh, 3.5rem), 4.4rem) clamp(2rem, 5vh, 4rem);
-    overflow: hidden;
+    /* Not hidden. The room and the row are held still against the scroll, and
+       clipping them to this section cut them away within a screenful — the
+       pieces stopped receding almost as soon as they started. The scene clips
+       its own plate, so nothing needs clipping here; the sections below paint
+       over what is left, which is how the two disappear. */
+    overflow: visible;
     isolation: isolate;
     /* flat, and exactly the colour the plate's own edges fade into — a
        gradient here reappears as a band under the photograph */
@@ -304,7 +311,11 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
 
   /* ---------- the room ---------- */
-  .bh__scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .bh__scene {
+    position: absolute; inset: 0; z-index: -1; overflow: hidden;
+    /* the script holds these still against the scroll; see 'walk back' below */
+    will-change: transform;
+  }
 
   /* The plate is the photograph's own frame, and everything in the hall is
      positioned in per cent of it — so the wall keeps its place in the
@@ -432,6 +443,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * below. Leaving the padding out of it — the first attempt — lands at 1.81
    * to 1.87 rather than 2. */
   .bh__plinths {
+    will-change: transform;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
     gap: 0;
@@ -712,6 +724,91 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      curve is worked on a wider radius instead — the same shape, opened out. */
   const MAX_TURN = (55 * Math.PI) / 180;
 
+  /**
+   * The hall holds still, and the pieces walk back into it.
+   *
+   * Scrolling the page moves everything but these two: the room is pinned by
+   * cancelling the scroll on it, and the row of pieces is pinned the same way
+   * and then scaled down about the hall's own vanishing point. Scaling about
+   * that point is not an approximation of walking away — in a one-point
+   * perspective it is exactly what walking away does: every part of the row
+   * slides toward the far door and shrinks in proportion, so the spacing, the
+   * plinths and the type all recede together rather than merely getting
+   * smaller in place.
+   *
+   * They reach half size as 本館推薦 arrives at the top of the window, which is
+   * where the hall has finished being the page's subject.
+   *
+   * Both are held by transform rather than by `position: fixed`, so nothing
+   * about the layout changes and the row still takes its space in the flow —
+   * the counts and the introduction under it move normally.
+   */
+  const RECEDE_TO = 0.5;
+  /* Only where there is a room to walk into. Below this the hall is a band
+     across the top and the pieces are a two-column list on white — holding
+     them still there just collides them with the page. */
+  const ROOM = matchMedia('(min-width: 48rem)');
+
+  const scene = document.querySelector<HTMLElement>('.bh__scene');
+  const plinths = document.querySelector<HTMLElement>('.bh__plinths');
+  const plate = document.querySelector<HTMLElement>('.bh__plate');
+  const feature = document.querySelector<HTMLElement>('.feature');
+
+  let travel = 1;              // how far the page scrolls before they are half size
+  let originX = 0, originY = 0;
+
+  function anchor() {
+    if (!plinths || !plate || !feature) return;
+    /* the vanishing point, in the row's own coordinates — the far doorway the
+       pieces are walking toward */
+    const pr = plate.getBoundingClientRect();
+    const gr = plinths.getBoundingClientRect();
+    const vx = Number(plate.dataset.vpX ?? 50);
+    const vy = Number(plate.dataset.vpY ?? 65);
+    originX = pr.left + (pr.width * vx) / 100 - gr.left;
+    originY = pr.top + (pr.height * vy) / 100 - gr.top;
+    plinths.style.transformOrigin = `${originX.toFixed(1)}px ${originY.toFixed(1)}px`;
+    travel = Math.max(1, feature.getBoundingClientRect().top + scrollY);
+  }
+
+  function walkBack() {
+    /* A scroll-driven transform is motion, so it goes when motion does — the
+       hall and the row then simply scroll with the page. */
+    if (!motionOn() || !ROOM.matches) {
+      if (scene) scene.style.transform = '';
+      if (plinths) plinths.style.transform = '';
+      return;
+    }
+    /* Held only while they are walking. Past the end they let go and leave with
+       the page — pinned for the whole document, the row would still be standing
+       in front of the footer. */
+    const held = Math.min(scrollY, travel);
+    const p = travel > 0 ? held / travel : 0;
+    const k = 1 - (1 - RECEDE_TO) * p;
+    if (scene) scene.style.transform = `translate3d(0, ${held}px, 0)`;
+    if (plinths) plinths.style.transform = `translate3d(0, ${held}px, 0) scale(${k.toFixed(4)})`;
+  }
+
+  if (scene && plinths) {
+    anchor();
+    walkBack();
+    let ticking = false;
+    addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => { walkBack(); ticking = false; });
+    }, { passive: true });
+    addEventListener('resize', () => {
+      /* measure with the transforms cleared, or the anchor drifts */
+      plinths.style.transform = '';
+      if (scene) scene.style.transform = '';
+      anchor();
+      walkBack();
+    });
+    addEventListener('motionpref', walkBack);
+    ROOM.addEventListener('change', () => { anchor(); walkBack(); });
+  }
+
   const faces = [...document.querySelectorAll<HTMLElement>('.bh__face')];
 
   /** split once, into words that stay whole and characters that can turn */
@@ -843,6 +940,9 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     const run = () => requestAnimationFrame(curve);
     document.fonts?.ready.then(run) ?? run();
     run();
+    /* the row carries a scale once the page moves, and getBoundingClientRect
+       reports it — so the labels are measured at the top of the page and left
+       alone after that */
     /* the labels are sized in container units, so they move with the row */
     let t: ReturnType<typeof setTimeout>;
     addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 120); });

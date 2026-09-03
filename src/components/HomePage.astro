@@ -41,6 +41,17 @@ const nVideos = totalVideos();
    : style === 'models' ? <HallModels lang={lang} />
    : <Hall lang={lang} />}
 
+  {/* A screenful of runway, only in the bright museum. The hall stands barely
+      taller than the window, so the sheet below began covering it 108px into
+      the scroll and the pieces did nine tenths of their walk unseen. This is
+      the room they walk in. */}
+  {bright && <div class="runway" aria-hidden="true"></div>}
+
+  {/* Everything under the hall travels together and opaquely. In the bright
+      museum the hall and its pieces are held still while the page scrolls, so
+      what comes after has to arrive as a sheet — transparent sections let the
+      room show through the gaps, and the pieces stood behind the type. */}
+  <div class="after">
   <section class="strip">
     <div class="wrap">
       <dl class="stats">
@@ -101,9 +112,14 @@ const nVideos = totalVideos();
       {latest.map((rec) => <li><LectureCard lang={lang} rec={rec} /></li>)}
     </ul>
   </section>
+  </div>
 </Base>
 
 <style>
+  .runway { block-size: 100svh; }
+  /* no walk, no runway — see the note in HallBright */
+  @media (max-width: 48rem) { .runway { block-size: 0; } }
+  .after { position: relative; z-index: 1; background: var(--bg-0); }
   .strip { border-block: 1px solid var(--line); background: var(--bg-1); }
   .stats {
     display: flex; flex-wrap: wrap; justify-content: center;

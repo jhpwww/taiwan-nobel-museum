@@ -119,7 +119,36 @@ html[data-theme='bright'] .topbar {
   background: rgba(255, 255, 255, 0.86);
   border-block-end: 1px solid var(--line);
 }
-html[data-theme='bright'] .topbar--ghost { background: none; }
+/* No rule under the hall's bar. The dark site's ghost bar sets border: 0, but
+   the theme rule above is the more specific of the two and was putting the
+   line back — straight across the photograph. */
+html[data-theme='bright'] .topbar--ghost {
+  background: none;
+  border-block-end: 0;
+}
+
+/* The nav over the hall: plain type at rest, a frosted pill on approach.
+   Which is how the galleries that put a bar over a photograph handle it —
+   nothing competes with the picture until the pointer is on its way, and then
+   the target is unmistakable. It also agrees with the glass on the video
+   frames below, so the page has one idea rather than two. */
+html[data-theme='bright'] .topbar--ghost .topbar__nav a {
+  padding-inline: 0.7rem;
+  padding-block: 0.34rem;
+  border-radius: 999px;
+  border-block-end: 0;
+  color: var(--cream);
+  transition: background 0.28s var(--ease), color 0.28s var(--ease),
+              box-shadow 0.28s var(--ease);
+}
+html[data-theme='bright'] .topbar--ghost .topbar__nav a:hover,
+html[data-theme='bright'] .topbar--ghost .topbar__nav a:focus-visible {
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85),
+              0 6px 18px -10px rgba(60, 70, 90, 0.5);
+  backdrop-filter: blur(8px) saturate(1.2);
+  color: var(--accent);
+}
 /* the dark hall needed a scrim to keep the controls legible; a white one
    does not, and the gradient would only smear grey across the marble */
 html[data-theme='bright'] .topbar--ghost::before { display: none; }
@@ -315,4 +344,60 @@ html[data-theme='bright'] :is(
 }
 html[data-theme='bright'] :is(.bh__name, .case__name, .plinth__name, .tile__name, .lec__title) {
   font-weight: 500;
+}
+
+
+/* ---------- glass on the video frames ----------
+ *
+ * After the reference sheet: a pane that is mostly the picture behind it, with
+ * the light caught along its edges and a cool bloom around it. Built from the
+ * frame rather than a wash over the poster — a translucent layer on top would
+ * only mute the still it is meant to show.
+ *
+ * The blue is kept to the rim and the bloom. The hall is warm white marble and
+ * gold, so a cool edge reads as glass in it; a cool fill would read as a
+ * colour cast.
+ */
+html[data-theme='bright'] .vf__btn {
+  border-color: rgba(255, 255, 255, 0.85);
+  border-radius: calc(var(--radius) * 2.2);
+  box-shadow:
+    /* the pane's own lit edge */
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(190, 225, 255, 0.75),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 0 34px -6px rgba(150, 200, 255, 0.5),
+    /* and the cool bloom it throws */
+    0 0 0 1px rgba(178, 214, 255, 0.55),
+    0 0 18px -2px rgba(130, 185, 255, 0.55),
+    0 0 46px 2px rgba(130, 185, 255, 0.26),
+    0 18px 46px -20px rgba(40, 70, 115, 0.45);
+}
+/* the pane's own edge light: a sweep off the top left, and a cooler one
+   returning along the bottom right */
+html[data-theme='bright'] .vf__btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    linear-gradient(146deg, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0) 26%),
+    linear-gradient(318deg, rgba(158, 205, 255, 0.38) 0%, rgba(158, 205, 255, 0) 24%),
+    /* a thin travelling highlight across the top edge, as on the sheet */
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0, rgba(255, 255, 255, 0) 3px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  transition: opacity 0.35s var(--ease);
+}
+html[data-theme='bright'] .vf__btn:hover {
+  border-color: #fff;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -1px 0 rgba(200, 232, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
+    inset 0 0 40px -4px rgba(150, 200, 255, 0.62),
+    0 0 0 1px rgba(190, 224, 255, 0.8),
+    0 0 24px 0 rgba(130, 185, 255, 0.7),
+    0 0 62px 6px rgba(130, 185, 255, 0.34),
+    0 22px 54px -20px rgba(40, 70, 115, 0.5);
 }
