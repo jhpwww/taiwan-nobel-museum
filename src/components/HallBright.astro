@@ -82,6 +82,11 @@ const cats = categoryList()
        without WebGL. */
     poster: stamp(`assets/models/gold/${key}.webp`),
     mark: stamp(`assets/marks/${key}.webp`),
+    /* Built here rather than in the attribute: an object literal inside a
+       template literal inside an Astro attribute loses the compiler. */
+    label: catName(key, lang) + (lang === 'zh' ? '（' : ' (')
+         + catNameAlt(key, lang) + (lang === 'zh' ? '）— ' : ') — ')
+         + ((counts[key] ?? 0) > 0 ? t('hall.count', { n: counts[key] ?? 0 }) : t('hall.soon')),
     credit: credited[key],
   }));
 
@@ -233,9 +238,13 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     <p class="bh__hint">{t('hall.hint')}</p>
   </div>
 
+  {/* Each piece is named outright rather than left to be assembled from what
+      is inside it. The label's characters are split into their own elements so
+      each can be turned onto the drum, and inline-block spans are a known way
+      to get a name read out one letter at a time. */}
   <nav class="bh__plinths" aria-label={t('hall.enter')}>
     {cats.map((c) => (
-      <a class="bh__piece" href={c.href} data-cat={c.key}>
+      <a class="bh__piece" href={c.href} data-cat={c.key} aria-label={c.label}>
         <span class="bh__art">
           <model-viewer
             class="bh__mv"
@@ -260,7 +269,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
           </model-viewer>
           {/* cut into the drum, where a museum puts the label — the plinth is
               part of the model, so the type is laid over its face */}
-          <span class="bh__face">
+          <span class="bh__face" aria-hidden="true">
             <img class="bh__mark" src={c.mark} alt="" width="192" height="192"
                  loading="lazy" decoding="async" />
             <span class="bh__name">{c.name}</span>
@@ -521,7 +530,17 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     text-align: center;
     text-wrap: balance;
     pointer-events: none;      /* the anchor owns every click */
+    /* The drum is a cylinder, so the type on it is turned to its surface —
+       see the script at the foot of this file. The perspective matches the
+       model's own camera: it stands 1.55 units off an assembly whose drum is
+       0.43 units across and draws 144px wide, which is 2.7 frames of distance. */
+    perspective: 273cqw;
+    transform-style: preserve-3d;
   }
+  .bh__name, .bh__name-en { transform-style: preserve-3d; }
+  /* each word stays whole; only the characters inside it are turned */
+  .bh__word { display: inline-block; white-space: nowrap; transform-style: preserve-3d; }
+  .bh__ch { display: inline-block; will-change: transform; }
   /* The device above the name, in the gold the hall keeps for ornament.
      :global because the mark is drawn by another component, and Astro's scope
      attribute stops at this file — a plain .bh__mark rule matches nothing and
@@ -639,6 +658,86 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
   applyRotation();
   addEventListener('motionpref', applyRotation);
+
+  /**
+   * Bend the plinth labels onto the drum.
+   *
+   * The drum is a cylinder, and flat type laid across it reads as a sticker.
+   * So each character is turned to the surface: rotated about Y by the angle
+   * its own position subtends, and pushed back by how far the surface falls
+   * away there. The browser's perspective does the rest — the foreshortening
+   * at the ends and the slight loss of size with depth are what sell it, and
+   * neither is drawn by hand.
+   *
+   * The angle is asin(x / R) rather than x / R, which is the difference
+   * between projecting the label onto the cylinder and wrapping it round by
+   * arc length. Projecting keeps every character exactly where the layout put
+   * it — the label holds the width it was designed to, and nothing reflows.
+   *
+   * R is measured off the model: at the label's height the drum draws 144px
+   * across a 190px frame, so its radius is 0.379 of the frame.
+   *
+   * Progressive: if this never runs, the labels are simply flat.
+   */
+  const DRUM_R = 0.379;        // of the frame's width
+  const VIEW_TILT = 8;         // degrees the camera sits below the drum's level
+
+  const faces = [...document.querySelectorAll<HTMLElement>('.bh__face')];
+
+  /** split once, into words that stay whole and characters that can turn */
+  function split(line: HTMLElement) {
+    if (line.dataset.flat !== undefined) return;
+    const text = line.textContent ?? '';
+    line.dataset.flat = text;
+    line.replaceChildren(...text.split(/(\s+)/).map((token) => {
+      if (!token.trim()) return document.createTextNode(token);
+      const word = document.createElement('span');
+      word.className = 'bh__word';
+      word.append(...[...token].map((ch) => {
+        const c = document.createElement('span');
+        c.className = 'bh__ch';
+        c.textContent = ch;
+        return c;
+      }));
+      return word;
+    }));
+  }
+
+  function curve() {
+    for (const face of faces) {
+      const frame = face.parentElement;
+      if (!frame) continue;
+      const R = frame.getBoundingClientRect().width * DRUM_R;
+      if (!(R > 0)) continue;
+      for (const line of face.querySelectorAll<HTMLElement>('.bh__name, .bh__name-en')) {
+        split(line);
+        const mid = line.getBoundingClientRect();
+        const cx = mid.left + mid.width / 2;
+        for (const ch of line.querySelectorAll<HTMLElement>('.bh__ch')) {
+          ch.style.transform = '';
+          const b = ch.getBoundingClientRect();
+          const dx = b.left + b.width / 2 - cx;
+          const th = Math.asin(Math.max(-1, Math.min(1, dx / R)));
+          /* how far the surface falls away behind the label's own plane */
+          const back = R * (1 - Math.cos(th));
+          /* and, seen from below, that depth reads as a little height */
+          const lift = back * Math.sin((VIEW_TILT * Math.PI) / 180);
+          ch.style.transform =
+            `translate3d(0, ${-lift.toFixed(2)}px, ${-back.toFixed(2)}px) ` +
+            `rotateY(${((th * 180) / Math.PI).toFixed(2)}deg)`;
+        }
+      }
+    }
+  }
+
+  if (faces.length) {
+    const run = () => requestAnimationFrame(curve);
+    document.fonts?.ready.then(run) ?? run();
+    run();
+    /* the labels are sized in container units, so they move with the row */
+    let t: ReturnType<typeof setTimeout>;
+    addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 120); });
+  }
   /* model-viewer has no animation to play until the GLB is in */
   for (const v of viewers) v.addEventListener('load', applyRotation);
 
