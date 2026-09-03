@@ -105,6 +105,18 @@ const CLEAR_LIFT = 0.0005;     // the piece, off the drum's top face
 const CLEAR_RING = 1.006;     // the inlay ring, proud of the wall
 
 /**
+ * The drum, cut down.
+ *
+ * A fifth off its height, taken from the foot so its top face — and therefore
+ * every piece standing on it — does not move; and the gold ring brought up to
+ * half its distance from that top. Both are done to the base as it is merged
+ * rather than to the file, so the owner's model is left as drawn.
+ */
+const DRUM_TRIM = 0.2;        // of the drum's height, off the bottom
+const RING_RAISE = 0.5;       // of the ring's distance to the top face
+const DRUM_FOOT = BASE_TOP * DRUM_TRIM;   // where it stands after the cut
+
+/**
  * The piece turns; the drum it stands on does not.
  *
  * model-viewer's auto-rotate turns the camera, so the whole assembly swings
@@ -438,14 +450,39 @@ async function addBase(doc, io, cat) {
     for (const child of s.listChildren()) { s.removeChild(child); scene.addChild(child); }
     s.dispose();
   }
-  /* and the inlay ring stands a hair proud of the wall it is set into */
-  const ring = [];
-  const findRing = (n) => { if ((n.getName() || '') === 'gold_inlay_ring') ring.push(n);
-                            n.listChildren().forEach(findRing); };
-  scene.listChildren().forEach(findRing);
-  for (const n of ring) {
-    const [x, y, z] = n.getScale();
-    n.setScale([x * CLEAR_RING, y, z * CLEAR_RING]);
+  /* Now reshape the drum: a fifth off its foot, and the ring up under its top.
+     Each adjustment goes on a wrapper node rather than onto the part's own
+     transform. A node's scale is applied in its own frame, before its
+     rotation — and the inlay ring is rotated, so scaling its local x and z
+     would have squashed the wrong two axes. Wrapping puts the change outside
+     the rotation, where the axes mean what they look like. */
+  const parts = new Map();
+  const find = (n, parent) => { const k = n.getName() || '';
+    if (k === 'marble_column' || k === 'gold_inlay_ring') parts.set(k, [n, parent]);
+    n.listChildren().forEach((c) => find(c, n)); };
+  scene.listChildren().forEach((n) => find(n, scene));
+
+  const wrap = (entry, scale, lift) => {
+    if (!entry) return;
+    const [node, parent] = entry;
+    const w = doc.createNode(`${node.getName()}__adjust`)
+      .setScale(scale).setTranslation([0, lift, 0]);
+    parent.removeChild(node);
+    w.addChild(node);
+    parent.addChild(w);
+  };
+
+  /* the column, scaled about its top face so the top — and every piece
+     standing on it — does not move */
+  wrap(parts.get('marble_column'),
+       [1, 1 - DRUM_TRIM, 1], BASE_TOP * DRUM_TRIM);
+
+  const ringEntry = parts.get('gold_inlay_ring');
+  if (ringEntry) {
+    const b = getBounds(ringEntry[0]);
+    const mid = (b.min[1] + b.max[1]) / 2;
+    /* up under the top face, and still a hair proud of the wall it is set into */
+    wrap(ringEntry, [CLEAR_RING, 1, CLEAR_RING], (BASE_TOP - mid) * (1 - RING_RAISE));
   }
 
   // the base brought its own buffer, and a GLB may only carry one
@@ -608,10 +645,13 @@ for (const file of fs.readdirSync(SRC).sort()) {
    * so all six stand on the same line. Their frames only agree if the camera
    * stops framing each box in turn, so the halls pin camera-target to the origin.
    */
-  const s = 1 / (BASE_TOP + PERCH_H);
+  /* One scale for all six and one ground line, both fixed rather than taken
+     from each model's own box — see the note above. The drum's foot is where
+     the cut left it, and that is what lands on the bottom of the unit box. */
+  const s = 1 / (BASE_TOP + PERCH_H - DRUM_FOOT);
   const fit = doc.createNode(`${cat}__fit`)
     .setScale([s, s, s])
-    .setTranslation([0, -0.5, 0]);
+    .setTranslation([0, -0.5 - DRUM_FOOT * s, 0]);
   for (const child of [...scene.listChildren()]) { scene.removeChild(child); fit.addChild(child); }
   scene.addChild(fit);
   addCage(doc, scene);

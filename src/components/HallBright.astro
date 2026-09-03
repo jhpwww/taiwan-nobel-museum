@@ -497,7 +497,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     position: absolute;
     inset-inline: 17%;
     /* Measured on the page, at the hall's own camera: the drum's gold line
-       crosses the frame at 72.8% and its foot at 95.5%, so the label has that
+       crosses the frame at 75.7% and its foot at 95.7%, so the label has that
        near-quarter of the frame to sit in and hangs from just under the line.
 
        Worth measuring more than once. Two readings caught the gold cap's rim
@@ -508,11 +508,16 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
 
        Hung from its top rather than centred, because two of the English names
        take two lines and a centred block grows upward as well as down —
-       'Physiology or Medicine' put its mark back on the gold line. */
-    inset-block-start: 73%;
+       'Physiology or Medicine' put its mark back on the gold line.
+
+       The plate is close to full. Taking a fifth off the drum took ten pixels
+       out of this band, and at that point the two-line English labels wanted
+       two more than were left: the mark and the second line give those back,
+       so they are a shade under the fifth larger the rest are. */
+    inset-block-start: 75.9%;
     display: grid;
     justify-items: center;
-    gap: 0.02em;
+    gap: 0;
     text-align: center;
     text-wrap: balance;
     pointer-events: none;      /* the anchor owns every click */
@@ -526,14 +531,14 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      rather than by width, or the tall caduceus and the wide book would carry
      quite different weight in the row. See scripts/build-marks.py. */
   .bh__mark {
-    inline-size: clamp(1.26rem, 14.2cqw, 2.35rem);
+    inline-size: clamp(1.17rem, 13.2cqw, 2.18rem);
     block-size: auto;
     margin-block-end: 0.1em;
   }
   .bh__name {
     font-family: var(--font-display);
     font-size: clamp(0.94rem, 9.6cqw, 1.5rem);
-    line-height: 1.05;
+    line-height: 1.0;
     letter-spacing: 0.04em;
     color: var(--cream);
   }
@@ -541,7 +546,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     /* The second line is the one that wraps — 'Physiology or Medicine' and
        'Economic Sciences' both take two — so it carries the compromise, and
        the name above it keeps its size. */
-    font-size: clamp(0.67rem, 5.75cqw, 1.03rem);
+    font-size: clamp(0.61rem, 5.2cqw, 0.93rem);
     line-height: 1.05;
     letter-spacing: 0.02em;
     color: var(--muted);
