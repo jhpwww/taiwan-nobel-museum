@@ -41,16 +41,15 @@ const nVideos = totalVideos();
    : style === 'models' ? <HallModels lang={lang} />
    : <Hall lang={lang} />}
 
-  {/* A screenful of runway, only in the bright museum. The hall stands barely
-      taller than the window, so the sheet below began covering it 108px into
-      the scroll and the pieces did nine tenths of their walk unseen. This is
-      the room they walk in. */}
-  {bright && <div class="runway" aria-hidden="true"></div>}
-
-  {/* Everything under the hall travels together and opaquely. In the bright
-      museum the hall and its pieces are held still while the page scrolls, so
-      what comes after has to arrive as a sheet — transparent sections let the
-      room show through the gaps, and the pieces stood behind the type. */}
+  {/* Everything under the hall travels together, and in the bright museum it
+      travels as one pane of glass. The hall is pinned for the whole document
+      now, so this is what is in front of it the rest of the way down: a single
+      frosted sheet with the room behind it. One blur, on this element — the
+      sections and cards inside only tint what it has already frosted, which is
+      both cheaper and more like glass than seven separate panes.
+      A runway used to stand between the two, a screenful of white to walk the
+      pieces across. The retreat is one second on a cue now, not a walk, and
+      the runway was just an empty screen. */}
   <div class="after">
   <section class="strip">
     <div class="wrap">
@@ -116,9 +115,8 @@ const nVideos = totalVideos();
 </Base>
 
 <style>
-  .runway { block-size: 100svh; }
-  /* no walk, no runway — see the note in HallBright */
-  @media (max-width: 48rem) { .runway { block-size: 0; } }
+  /* opaque on the dark site, where there is nothing behind it; the bright
+     museum makes this glass — see 'the sheet over the hall' in bright.css */
   .after { position: relative; z-index: 1; background: var(--bg-0); }
   .strip { border-block: 1px solid var(--line); background: var(--bg-1); }
   .stats {

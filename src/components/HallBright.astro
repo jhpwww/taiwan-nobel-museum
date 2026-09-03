@@ -298,11 +298,10 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     grid-template-rows: auto 1fr auto;
     align-content: start;
     padding-block: max(clamp(1.5rem, 4vh, 3.5rem), 4.4rem) clamp(2rem, 5vh, 4rem);
-    /* Not hidden. The room and the row are held still against the scroll, and
-       clipping them to this section cut them away within a screenful — the
-       pieces stopped receding almost as soon as they started. The scene clips
-       its own plate, so nothing needs clipping here; the sections below paint
-       over what is left, which is how the two disappear. */
+    /* Not hidden. The row is held still against the scroll and outlives this
+       section by the whole document; clipping to the section cut it away
+       within a screenful. The scene clips its own plate, so nothing needs
+       clipping here, and the glass below covers what is left. */
     overflow: visible;
     isolation: isolate;
     /* flat, and exactly the colour the plate's own edges fade into — a
@@ -311,10 +310,16 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
 
   /* ---------- the room ---------- */
+  /* Fixed, for the whole document. The hall is not this section's backdrop any
+     more, it is the page's: everything below is glass, and what it is glass
+     over is this. Fixed rather than held by script — there is no scroll
+     arithmetic in a room that never moves, and the compositor keeps it on its
+     own layer for free.
+     It stays inside .bh, which isolates, so it still paints under .bh's own
+     content and under the sheet below; and .bh sets no transform or filter, so
+     nothing steals the containing block back off the viewport. */
   .bh__scene {
-    position: absolute; inset: 0; z-index: -1; overflow: hidden;
-    /* the script holds these still against the scroll; see 'walk back' below */
-    will-change: transform;
+    position: fixed; inset: 0; z-index: -1; overflow: hidden;
   }
 
   /* The plate is the photograph's own frame, and everything in the hall is
@@ -443,7 +448,14 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
    * below. Leaving the padding out of it — the first attempt — lands at 1.81
    * to 1.87 rather than 2. */
   .bh__plinths {
-    will-change: transform;
+    /* Two transforms with two different jobs, so they are two properties.
+       `translate` cancels the scroll every frame and must not lag; `transform`
+       carries the one-second retreat and must. They compose translate · scale,
+       in that order, which is the order that keeps the pin unscaled — the same
+       pair written into `transform` alone would multiply the hold by the
+       scale and the row would drift as it shrank. */
+    will-change: transform, translate;
+    transition: transform 1s var(--ease);
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
     gap: 0;
@@ -464,6 +476,9 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   .bh__piece:hover { transform: translateY(-4px); }
   .bh__piece:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   :global(html[data-motion='off']) .bh__piece:hover { transform: none; }
+  /* the room still stands still — that is the page's ground, not motion — but
+     the retreat arrives rather than travels */
+  :global(html[data-motion='off']) .bh__plinths { transition: none; }
 
   .bh__art {
     /* Portrait, not square. The piece is a tall thing in a wide box: at a
@@ -617,7 +632,10 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
 
   /* ---------- introduction ---------- */
+  /* This is the line the retreat waits for, so it scrolls while the room and
+     the pieces hold — it passes up over them, which is why it is glass. */
   .bh__intro {
+    position: relative;
     display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.8rem);
     inline-size: min(100% - 2rem, 46rem);
     margin: clamp(1.4rem, 3.5vh, 2.4rem) auto 0;
@@ -725,88 +743,114 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   const MAX_TURN = (55 * Math.PI) / 180;
 
   /**
-   * The hall holds still, and the pieces walk back into it.
+   * The hall stays. The pieces step back into it, once.
    *
-   * Scrolling the page moves everything but these two: the room is pinned by
-   * cancelling the scroll on it, and the row of pieces is pinned the same way
-   * and then scaled down about the hall's own vanishing point. Scaling about
-   * that point is not an approximation of walking away — in a one-point
-   * perspective it is exactly what walking away does: every part of the row
-   * slides toward the far door and shrinks in proportion, so the spacing, the
-   * plinths and the type all recede together rather than merely getting
-   * smaller in place.
+   * The room is pinned by the stylesheet — `position: fixed`, for the whole
+   * document — so everything here is about the row of six.
    *
-   * They reach half size as 本館推薦 arrives at the top of the window, which is
-   * where the hall has finished being the page's subject.
+   * The row is pinned too, but by cancelling the scroll on it rather than by
+   * taking it out of the flow: it keeps its place in the grid, so the title
+   * above it and the introduction below it still sit where they always did,
+   * and still travel. That travel is what drives this. 關於這座獎 is the last
+   * line of the hall; when it reaches the top of the window the hall has
+   * finished being the page's subject, and the pieces withdraw — all six at
+   * once, over a second, and not again.
    *
-   * Both are held by transform rather than by `position: fixed`, so nothing
-   * about the layout changes and the row still takes its space in the flow —
-   * the counts and the introduction under it move normally.
+   * They withdraw by scaling about the hall's own vanishing point. In a
+   * one-point perspective that is not an approximation of walking away, it is
+   * exactly what walking away does: every piece slides toward the far doorway
+   * and shrinks in proportion, so the spacing, the plinths and the type recede
+   * together instead of each shrinking where it stands.
+   *
+   * The pin and the retreat are kept in two different CSS properties on
+   * purpose — see the note by .bh__plinths. Scrolling back above the line
+   * brings them forward again, by the same second.
    */
   const RECEDE_TO = 0.5;
-  /* Only where there is a room to walk into. Below this the hall is a band
-     across the top and the pieces are a two-column list on white — holding
-     them still there just collides them with the page. */
-  const ROOM = matchMedia('(min-width: 48rem)');
 
-  const scene = document.querySelector<HTMLElement>('.bh__scene');
   const plinths = document.querySelector<HTMLElement>('.bh__plinths');
   const plate = document.querySelector<HTMLElement>('.bh__plate');
-  const feature = document.querySelector<HTMLElement>('.feature');
+  const intro = document.querySelector<HTMLElement>('.bh__intro');
+  const bar = document.querySelector<HTMLElement>('.topbar');
 
-  let travel = 1;              // how far the page scrolls before they are half size
-  let originX = 0, originY = 0;
+  let trigger = Infinity;
+  /* How far the page scrolls before the row locks.
+   *
+   * Nought on any screen the row fits on, which is every desktop — it locks
+   * from the top and never moves. On a phone it does not fit: the six stand
+   * two abreast and the last pair is a screen and a half down, so a row pinned
+   * from the top would hold 經濟學 and 文學 below the fold permanently and
+   * neither could ever be reached from the hall. So the row is held from the
+   * moment it has finished being revealed, which on a desktop is immediately
+   * and on a phone is once its last piece has come up. The room itself is
+   * pinned from the start either way; this is only about the six.
+   */
+  let pinFrom = 0;
+  let back: boolean | null = null;
 
   function anchor() {
-    if (!plinths || !plate || !feature) return;
-    /* the vanishing point, in the row's own coordinates — the far doorway the
-       pieces are walking toward */
+    if (!plinths || !plate || !intro) return;
+    /* measure with both transforms off, or the anchor drifts by whatever the
+       row is already carrying — and without the transition, or clearing them
+       animates */
+    const held = plinths.style.transform;
+    plinths.style.transition = 'none';
+    plinths.style.transform = '';
+    plinths.style.translate = '';
+
     const pr = plate.getBoundingClientRect();
     const gr = plinths.getBoundingClientRect();
-    const vx = Number(plate.dataset.vpX ?? 50);
-    const vy = Number(plate.dataset.vpY ?? 65);
-    originX = pr.left + (pr.width * vx) / 100 - gr.left;
-    originY = pr.top + (pr.height * vy) / 100 - gr.top;
-    plinths.style.transformOrigin = `${originX.toFixed(1)}px ${originY.toFixed(1)}px`;
-    travel = Math.max(1, feature.getBoundingClientRect().top + scrollY);
+    const top = gr.top + scrollY;                        // the row, unheld
+    pinFrom = Math.max(0, top + gr.height - innerHeight);
+
+    /* The vanishing point in the row's own coordinates — the far doorway the
+       pieces are walking toward. The plate is fixed, so its rectangle is
+       already where it will be on screen for ever; the row will be, once it is
+       held, `pinFrom` higher than where it is measured. Leaving that term out
+       is what would send the phone's pieces off toward a doorway a screen and
+       a half above the one in the picture. */
+    const vpX = pr.left + (pr.width * Number(plate.dataset.vpX ?? 50)) / 100;
+    const vpY = pr.top + (pr.height * Number(plate.dataset.vpY ?? 65)) / 100;
+    plinths.style.transformOrigin =
+      `${(vpX - gr.left).toFixed(1)}px ${(vpY - top + pinFrom).toFixed(1)}px`;
+
+    /* under the bar, not under the window's edge: the bar is fixed over the
+       hall, so a line level with the very top has not arrived, it is hidden */
+    trigger = intro.getBoundingClientRect().top + scrollY - (bar?.offsetHeight ?? 0);
+
+    plinths.style.transform = held;
+    void plinths.offsetWidth;
+    plinths.style.transition = '';
   }
 
-  function walkBack() {
-    /* A scroll-driven transform is motion, so it goes when motion does — the
-       hall and the row then simply scroll with the page. */
-    if (!motionOn() || !ROOM.matches) {
-      if (scene) scene.style.transform = '';
-      if (plinths) plinths.style.transform = '';
-      return;
-    }
-    /* Held only while they are walking. Past the end they let go and leave with
-       the page — pinned for the whole document, the row would still be standing
-       in front of the footer. */
-    const held = Math.min(scrollY, travel);
-    const p = travel > 0 ? held / travel : 0;
-    const k = 1 - (1 - RECEDE_TO) * p;
-    if (scene) scene.style.transform = `translate3d(0, ${held}px, 0)`;
-    if (plinths) plinths.style.transform = `translate3d(0, ${held}px, 0) scale(${k.toFixed(4)})`;
+  function pin() {
+    if (plinths) plinths.style.translate = `0 ${Math.max(0, Math.round(scrollY - pinFrom))}px`;
   }
 
-  if (scene && plinths) {
+  function setBack(v: boolean, animate: boolean) {
+    if (!plinths || v === back) return;
+    back = v;
+    if (!animate) plinths.style.transition = 'none';
+    plinths.style.transform = v ? `scale(${RECEDE_TO})` : 'scale(1)';
+    if (!animate) { void plinths.offsetWidth; plinths.style.transition = ''; }
+  }
+
+  if (plinths) {
     anchor();
-    walkBack();
+    pin();
+    /* whatever the page was restored at, the first state is simply the state —
+       a reload halfway down should not play the retreat at the reader */
+    setBack(scrollY >= trigger, false);
+
     let ticking = false;
     addEventListener('scroll', () => {
       if (ticking) return;
       ticking = true;
-      requestAnimationFrame(() => { walkBack(); ticking = false; });
+      requestAnimationFrame(() => { pin(); setBack(scrollY >= trigger, true); ticking = false; });
     }, { passive: true });
     addEventListener('resize', () => {
-      /* measure with the transforms cleared, or the anchor drifts */
-      plinths.style.transform = '';
-      if (scene) scene.style.transform = '';
-      anchor();
-      walkBack();
+      anchor(); pin(); setBack(scrollY >= trigger, false);
     });
-    addEventListener('motionpref', walkBack);
-    ROOM.addEventListener('change', () => { anchor(); walkBack(); });
   }
 
   const faces = [...document.querySelectorAll<HTMLElement>('.bh__face')];
@@ -857,7 +901,10 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      out of drum there, and a stroke ending on the edge looks like it overshoots */
   const RING_REACH = 0.985;
   const RING_GAP = 1.4;        // of the logo's width
-  const RING_STEP = 0.25;      // of the logo's height, between the rings
+  /* of the logo's height, between the rings. A quarter to begin with; nine
+     tenths of that reads as a set of three rather than as three separate
+     lines. */
+  const RING_STEP = 0.225;
 
   function drawRings(face: HTMLElement, frame: HTMLElement) {
     const svg = frame.querySelector<SVGSVGElement>('.bh__rings');
@@ -877,9 +924,21 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     /* where the gap's edge meets the ellipse, as a fraction of its depth */
     const k = half < R ? Math.sqrt(1 - (half / R) ** 2) : 0;
 
+    /* Solve for each ring's height *on the drum*, rather than drawing it at
+       the height we want to see it.
+       Only the near half of a ring is on the drum's front, so what is drawn
+       hangs below the height it belongs to: where the gap cuts it, at x = half,
+       it has already sagged by b·k. Setting y to the logo's centre therefore
+       put the visible arc a whole b·k under it — six pixels, a fifth of the
+       logo — which is the low reading. Inverting it is one line, and b is
+       itself a function of y, so it has to be solved rather than subtracted. */
+    const eye = f.height * EYE;
+    const solve = (t: number) => (t + eye * ELLIPSE * k) / (1 + ELLIPSE * k);
+
     const d: string[] = [];
-    for (const y of [mid - step, mid, mid + step]) {
-      const b = Math.max(0.2, (y - f.height * EYE) * ELLIPSE);
+    for (const t of [mid - step, mid, mid + step]) {
+      const y = solve(t);
+      const b = Math.max(0.2, (y - eye) * ELLIPSE);
       const drop = b * k;
       const reach = R * RING_REACH;
       const edge = y + b * Math.sqrt(Math.max(0, 1 - RING_REACH ** 2));

@@ -11,7 +11,8 @@
     "sync": "node scripts/sync-sheet.mjs",
     "content": "python3 scripts/build-catalog.py",
     "sheet": "python3 scripts/export-sheet-csv.py",
-    "shots": "node scripts/shots.mjs"
+    "shots": "node scripts/shots.mjs",
+    "glass": "node scripts/check-glass.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.3",
@@ -25,6 +26,7 @@
     "@gltf-transform/extensions": "^4.4.2",
     "@gltf-transform/functions": "^4.4.2",
     "playwright": "^1.62.1",
+    "pngjs": "^7.0.0",
     "typescript": "^5.9.3"
   },
   "description": "A virtual museum of the Nobel laureate lectures delivered in Taiwan.",

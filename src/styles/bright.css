@@ -127,26 +127,40 @@ html[data-theme='bright'] .topbar--ghost {
   border-block-end: 0;
 }
 
-/* The nav over the hall: plain type at rest, a frosted pill on approach.
-   Which is how the galleries that put a bar over a photograph handle it —
-   nothing competes with the picture until the pointer is on its way, and then
-   the target is unmistakable. It also agrees with the glass on the video
-   frames below, so the page has one idea rather than two. */
+/* The nav over the hall: a frosted tablet under every item, always.
+   It began as a pill that appeared on approach, which is what a bar over a
+   photograph usually does — but this bar is over a photograph AND over
+   everything that scrolls up past it, and glass that is only there on hover
+   left the labels to fight the page for the other 99% of the time. So the
+   tablets stand: a small radius rather than a full pill, because six of these
+   in a row read as a set of keys and a row of lozenges reads as pills of
+   medicine. Hover deepens the same glass rather than introducing any. */
 html[data-theme='bright'] .topbar--ghost .topbar__nav a {
-  padding-inline: 0.7rem;
-  padding-block: 0.34rem;
-  border-radius: 999px;
+  padding-inline: 0.78rem;
+  padding-block: 0.36rem;
+  border-radius: 0.62rem;
   border-block-end: 0;
   color: var(--cream);
+  background: rgba(255, 255, 255, 0.42);
+  backdrop-filter: blur(14px) saturate(1.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(196, 226, 255, 0.5),
+    0 1px 2px rgba(46, 58, 78, 0.06),
+    0 8px 20px -14px rgba(46, 58, 78, 0.5);
   transition: background 0.28s var(--ease), color 0.28s var(--ease),
               box-shadow 0.28s var(--ease);
 }
 html[data-theme='bright'] .topbar--ghost .topbar__nav a:hover,
 html[data-theme='bright'] .topbar--ghost .topbar__nav a:focus-visible {
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.85),
-              0 6px 18px -10px rgba(60, 70, 90, 0.5);
-  backdrop-filter: blur(8px) saturate(1.2);
+  background: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(196, 226, 255, 0.8),
+    0 2px 4px rgba(46, 58, 78, 0.08),
+    0 10px 24px -14px rgba(46, 58, 78, 0.6);
   color: var(--accent);
 }
 /* the dark hall needed a scrim to keep the controls legible; a white one
@@ -349,55 +363,209 @@ html[data-theme='bright'] :is(.bh__name, .case__name, .plinth__name, .tile__name
 
 /* ---------- glass on the video frames ----------
  *
- * After the reference sheet: a pane that is mostly the picture behind it, with
- * the light caught along its edges and a cool bloom around it. Built from the
- * frame rather than a wash over the poster — a translucent layer on top would
- * only mute the still it is meant to show.
+ * After the reference sheet, and this time built the way the sheet builds it.
  *
- * The blue is kept to the rim and the bloom. The hall is warm white marble and
- * gold, so a cool edge reads as glass in it; a cool fill would read as a
- * colour cast.
+ * The first attempt lit the poster's own edge — a rim and a bloom drawn round
+ * the picture itself. That is a glow, not glass: on the sheet the pane is a
+ * pane, a slab of frosted material with the artwork lying ON it and a margin
+ * of the material showing all the way round. The margin is the whole effect.
+ * Without it there is no glass, only a picture with a bright border.
+ *
+ * So the figure is the pane and the poster is inset in it. The pane carries
+ * the blur, the milky fill, the lit top edge, the cool return along the
+ * bottom, and one diagonal specular sweep; the poster sits on it under its own
+ * small radius and a shadow, so it reads as resting on the surface rather than
+ * cut out of it.
+ *
+ * The blue stays in the edges, the sweep and the bloom. The hall is warm white
+ * marble and gold, and a cool fill across it reads as a colour cast rather
+ * than as glass.
  */
-html[data-theme='bright'] .vf__btn {
-  border-color: rgba(255, 255, 255, 0.85);
-  border-radius: calc(var(--radius) * 2.2);
+html[data-theme='bright'] .vf {
+  position: relative;
+  /* Wide enough to be a mat. At half this the margin read as a border on the
+     picture, which is the thing the first attempt got wrong — the material
+     showing round the artwork IS the effect, and there has to be enough of it
+     to look like material. */
+  padding: 0.95rem;
+  border-radius: 1.4rem;
+  /* Cool, and openly so. On the reference the pane is over a photograph and
+     the material is legible for free; here it is over the page's own frosted
+     sheet, which is nearly white — a white pane on it is a white border. So
+     the tint has to carry the material on its own, and it is blue because
+     that is where glass sits against a hall of warm marble. */
+  background:
+    linear-gradient(152deg,
+      rgba(255, 255, 255, 0.72) 0%,
+      rgba(196, 224, 255, 0.62) 42%,
+      rgba(226, 240, 255, 0.5) 72%,
+      rgba(255, 255, 255, 0.66) 100%);
+  backdrop-filter: blur(18px) saturate(1.7) brightness(1.06);
   box-shadow:
-    /* the pane's own lit edge */
+    /* the pane's own lit edge, and the cooler light returning under it */
     inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 0 rgba(190, 225, 255, 0.75),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-    inset 0 0 34px -6px rgba(150, 200, 255, 0.5),
-    /* and the cool bloom it throws */
-    0 0 0 1px rgba(178, 214, 255, 0.55),
-    0 0 18px -2px rgba(130, 185, 255, 0.55),
-    0 0 46px 2px rgba(130, 185, 255, 0.26),
-    0 18px 46px -20px rgba(40, 70, 115, 0.45);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+    inset 0 -1.5px 0 rgba(168, 210, 255, 0.95),
+    /* and the bloom it throws */
+    0 0 0 1px rgba(150, 197, 250, 0.6),
+    0 1px 2px rgba(40, 70, 115, 0.08),
+    0 16px 40px -18px rgba(40, 70, 115, 0.55),
+    0 0 52px -8px rgba(120, 178, 255, 0.45);
+  transition: box-shadow 0.35s var(--ease), transform 0.35s var(--ease);
 }
-/* the pane's own edge light: a sweep off the top left, and a cooler one
-   returning along the bottom right */
-html[data-theme='bright'] .vf__btn::after {
+/* the specular sweep across the pane — off the top left, returning cool at the
+   bottom right, plus the hairline the sheet catches along the very top */
+html[data-theme='bright'] .vf::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   pointer-events: none;
+  z-index: 1;
   background:
-    linear-gradient(146deg, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0) 26%),
-    linear-gradient(318deg, rgba(158, 205, 255, 0.38) 0%, rgba(158, 205, 255, 0) 24%),
-    /* a thin travelling highlight across the top edge, as on the sheet */
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.5) 0, rgba(255, 255, 255, 0) 3px);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.6);
-  transition: opacity 0.35s var(--ease);
+    linear-gradient(148deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0) 26%),
+    linear-gradient(320deg, rgba(132, 186, 250, 0.5) 0%, rgba(132, 186, 250, 0) 22%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.85) 0, rgba(255, 255, 255, 0) 2px);
 }
-html[data-theme='bright'] .vf__btn:hover {
+/* the note is printed on the glass, not above it */
+html[data-theme='bright'] .vf__note {
+  position: relative;
+  z-index: 2;
+  margin: 0 0 0.5rem;
+  padding-inline: 0.15rem;
+}
+
+/* the picture lies on the pane: its own small radius, and a shadow so it sits
+   on the surface rather than being a hole cut through it */
+html[data-theme='bright'] .vf__btn {
+  border-color: rgba(255, 255, 255, 0.72);
+  border-radius: 0.66rem;
+  background: rgba(255, 255, 255, 0.25);
+  box-shadow:
+    0 1px 2px rgba(30, 45, 70, 0.14),
+    0 6px 16px -10px rgba(30, 45, 70, 0.45);
+}
+html[data-theme='bright'] .vf__btn:hover,
+html[data-theme='bright'] .vf__btn:focus-visible {
   border-color: #fff;
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 0 rgba(200, 232, 255, 0.9),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.7),
-    inset 0 0 40px -4px rgba(150, 200, 255, 0.62),
-    0 0 0 1px rgba(190, 224, 255, 0.8),
-    0 0 24px 0 rgba(130, 185, 255, 0.7),
-    0 0 62px 6px rgba(130, 185, 255, 0.34),
-    0 22px 54px -20px rgba(40, 70, 115, 0.5);
+    0 2px 4px rgba(30, 45, 70, 0.16),
+    0 10px 24px -12px rgba(30, 45, 70, 0.5);
+}
+/* the pane answers the pointer, not just the picture on it */
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme='bright'] .vf:hover {
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 1),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.72),
+      inset 0 -1px 0 rgba(200, 232, 255, 0.95),
+      0 0 0 1px rgba(196, 224, 255, 0.62),
+      0 1px 2px rgba(40, 70, 115, 0.08),
+      0 18px 44px -18px rgba(40, 70, 115, 0.55),
+      0 0 58px -6px rgba(140, 190, 255, 0.46);
+  }
+}
+/* the live player takes the picture's place on the same pane */
+html[data-theme='bright'] .vf :is(iframe) {
+  border-color: rgba(255, 255, 255, 0.72);
+  border-radius: 0.66rem;
+}
+
+
+/* ---------- the sheet over the hall ----------
+ *
+ * The hall is fixed for the whole document, so everything the home page has to
+ * say is said in front of it. That sheet is glass: one blur, on the sheet
+ * itself, and the sections and cards inside only tint what it has already
+ * frosted. Seven separate frosted panes would cost seven backdrop passes and
+ * would look like seven panes; this looks like one, which is what it is.
+ *
+ * The fill is the part that had to be solved rather than chosen, and a white
+ * veil alone could not solve it. The hall is not uniform: it is marble at 87%
+ * and the video wall at 10%, and any single veil thick enough to carry type
+ * over the wall leaves nothing of the marble. Which is what the first setting
+ * did — 74% white, and the hall behind it was a rumour.
+ *
+ * Frosted glass does not veil, it scatters, and scattering collapses the range
+ * it is looking at. So that is what the filter does: contrast() pulls the
+ * hall's darks and lights toward each other before anything is laid over them,
+ * brightness() lifts what is left, and only then a thin veil. The marble comes
+ * through at 96% and the video wall — the worst thing behind any of this type
+ * — at 68%, which carries the body text at better than 6:1. Measured on the
+ * rendered page, not computed from the tokens: what is behind the type here is
+ * a photograph, and no token describes it.
+ *
+ * The pieces stay gold through it, which matters more than it sounds: the
+ * retreat happens under this sheet, and it is the only place it can be seen.
+ */
+/* The glass is one pane the size of the window, not the size of the page.
+ *
+ * It was the page's size to begin with — the blur on .after itself — and that
+ * works on a desktop and fails silently on a phone. The sheet is 3197 CSS px
+ * tall; at the device pixel ratio of 3 that most phones have, its layer is
+ * 9591px, past the 8192px a GPU texture is allowed. Chromium does not warn or
+ * fall back: it simply stops filtering, and every word is read straight over
+ * the hall. Caught at ratio 3 and not at ratio 2, which is the whole reason to
+ * test at both.
+ *
+ * So the pane is a sticky child a viewport tall. It parks at the top of the
+ * window for as long as .after is under it, and stops with its foot on
+ * .after's own foot, so the coverage is exactly the same as before and the
+ * layer is never bigger than the screen. It is also the truer object: a sheet
+ * of glass held up in front of a room, rather than a frosted page.
+ */
+html[data-theme='bright'] .after {
+  background: none;
+  box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.85),
+              0 -20px 44px -30px rgba(40, 55, 80, 0.5);
+}
+html[data-theme='bright'] .after::before {
+  content: '';
+  display: block;
+  position: sticky;
+  inset-block-start: 0;
+  z-index: -1;                 /* behind the type, in front of the hall */
+  block-size: 100vh;
+  margin-block-end: -100vh;    /* it stands in the flow without taking space */
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(20px) saturate(1.6) contrast(0.6) brightness(1.24);
+}
+/* inside it, nothing frosts again — these only tint the sheet */
+html[data-theme='bright'] .after .strip {
+  background: rgba(255, 255, 255, 0.22);
+  border-color: rgba(255, 255, 255, 0.7);
+}
+html[data-theme='bright'] .after .card {
+  background: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 1px 2px rgba(40, 55, 80, 0.06),
+    0 10px 26px -18px rgba(40, 55, 80, 0.4);
+}
+html[data-theme='bright'] .after .card:hover {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(255, 255, 255, 0.95);
+}
+html[data-theme='bright'] .after .feature__date {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* The introduction is the one thing in the hall that still travels, because it
+   is the cue the pieces wait for — it rides up over them, so it is glass too
+   rather than a white card passing in front of the sculptures. */
+html[data-theme='bright'] .bh__intro {
+  background: rgba(255, 255, 255, 0.56);
+  border-color: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px) saturate(1.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(196, 226, 255, 0.6),
+    0 0 0 1px rgba(186, 218, 255, 0.35),
+    0 14px 34px -20px rgba(40, 70, 115, 0.45);
+}
+html[data-theme='bright'] .bh__intro:hover {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(255, 255, 255, 0.95);
 }
