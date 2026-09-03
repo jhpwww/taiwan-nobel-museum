@@ -3,7 +3,9 @@ import Base from '../layouts/Base.astro';
 import LectureCard from './LectureCard.astro';
 import Sculpture from './Sculpture.astro';
 import { useT, type Lang } from '../i18n/ui';
-import { home } from '../i18n/routing';
+import { home, asset } from '../i18n/routing';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import {
   byCategory, catName, categories, factsAsOf, intro, introParts, INTRO,
   type GalleryKey, type CategoryKey,
@@ -41,24 +43,127 @@ const INTRO_LINKS = [
     dzh: '官方為學生製作的互動教材與遊戲（英文）。', den: 'Interactive teaching material and games from the official site.' },
 ];
 const links = isIntro ? INTRO_LINKS : meta!.links;
+
+/* ---------------------------------------------------------------
+ * The bright museum shows the prize's own sculpture here, standing on the
+ * same drum and lit by the same room as in the hall — a prize page is a room
+ * in the museum, not a document about one. The dark site keeps its line
+ * drawing.
+ *
+ * Fingerprinted for the same reason the hall does it: anything under public/
+ * keeps its URL for ever, so a redeployed model sits behind whatever the
+ * visitor already cached.
+ * ------------------------------------------------------------- */
+const bright = process.env.THEME === 'bright';
+const stamp = (rel: string) => {
+  const hash = createHash('sha256')
+    .update(readFileSync(new URL(`../../public/${rel}`, import.meta.url)))
+    .digest('hex').slice(0, 8);
+  return `${asset(rel)}?v=${hash}`;
+};
+const piece = bright && !isIntro ? {
+  model: stamp(`assets/models/gold/${cat}.glb`),
+  poster: stamp(`assets/models/gold/${cat}.webp`),
+  mark: stamp(`assets/marks/${cat}.webp`),
+} : null;
+/* the hall's own camera, so the piece is the same object at the same angle */
+const CAMERA = '35deg 98deg 1.55m';
+const CAMERA_LIMIT = 'auto auto 1.55m';
 ---
 
-<Base lang={lang} title={title} segments={['gallery', cat]}>
-  <header class="gh" data-cat={cat}>
-    <div class="wrap gh__in">
-      <div class="gh__art" aria-hidden="true"><Sculpture cat={cat} size={150} id={`gal-${cat}`} /></div>
-      <div class="gh__id">
-        <p class="eyebrow"><a class="gh__back" href={home(lang)}>← {t('cat.back')}</a></p>
-        <h1 class="gh__title">
-          {isIntro ? <>{introA}<span class="conj">{introConj}</span>{introB}</> : title}
-        </h1>
-        {!isIntro && <p class="gh__title-en">{titleAlt}</p>}
-        <p class="gh__n">
-          {isIntro ? t('hall.nobelRoom') : recs.length > 0 ? t('hall.count', { n: recs.length }) : t('hall.soon')}
-        </p>
+{/* The bright museum's prize pages carry the hall's own bar: no white band
+    above the room, and the way back is a key in the corner rather than a line
+    of text under the title. */}
+<Base lang={lang} title={title} segments={['gallery', cat]} bare={bright}>
+  {bright ? (
+    <header class="gr" data-cat={cat}>
+      {/* the hall's own room, and no band of empty page above it */}
+      <div class="gr__room" aria-hidden="true">
+        <picture>
+          <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
+          <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
+               fetchpriority="high" decoding="async" />
+        </picture>
       </div>
-    </div>
-  </header>
+
+      {/* the museum's name, in the mark it folds into on the hall — and it is
+          the way back, which is why the 'return to the hall' line under the
+          title has gone: two doors out of one room, side by side, is one too
+          many */}
+      <a class="gr__lock" href={home(lang)} aria-label={t('nav.hall')}>
+        <span class="gr__lock-name">{t('site.tagline')}</span>
+      </a>
+
+      <div class="wrap gr__in">
+        {piece && (
+          <div class="gr__piece">
+            <span class="bh__art">
+              <model-viewer
+                class="bh__mv"
+                src={piece.model}
+                alt={t('models.alt', { what: title, cat: title })}
+                poster={piece.poster}
+                camera-orbit={CAMERA}
+                camera-target="0m 0m 0m"
+                min-camera-orbit={CAMERA_LIMIT}
+                max-camera-orbit={CAMERA_LIMIT}
+                field-of-view="30deg"
+                interaction-prompt="none"
+                disable-zoom
+                environment-image="neutral"
+                exposure="1.35"
+                shadow-intensity="0.55"
+                shadow-softness="0.9"
+                autoplay
+              >
+                <img class="bh__poster" slot="poster" src={piece.poster} alt="" width="640" height="1280" />
+              </model-viewer>
+              <svg class="bh__rings" aria-hidden="true" focusable="false"></svg>
+              <span class="bh__face" aria-hidden="true">
+                <img class="bh__mark" src={piece.mark} alt="" width="192" height="192" decoding="async" />
+                <span class="bh__name">{title}</span>
+                <span class="bh__name-en">{titleAlt}</span>
+              </span>
+            </span>
+          </div>
+        )}
+        <div class="gr__id">
+          <h1 class="gr__title">
+            {isIntro ? <>{introA}<span class="conj">{introConj}</span>{introB}</> : title}
+          </h1>
+          {!isIntro && <p class="gr__title-en">{titleAlt}</p>}
+          <p class="gr__n">
+            {isIntro ? t('hall.nobelRoom') : recs.length > 0 ? t('hall.count', { n: recs.length }) : t('hall.soon')}
+          </p>
+        </div>
+      </div>
+
+      <a class="bh__cue gr__cue" href="#gr-body" aria-label={t('hall.scroll')}>
+        <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
+        <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
+          <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
+        </svg>
+        <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
+      </a>
+    </header>
+  ) : (
+    <header class="gh" data-cat={cat}>
+      <div class="wrap gh__in">
+        <div class="gh__art" aria-hidden="true"><Sculpture cat={cat} size={150} id={`gal-${cat}`} /></div>
+        <div class="gh__id">
+          <p class="eyebrow"><a class="gh__back" href={home(lang)}>← {t('cat.back')}</a></p>
+          <h1 class="gh__title">
+            {isIntro ? <>{introA}<span class="conj">{introConj}</span>{introB}</> : title}
+          </h1>
+          {!isIntro && <p class="gh__title-en">{titleAlt}</p>}
+          <p class="gh__n">
+            {isIntro ? t('hall.nobelRoom') : recs.length > 0 ? t('hall.count', { n: recs.length }) : t('hall.soon')}
+          </p>
+        </div>
+      </div>
+    </header>
+  )}
+  <span id="gr-body" class="gr__anchor"></span>
 
   {meta && (
     <section class="about" data-cat={cat} aria-labelledby="h-about">
@@ -141,6 +246,123 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
 </Base>
 
 <style>
+  /* ---------- the prize's own room (bright museum) ----------
+   *
+   * A prize page opens the way the hall does: the same photograph, the same
+   * piece on the same drum, the museum's name in the corner and the way on at
+   * the foot. What it does not do is hold still — this room scrolls away, and
+   * the lectures are the page.
+   *
+   * The photograph is cropped here where the hall shows it whole. The hall is
+   * the room; this is a view into it, and a view can be framed. It is cropped
+   * from the top, keeping the floor and the colonnade, because the floor is
+   * what the piece has to stand on.
+   */
+  .gr {
+    position: relative;
+    isolation: isolate;
+    block-size: clamp(21rem, 60svh, 32rem);
+    display: grid;
+    align-items: end;
+    overflow: hidden;
+  }
+  .gr__room { position: absolute; inset: 0; z-index: -1; }
+  .gr__room img {
+    inline-size: 100%; block-size: 100%;
+    object-fit: cover;
+    object-position: 50% 74%;
+  }
+  /* the picture's own edges are a warm grey and the page is white; without
+     this it ends on a ruled line */
+  .gr__room::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, transparent 78%, var(--bg-0) 100%);
+  }
+
+  /* the mark the hall's name folds into, in the same gold glass — see
+     'the name, condensed' in bright.css, which this borrows outright */
+  .gr__lock {
+    position: absolute;
+    inset-block-start: 0.62rem;
+    inset-inline-start: clamp(0.7rem, 2.2vw, 1.6rem);
+    z-index: 2;
+    padding: 0.34rem 0.85rem;
+    border-radius: 0.42rem;
+    text-decoration: none;
+    background: var(--glass-g-bg);
+    backdrop-filter: blur(6px) saturate(1.5);
+    box-shadow: var(--glass-g-edge);
+    transition: filter 0.28s var(--ease), transform 0.28s var(--ease);
+  }
+  .gr__lock:hover { filter: brightness(1.06); transform: translateY(-1px); }
+  .gr__lock .gr__lock-name { color: #2b2008; }
+  .gr__lock-name {
+    font-family: var(--font-han-serif);
+    font-size: var(--step-0);
+    letter-spacing: 0.07em;
+    text-indent: 0.07em;
+    color: var(--cream);
+  }
+
+  .gr__in {
+    display: flex;
+    align-items: flex-end;
+    /* Left, not centred: the way on sits at the middle of the foot, and a
+       centred piece put the lecture count directly on top of it. */
+    justify-content: flex-start;
+    gap: clamp(0.8rem, 3vw, 2.6rem);
+    /* the floor of the crop, measured on the rendered page: below this the
+       picture is fading into the page and there is nothing to stand on */
+    padding-block-end: clamp(1.2rem, 3.4vh, 2.2rem);
+  }
+  /* The piece stands on the floor of the picture. Its frame's foot is 95.7%
+     of the way down it — the same figure the hall stands its row by — so the
+     frame is pulled down by the 4.3% that is left. */
+  .gr__piece { flex: none; margin-block-end: calc(-0.043 * var(--gr-art, 15rem)); }
+  .gr__piece .bh__art {
+    inline-size: calc(var(--gr-art, 15rem) / 2);
+    block-size: var(--gr-art, 15rem);
+    aspect-ratio: auto;
+    max-inline-size: none;
+  }
+  .gr { --gr-art: clamp(13rem, 38svh, 21rem); }
+  .gr__id { padding-block-end: 0.2rem; }
+  .gr__title {
+    font-family: var(--font-han-serif);
+    font-size: var(--step-3);
+    color: var(--cream);
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 3px rgba(255, 255, 255, 0.95), 0 0 12px rgba(255, 255, 255, 0.8);
+  }
+  .gr__title .conj { font-size: 0.55em; opacity: 0.68; margin-inline: 0.2em; vertical-align: 0.1em; }
+  .gr__title-en {
+    font-size: var(--step-0);
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  }
+  .gr__n {
+    font-size: var(--step--1); color: var(--accent); letter-spacing: 0.14em;
+    margin-block-start: 0.3rem;
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
+  }
+  .gr__cue {
+    position: absolute;
+    inset-block-end: 0.5rem;
+    inset-inline-start: 50%;
+    translate: -50% 0;
+    z-index: 2;
+  }
+  .gr__anchor { display: block; scroll-margin-block-start: 4rem; }
+
+  @media (max-width: 40rem) {
+    .gr { --gr-art: clamp(9rem, 26svh, 13rem); block-size: clamp(17rem, 50svh, 24rem); }
+    .gr__in { gap: 0.5rem; }
+    .gr__title { font-size: var(--step-2); }
+    .gr__cue .bh__cue-txt { display: none; }
+  }
+
   /* ---------- header ---------- */
   .gh {
     border-block-end: 1px solid var(--line);
@@ -312,3 +534,11 @@ const links = isIntro ? INTRO_LINKS : meta!.links;
   .cards a:hover .cards__host { color: var(--accent); }
 
 </style>
+
+<script>
+  import '../../vendor/model-viewer.min.js';
+  import { dressPlinths } from '../scripts/plinth';
+  /* one piece rather than six, but the same object — same drum, same rings,
+     same name bent onto the same cylinder */
+  dressPlinths();
+</script>

@@ -9,7 +9,7 @@ import LectureCard from './LectureCard.astro';
 import VideoFacade from './VideoFacade.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { browse, lecture as lectureUrl } from '../i18n/routing';
-import { lectures, byDateDesc, catName, totalVideos, nextUpcoming, recommended, localDate, catPrizeName } from '../data/catalog';
+import { lectures, byDateDesc, catName, totalVideos, nextUpcoming, recommended, localDate, catPrizeName, videoCounts } from '../data/catalog';
 
 interface Props { lang: Lang; style?: 'flat' | 'room' | 'gl' | 'models' }
 const { lang, style = 'flat' } = Astro.props;
@@ -32,6 +32,21 @@ const featuredDate = localDate(featured.event.date, lang, true);
 const featuredHost = lang === 'zh' ? featured.event.host_zh : featured.event.host_en;
 
 const nVideos = totalVideos();
+/* Six figures rather than three, and each one counted rather than repeated:
+   the first pair used to be the same number under two labels. Laureates are
+   distinct people — a laureate who came twice is one laureate — and the three
+   kinds of film are what the browse page already filters by. */
+const kinds = videoCounts();
+const nLaureates = new Set(lectures.map((l) => l.laureate.en)).size;
+const nHosts = new Set(lectures.map((l) => l.event.host_en)).size;
+const figures = [
+  { n: lectures.length, label: t('hall.stat.lectures') },
+  { n: nLaureates,      label: t('hall.stat.laureates') },
+  { n: nHosts,          label: t('hall.stat.hosts') },
+  { n: nVideos,         label: t('hall.stat.videos') },
+  { n: kinds.guide,     label: t('hall.stat.guide') },
+  { n: kinds.record,    label: t('hall.stat.interview') },
+];
 ---
 
 <Base lang={lang} bare>
@@ -50,9 +65,7 @@ const nVideos = totalVideos();
   <section class="strip">
     <div class="wrap">
       <dl class="stats">
-        <div><dt>{lectures.length}</dt><dd>{t('hall.stat.lectures')}</dd></div>
-        <div><dt>{lectures.length}</dt><dd>{t('hall.stat.laureates')}</dd></div>
-        <div><dt>{nVideos}</dt><dd>{t('hall.stat.videos')}</dd></div>
+        {figures.map((f) => <div><dt>{f.n}</dt><dd>{f.label}</dd></div>)}
       </dl>
     </div>
   </section>
@@ -116,8 +129,11 @@ const nVideos = totalVideos();
   .after { position: relative; z-index: 1; background: var(--bg-0); }
   .strip { border-block: 1px solid var(--line); background: var(--bg-1); }
   .stats {
-    display: flex; flex-wrap: wrap; justify-content: center;
-    gap: clamp(1.5rem, 6vw, 5rem); padding-block: 1.6rem; margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(6.6rem, 1fr));
+    gap: clamp(0.5rem, 1.4vw, 0.9rem);
+    padding-block: 1.6rem; margin: 0;
+    max-inline-size: 62rem; margin-inline: auto;
   }
   .stats div { text-align: center; }
   .stats dt {

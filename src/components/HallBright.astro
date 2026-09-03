@@ -518,7 +518,10 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     inset-inline-start: clamp(1.1rem, 4.2vw, 3.4rem);
     display: grid;
     justify-items: start;
-    gap: 0.16rem;
+    /* Tight. The university above and the English below belong to the name,
+       not beside it — an inscription sets its lines close and lets the space
+       fall outside the block. Halved from where they started. */
+    gap: 0.08rem;
     padding: 0.7rem 1.5rem 0.9rem 0;
     isolation: isolate;
     border-radius: 0.42rem;
@@ -603,7 +606,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     letter-spacing: 0.24em;
     text-indent: 0.24em;
     color: var(--muted);
-    margin-block-start: 0.28rem;
+    margin-block-start: 0.14rem;
   }
 
   /* ---------- the pieces ---------- */
@@ -633,7 +636,11 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     inset-block-start: calc(var(--floor) - 0.957 * var(--frame-h) - 0.5rem);
     inline-size: var(--row-w);
     display: grid;
-    grid-template-columns: repeat(6, 1fr);
+    /* minmax(0, …), not 1fr. A bare 1fr floors each column at its content's
+       min-content width, so a frame allowed to overrun its column drags the
+       column out with it and the row grows past the screen — three of them
+       cut 生理學或醫學 and 文學 in half at the right-hand edge. */
+    grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 0;
     align-items: end;
     will-change: transform;
@@ -683,152 +690,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      in a one-point perspective is exactly what walking away does. */
   .bh__plinths[data-state='back'] { transform: scale(0.5); }
 
-  .bh__art {
-    /* Portrait, not square. The piece is a tall thing in a wide box: at a
-       vertical field of view the frame's height is what sets how big it draws,
-       and a square box spent most of its width on air. Twice as tall is twice
-       the piece, at the same column width. */
-    inline-size: 100%; aspect-ratio: 1 / 2; max-inline-size: 24rem;
-    display: grid; place-items: center; position: relative;
-    container-type: inline-size;      /* the label is sized against the drum */
-  }
-  .bh__mv {
-    inline-size: 100%; block-size: 100%;
-    pointer-events: none;              /* the anchor owns every click */
-    --poster-color: transparent;
-    background: transparent;
-    /* model-viewer draws a loading bar across the top of its own box, and it
-       does not always clear itself once the model is in. Against a dark vault
-       that never showed; on white marble it is a grey rule ruled across all six
-       pieces. There is nothing for it to report anyway — the poster is already
-       on screen while the model loads. */
-    --progress-bar-height: 0px;
-    --progress-bar-color: transparent;
-  }
-  .bh__poster { inline-size: 100%; block-size: 100%; object-fit: contain; }
-
-  /* No CSS pedestal any more: every piece now carries its own, a marble drum
-     merged into the model itself. Drawing a second one under it made two. */
-  /* the other language, set under the first — the halls name a prize the
-     same way a lecture page names its laureate */
-  /* The label on the drum's face.
-   *
-   * Its box is measured off the model rather than guessed: at the hall's own
-   * camera the marble runs from 72% to 96% of the frame's height and from 16%
-   * to 84% of its width, and the middle of that is the part flat enough to
-   * carry type. So the block sits on the face's centre and keeps to the
-   * straight-on third; the rest is the cylinder turning away.
-   *
-   * It stays real text rather than being painted into the drum's texture.
-   * Baked lettering would need a model per language as well as per category —
-   * and it could not be selected, read aloud, or translated. */
-  .bh__face {
-    position: absolute;
-    inset-inline: 17%;
-    /* Measured on the page, at the hall's own camera: the drum's gold line
-       crosses the frame at 75.7% and its foot at 95.7%, so the label has that
-       near-quarter of the frame to sit in and hangs from just under the line.
-
-       Worth measuring more than once. Two readings caught the gold cap's rim
-       and then the statue itself — both gold, both wider than the inlay — and
-       put the line at 54% and at 45%; the inlay is the thin wide run, one
-       pixel tall and seventy-six across, and nothing else fits that. And an
-       eyeballed foot at 92% was three and a half points shy of the silhouette.
-
-       Hung from its top rather than centred, because two of the English names
-       take two lines and a centred block grows upward as well as down —
-       'Physiology or Medicine' put its mark back on the gold line.
-
-       The plate is close to full. Taking a fifth off the drum took ten pixels
-       out of this band, and at that point the two-line English labels wanted
-       two more than were left: the mark and the second line give those back,
-       so they are a shade under the fifth larger the rest are. */
-    inset-block-start: 75.9%;
-    display: grid;
-    justify-items: center;
-    gap: 0;
-    text-align: center;
-    text-wrap: balance;
-    pointer-events: none;      /* the anchor owns every click */
-    /* The drum is a cylinder, so the type on it is turned to its surface —
-       see the script at the foot of this file. The perspective matches the
-       model's own camera: it stands 1.55 units off an assembly whose drum is
-       0.43 units across and draws 144px wide, which is 2.7 frames of distance. */
-    perspective: 273cqw;
-    transform-style: preserve-3d;
-  }
-  .bh__name, .bh__name-en { transform-style: preserve-3d; }
-  /* Each word stays whole; only the characters inside it are turned.
-     :global because the script builds these spans at runtime, so they never
-     carry Astro's scope attribute and a plain rule matches nothing. Which is
-     not cosmetic here: without `display: inline-block` they stay inline, and
-     transform does not apply to a non-replaced inline element — the style is
-     set, and nothing moves. Measure the rendered width, not the style string.
-     Same trap as .bh__mark above. */
-  .bh__face :global(.bh__word) {
-    display: inline-block; white-space: nowrap; transform-style: preserve-3d;
-  }
-  .bh__face :global(.bh__ch) { display: inline-block; will-change: transform; }
-  /* The device above the name, in the gold the hall keeps for ornament.
-     :global because the mark is drawn by another component, and Astro's scope
-     attribute stops at this file — a plain .bh__mark rule matches nothing and
-     the SVG comes out at its natural size, filling the whole plinth. */
-  /* The device above the name. Drawn by the project owner as a lit gold
-     object, so it is an image rather than a glyph — and one sized by area
-     rather than by width, or the tall caduceus and the wide book would carry
-     quite different weight in the row. See scripts/build-marks.py. */
-  /* The rings sit on the drum, under the type. Gold, and thin: the one they
-     replace was a single pixel of the model. */
-  .bh__rings {
-    position: absolute; inset: 0;
-    inline-size: 100%; block-size: 100%;
-    pointer-events: none;
-    fill: none;
-    stroke: var(--gold-orn, #b8862a);
-    stroke-width: 1.1;
-    stroke-linecap: round;
-    /* the outer tenth of each end fades, so the ring goes round the drum
-       rather than stopping dead on its edge */
-    mask-image: linear-gradient(to right,
-      transparent 0%, #000 9%, #000 91%, transparent 100%);
-  }
-  .bh__mark {
-    inline-size: clamp(1.4rem, 15.85cqw, 2.62rem);
-    block-size: auto;
-    margin-block-end: 0.1em;
-  }
-  .bh__name {
-    font-family: var(--font-display);
-    font-size: clamp(0.94rem, 9.6cqw, 1.5rem);
-    line-height: 1.0;
-    letter-spacing: 0.04em;
-    color: var(--cream);
-  }
-  .bh__name-en {
-    /* The second line is the one that wraps — 'Physiology or Medicine' and
-       'Economic Sciences' both take two — so it carries the compromise, and
-       the name above it keeps its size. */
-    font-size: clamp(0.61rem, 5.2cqw, 0.93rem);
-    line-height: 1.05;
-    letter-spacing: 0.02em;
-    color: var(--muted);
-    /* one line or two, as the name needs — the two-line floor the halls use
-       elsewhere would push the type off the drum's face */
-    min-block-size: 0;
-  }
-  /* Latin set smaller than Han, which is ordinary bilingual typography rather
-     than a concession: a Han character at 18px carries the weight of Latin at
-     about 16. It also buys the room the two long English names need — with the
-     mark a fifth larger, 'Physiology or Medicine' and 'Economic Sciences' take
-     two lines that would otherwise hang three pixels past the drum's foot. */
-  :global(html[lang='en']) .bh__name {
-    font-size: clamp(0.82rem, 8.35cqw, 1.3rem);
-  }
-  .bh__piece:hover .bh__name { color: var(--accent); }
-  /* Two lines' worth whether it needs them or not. The pieces are bottom
-     aligned, so one column whose count wraps — 'No lectures in this category
-     yet' does, in English — lifts its whole column out of line with the other
-     five. Same reason .bh__name-en holds two lines. */
   .bh__n {
     font-size: var(--step--1); color: var(--muted);
     min-block-size: 2lh;
@@ -874,62 +735,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   .bh__intro-desc { font-size: var(--step--1); color: var(--muted); }
   .bh__cta { margin-inline-start: auto; color: var(--accent); font-size: var(--step--1); white-space: nowrap; }
 
-  /* ---------- the way on ----------
-     A hairline, a bead of light running down it, one chevron and a word. The
-     bead is what carries the meaning — a mark that travels downward is read as
-     'downward' before it is read as anything else — and the hairline is the
-     same gold as the rule under the name, so the two ends of the screen belong
-     to each other. */
-  .bh__cue {
-    display: grid;
-    justify-items: center;
-    gap: 0.3rem;
-    text-decoration: none;
-    padding: 0.2rem 1rem 0;
-    border-radius: var(--radius);
-  }
-  .bh__cue-rule {
-    position: relative;
-    inline-size: 1px;
-    block-size: clamp(1.5rem, 3.4vh, 2.3rem);
-    background: linear-gradient(to bottom,
-      transparent, rgba(184, 134, 42, 0.55) 30%, rgba(184, 134, 42, 0.55) 70%, transparent);
-  }
-  .bh__cue-rule i {
-    position: absolute;
-    inset-inline-start: 50%;
-    inline-size: 4px; block-size: 4px;
-    margin-inline-start: -2px;
-    border-radius: 50%;
-    background: var(--gold-bright, #d8a63c);
-    box-shadow: 0 0 6px 1px rgba(216, 166, 60, 0.75);
-    animation: bh-bead 2.6s var(--ease) infinite;
-  }
-  @keyframes bh-bead {
-    0%   { inset-block-start: 0;    opacity: 0; }
-    18%  { opacity: 1; }
-    72%  { opacity: 1; }
-    100% { inset-block-start: 100%; opacity: 0; }
-  }
-  .bh__cue-chev {
-    inline-size: 1.05rem; block-size: auto;
-    fill: none;
-    stroke: var(--gold-orn, #b8862a);
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    opacity: 0.85;
-  }
-  .bh__cue-txt {
-    font-size: var(--step--2);
-    letter-spacing: 0.3em;
-    text-indent: 0.3em;
-    color: var(--gold-orn, #b8862a);
-    text-transform: uppercase;
-  }
-  .bh__cue:hover .bh__cue-chev { opacity: 1; translate: 0 2px; }
-  .bh__cue-chev { transition: opacity 0.3s var(--ease), translate 0.3s var(--ease); }
-  :global(html[data-motion='off']) .bh__cue-rule i { animation: none; inset-block-start: 40%; }
 
   /* ---------- the phone ----------
    *
@@ -949,22 +754,47 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
       /* the near floor of the band, the same 76.45% of the picture the desktop
          row stands on — it is the same photograph */
       --floor: calc(var(--band) * 0.7645);
-      --foot-h: 9.1rem;        /* the introduction and the cue, measured */
-      --label-h: 3.35rem;      /* the name and the count, with their padding */
+      --foot-h: 7.4rem;        /* the introduction and the cue, measured */
+      --label-h: 2.8rem;       /* the name and the count, with their padding */
       /* The row starts inside the picture rather than under it. The sculptures
          are tall and thin, so their tops reach up into the room while the
          drums stand on the page below — which buys the height that makes them
          bigger, and reads as six pieces standing in the foreground of the
          hall rather than in a list beneath a photograph of one. */
-      --top: calc(var(--band) * 0.58);
-      --row-m: min(calc(100vw - 0.9rem), 30rem);
-      /* Three across a 390px screen is 125px a column, and a piece is half as
-         wide as it is tall — so 250px is the ceiling on how big these can be,
-         and it is width that sets it, not height. (Twice the present size
-         would want 260px a column, which is a 780px-wide phone.) */
-      --art-h: max(5.2rem, min(calc((var(--row-m) / 3 - 2 * var(--pad)) * 2),
-               calc((min(100svh, 62rem) - var(--top)
-                     - var(--foot-h) - 2 * var(--label-h) - 1.2rem) / 2)));
+      --pad: 0.15rem;          /* nearly all of the column is the piece here */
+      --top: calc(var(--band) * 0.46);
+      /* Narrow enough that the overrun below has somewhere to go. The row is
+         centred, so each end piece hangs 0.15 of a column past the row's edge;
+         at the full width that hung 24px off the screen and cut 生理學或醫學
+         and 文學 in half. */
+      --row-m: min(calc(100vw - 2.4rem), 30rem);
+
+      /* How big a piece can be, and it is not the column.
+       *
+       * model-viewer fits the bounding cage into the frame, and the cage is
+       * 0.56 wide to 1 tall — narrower than the frame, so the frame's *width*
+       * is what sets the size and its height was carrying 11% air. Two things
+       * come out of that. The frame is given the cage's own ratio, which
+       * hands the air back; and the frame is allowed to overrun its column,
+       * because the drum is only 76% of the frame and three drums 146px wide
+       * still have 30px of daylight between them in a 125px column. Those two
+       * together are the 30%.
+       *
+       * The overrun means the frame covers part of its neighbour's box, so it
+       * is made transparent to the pointer — the drum, which is the thing
+       * anyone aims at, stays inside its own column.
+       *
+       * 0.545, and the exact figure matters: the cage is 0.56 wide to 1 tall,
+       * and model-viewer fits horizontally only while the frame is narrower
+       * than that. Go wider and the fixed 30° vertical field takes over, which
+       * shows 0.83 of a model that is 1.0 tall — at 0.6 the drum's foot came
+       * off in a straight cut, with no ellipse and no shadow under it. Just
+       * under the boundary, nothing is lost and almost no height is wasted. */
+      --avail: calc((min(100svh, 62rem) - var(--top)
+                     - var(--foot-h) - 2 * var(--label-h) - 1.2rem) / 2);
+      --art-w: max(3.4rem, min(calc((var(--row-m) / 3 - 2 * var(--pad)) * 1.3),
+               calc(var(--avail) * 0.545)));
+      --art-h: calc(var(--art-w) / 0.545);
       /* and the same, six across, for the far state */
       --back-row: min(calc(100vw - 0.5rem), 34rem);
       --back-h: calc((var(--back-row) / 6 - 0.5rem) * 2);
@@ -988,18 +818,17 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     .bh__plinths {
       inset-block-start: var(--top);
       inline-size: var(--row-m);
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       row-gap: 0.25rem;
       transform-origin: 50% calc(var(--floor) - var(--top));
     }
-    /* The frame keeps its 1:2 — it is narrowed to the height it is allowed,
-       rather than squashed into the column. Everything on the drum's face is
-       sized in container units of this box, and those units assume the piece
-       fills a frame twice as tall as it is wide; let the box go squat and
-       model-viewer fits the model to the height instead, the drum draws
-       narrower than the label expects, and 生理學或醫學 runs off both sides
-       of its own plinth. */
-    .bh__art { inline-size: min(100%, calc(var(--art-h) / 2)); }
+    .bh__art {
+      inline-size: var(--art-w);
+      block-size: var(--art-h);
+      aspect-ratio: auto;
+      max-inline-size: none;
+      pointer-events: none;          /* the anchor under it takes the tap */
+    }
     .bh__piece { padding: 0.25rem var(--pad) 0.35rem; }
 
     /* The name comes off the drum and stands under the piece.
@@ -1016,7 +845,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      * actually be read. It is the same name; only the surface changes. */
     .bh__face .bh__name, .bh__face .bh__name-en { display: none; }
     .bh__mark { inline-size: 17cqw; margin-block-end: 0; }
-    .bh__n { font-size: var(--step--2); line-height: 1.3; min-block-size: 0; }
+    .bh__n { font-size: var(--step--2); line-height: 1.3; min-block-size: 0; text-align: center; }
     .bh__cap { display: block; color: var(--cream); font-weight: 500; }
 
     /* Gone back, on a phone: one line of six rather than the same six further
@@ -1029,12 +858,15 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
        desktop row stands on puts them in the room. */
     .bh__plinths[data-state='back'] {
       transform: none;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       inline-size: var(--back-row);
       inset-block-start: calc(var(--floor) - 0.957 * var(--back-h) - 0.25rem);
     }
     .bh__plinths[data-state='back'] .bh__piece { padding-inline: 0.25rem; }
-    .bh__plinths[data-state='back'] .bh__art { inline-size: 100%; }
+    .bh__plinths[data-state='back'] .bh__art {
+      inline-size: 100%;
+      block-size: var(--back-h);
+    }
     .bh__plinths[data-state='back'] .bh__n { display: none; }
     .bh__plinths[data-state='back'] .bh__face,
     .bh__plinths[data-state='back'] .bh__rings { opacity: 0; transition: opacity 0.5s var(--ease); }
@@ -1044,14 +876,16 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     .bh__wallwrap { perspective: var(--persp-n); }
     .bh__wall { --panel: var(--panel-n); --z: var(--z-n); --lift: var(--lift-n); }
 
-    .bh__foot { gap: 0.4rem; inset-block-end: 0.55rem; }
+    .bh__foot { gap: 0.3rem; inset-block-end: 0.45rem; }
     .bh__intro {
       inline-size: min(100% - 1rem, 30rem);
-      padding: 0.45rem 0.8rem;
+      padding: 0.34rem 0.75rem;
       gap: 0.5rem;
     }
-    .bh__intro-title { font-size: var(--step-0); }
-    .bh__cue-rule { block-size: 1.2rem; }
+    .bh__intro-title { font-size: var(--step--1); }
+    .bh__eyebrow { font-size: 0.6rem; }
+    .bh__cue-rule { block-size: 0.95rem; }
+    .bh__cue { gap: 0.16rem; padding-block-start: 0; }
     .bh__intro-desc { display: none; }   /* the title and the call are enough here */
     .bh__cue-txt { display: none; }
   }
@@ -1059,6 +893,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
 
 <script>
   import { motionOn } from '../scripts/motion';
+  import { dressPlinths } from '../scripts/plinth';
   import '../../vendor/model-viewer.min.js';
 
   /* The turn is an animation in the model now, not auto-rotate — auto-rotate
@@ -1076,70 +911,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
   applyRotation();
   addEventListener('motionpref', applyRotation);
-
-  /**
-   * Bend the plinth labels onto the drum.
-   *
-   * The drum is a cylinder, and flat type laid across it reads as a sticker.
-   * So each character is turned to the surface: rotated about Y by the angle
-   * its own position subtends, and pushed back by how far the surface falls
-   * away there. The browser's perspective does the rest — the foreshortening
-   * at the ends and the slight loss of size with depth are what sell it, and
-   * neither is drawn by hand.
-   *
-   * The angle is x / R — arc length — and not asin(x / R). That is the
-   * difference between wrapping the label round the cylinder and projecting it
-   * onto one, and it is the whole of what was wrong with 生理學或醫學.
-   *
-   * Projecting leaves each character where the layout put it and shrinks it
-   * about its own centre. Two neighbours therefore both pull away from the
-   * line between them, and a gap opens — w(1 − (cos θᵢ + cos θᵢ₊₁)/2) wide,
-   * which at the ends of a six-character name is a fifth of a character. The
-   * label stopped reading as a curve and started reading as squashed letters
-   * with holes between them, worst exactly where the name is longest.
-   *
-   * Wrapping by arc length puts the right-hand edge of one character and the
-   * left-hand edge of the next at the same arc position — but only if the
-   * character is moved to where that arc position projects. Turning it in
-   * place is not enough: the layout puts its centre at the arc length rθ and
-   * the cylinder puts it at the chord r·sin θ, and the difference is exactly
-   * the gap. So each character is also slid inward by r·sin θ − rθ, which is
-   * three pixels at the ends of the longest name and nothing in the middle.
-   * The line contracts by that much — 6% at this width, which is what a label
-   * wrapped round a drum actually does — and it is continuous.
-   *
-   * The radius is measured off the model: at the label's height the drum draws
-   * 144px across a 190px frame.
-   *
-   * How much of that depth reads as height is NOT a separate figure, and
-   * treating it as one is what bent 生理學或醫學 the wrong amount. It was a
-   * guessed 8° of camera tilt, which lifted the outer characters 2.2px while
-   * the gold rings — drawn on the very same drum, from measured constants —
-   * rise only 1.35px across the same span. The line therefore sat on a tighter
-   * cylinder than the drum it is cut into, bowed two thirds too hard, and
-   * kinked at the ends where the foreshortening is strongest.
-   *
-   * So it comes from the rings instead. A horizontal circle at height y draws
-   * as an ellipse b deep, and b/R is exactly how much a unit of depth rises on
-   * screen. Same two constants, same drum, by construction rather than by
-   * agreement.
-   *
-   * They were briefly set to 0.30 and 18° on the belief that the true figures
-   * were invisible. They were not invisible; they were not being applied at all,
-   * because the spans this script creates never carry Astro's scope attribute
-   * and so never got `display: inline-block` — and transform does nothing to a
-   * non-replaced inline element. Tune against the rendered width, never against
-   * the style string.
-   *
-   * Progressive: if this never runs, the labels are simply flat.
-   */
-  const DRUM_R = 0.379;        // of the frame's width, measured
-  /* No character turns further than this. The type is set with a clamp, so at
-     narrow widths its floor binds while the frame goes on shrinking and the
-     line takes a larger share of the drum: at 1120px the ends were turning 71°
-     and drawing at a third of their width. Where a line would overrun, the
-     curve is worked on a wider radius instead — the same shape, opened out. */
-  const MAX_TURN = (55 * Math.PI) / 180;
 
   /**
    * The pieces step back, once.
@@ -1231,168 +1002,10 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     });
   }
 
-  const faces = [...document.querySelectorAll<HTMLElement>('.bh__face')];
+  /* The rings and the bent names are the same object here and on the prize
+     pages, so they are drawn by one module — see src/scripts/plinth.ts. */
+  dressPlinths();
 
-  /** split once, into words that stay whole and characters that can turn */
-  function split(line: HTMLElement) {
-    if (line.dataset.flat !== undefined) return;
-    const text = line.textContent ?? '';
-    line.dataset.flat = text;
-    line.replaceChildren(...text.split(/(\s+)/).map((token) => {
-      if (!token.trim()) return document.createTextNode(token);
-      const word = document.createElement('span');
-      word.className = 'bh__word';
-      word.append(...[...token].map((ch) => {
-        const c = document.createElement('span');
-        c.className = 'bh__ch';
-        c.textContent = ch;
-        return c;
-      }));
-      return word;
-    }));
-  }
-
-  /**
-   * Three gold rings round the drum, set to the logo rather than to the model.
-   *
-   * They replace the single ring the base model carried, which sat under the
-   * cap and had no relation to anything on the plinth. These take their height
-   * from the logo itself — one on its centre line and one a quarter of its
-   * height above and below — so they cannot drift when the type is resized.
-   *
-   * Each is a horizontal circle on the drum, so it draws as an ellipse: full
-   * width across the drum, and as deep as its distance below the eye.
-   *
-   * Both constants are solved from two of the drum's own ellipses rather than
-   * guessed at one. Its foot is 13.8px deep at 95.7% of the frame; its top
-   * circle, four times nearer the eye in the model, is 3.4px deep at 72.4%.
-   * Two depths at two heights give the slope, 0.1168, and where the ellipse
-   * would close, 0.646. Reading the eye off the foot alone put it at 0.726 and
-   * the rings came out half as deep as they should be.
-   *
-   * And each is broken where the logo crosses it, by 140% of the logo's width,
-   * so the mark sits in a clearing rather than on top of a line.
-   */
-  const EYE = 0.646;           // of the frame's height, where the drum is edge-on
-  const ELLIPSE = 0.1168;      // how fast the ellipse opens below that
-  /* the arcs stop just short of the silhouette and fade into it — a ring runs
-     out of drum there, and a stroke ending on the edge looks like it overshoots */
-  const RING_REACH = 0.985;
-  const RING_GAP = 1.4;        // of the logo's width
-  /* of the logo's height, between the rings. A quarter to begin with; nine
-     tenths of that reads as a set of three rather than as three separate
-     lines. */
-  const RING_STEP = 0.225;
-
-  function drawRings(face: HTMLElement, frame: HTMLElement) {
-    const svg = frame.querySelector<SVGSVGElement>('.bh__rings');
-    const mark = face.querySelector<HTMLElement>('.bh__mark');
-    if (!svg || !mark) return;
-    const f = frame.getBoundingClientRect();
-    const m = mark.getBoundingClientRect();
-    if (!f.width || !m.height) return;
-
-    svg.setAttribute('viewBox', `0 0 ${f.width} ${f.height}`);
-    const cx = f.width / 2;
-    const R = f.width * DRUM_R;
-    const half = (m.width * RING_GAP) / 2;
-    const mid = m.top + m.height / 2 - f.top;
-    const step = m.height * RING_STEP;
-
-    /* where the gap's edge meets the ellipse, as a fraction of its depth */
-    const k = half < R ? Math.sqrt(1 - (half / R) ** 2) : 0;
-
-    /* Solve for each ring's height *on the drum*, rather than drawing it at
-       the height we want to see it.
-       Only the near half of a ring is on the drum's front, so what is drawn
-       hangs below the height it belongs to: where the gap cuts it, at x = half,
-       it has already sagged by b·k. Setting y to the logo's centre therefore
-       put the visible arc a whole b·k under it — six pixels, a fifth of the
-       logo — which is the low reading. Inverting it is one line, and b is
-       itself a function of y, so it has to be solved rather than subtracted. */
-    const eye = f.height * EYE;
-    const solve = (t: number) => (t + eye * ELLIPSE * k) / (1 + ELLIPSE * k);
-
-    const d: string[] = [];
-    for (const t of [mid - step, mid, mid + step]) {
-      const y = solve(t);
-      const b = Math.max(0.2, (y - eye) * ELLIPSE);
-      const drop = b * k;
-      const reach = R * RING_REACH;
-      const edge = y + b * Math.sqrt(Math.max(0, 1 - RING_REACH ** 2));
-      d.push(`M${(cx - reach).toFixed(1)} ${edge.toFixed(1)}`
-           + `A${R.toFixed(1)} ${b.toFixed(2)} 0 0 0 ${(cx - half).toFixed(1)} ${(y + drop).toFixed(1)}`);
-      d.push(`M${(cx + half).toFixed(1)} ${(y + drop).toFixed(1)}`
-           + `A${R.toFixed(1)} ${b.toFixed(2)} 0 0 0 ${(cx + reach).toFixed(1)} ${edge.toFixed(1)}`);
-    }
-    svg.replaceChildren(...d.map((path) => {
-      const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-      el.setAttribute('d', path);
-      return el;
-    }));
-  }
-
-  function curve() {
-    for (const face of faces) {
-      const frame = face.parentElement;
-      if (!frame) continue;
-      const fr = frame.getBoundingClientRect();
-      const R = fr.width * DRUM_R;
-      if (!(R > 0)) continue;
-      drawRings(face, frame);
-      for (const line of face.querySelectorAll<HTMLElement>('.bh__name, .bh__name-en')) {
-        split(line);
-        const chars = [...line.querySelectorAll<HTMLElement>('.bh__ch')];
-        if (!chars.length) continue;
-
-        /* Clear every one before measuring any. A transformed element reports
-           its transformed box, so measuring as we go made each character's
-           angle depend on the ones already turned — wrong the second time this
-           runs, which is after the fonts land. */
-        for (const ch of chars) ch.style.transform = '';
-        const mid = line.getBoundingClientRect();
-        const cx = mid.left + mid.width / 2;
-        const dx = chars.map((ch) => {
-          const b = ch.getBoundingClientRect();
-          return b.left + b.width / 2 - cx;
-        });
-
-        const reach = Math.max(...dx.map(Math.abs), 1);
-        const r = Math.max(R, reach / MAX_TURN);
-
-        /* How steeply this line's own circle opens, in the ring's own terms:
-           b at this height, over the radius it is worked on. At the Han name's
-           height that is about 0.085 — under 5°, not the 8° that was assumed. */
-        const b = Math.max(0, (mid.top + mid.height / 2 - fr.top - fr.height * EYE) * ELLIPSE);
-        const rise = b / r;
-
-        chars.forEach((ch, i) => {
-          const th = dx[i] / r;          // arc length, not projection
-          /* how far the surface falls away behind the label's own plane */
-          const back = r * (1 - Math.cos(th));
-          /* and that depth reads on screen as exactly the sag the rings have */
-          const lift = back * rise;
-          /* arc length in, chord out — the slide that keeps the line closed */
-          const slide = r * Math.sin(th) - dx[i];
-          ch.style.transform =
-            `translate3d(${slide.toFixed(2)}px, ${-lift.toFixed(2)}px, ${-back.toFixed(2)}px) ` +
-            `rotateY(${((th * 180) / Math.PI).toFixed(2)}deg)`;
-        });
-      }
-    }
-  }
-
-  if (faces.length) {
-    const run = () => requestAnimationFrame(curve);
-    document.fonts?.ready.then(run) ?? run();
-    run();
-    /* the row carries a scale once the page moves, and getBoundingClientRect
-       reports it — so the labels are measured at the top of the page and left
-       alone after that */
-    /* the labels are sized in container units, so they move with the row */
-    let t: ReturnType<typeof setTimeout>;
-    addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 120); });
-  }
   /* model-viewer has no animation to play until the GLB is in */
   for (const v of viewers) v.addEventListener('load', applyRotation);
 

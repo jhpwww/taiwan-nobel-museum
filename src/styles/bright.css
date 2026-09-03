@@ -462,7 +462,12 @@ html[data-theme='bright'] :is(.bh__name, .case__name, .plinth__name, .tile__name
  * had no margin at all and read as a lit border.
  */
 html[data-theme='bright'] .vf {
-  --rim: clamp(16px, 2.4vw, 30px);
+  /* A tenth of what it was. The mat was the effect when the pane was a mat;
+     asked for a frame rather than a mount, it becomes an edge — which is
+     what liquid glass is on a card anyway. The picture in build-glass-frame.py
+     is drawn for a 30px rim and scales off border-width, so the whole optical
+     profile shrinks with it and keeps its proportions. */
+  --rim: clamp(2px, 0.24vw, 3px);
   position: relative;
   padding: 0;
   border: var(--rim) solid rgba(255, 255, 255, 0.5);
@@ -534,8 +539,16 @@ html[data-theme='bright'] .vf__btn:focus-visible {
     0 2px 4px rgba(28, 42, 66, 0.18),
     0 12px 28px -14px rgba(28, 42, 66, 0.55);
 }
+/* Under the pointer the pane stops being glass and becomes paper: solid
+   white, not more transparent. Glass that clears as you approach it reads as
+   the thing disappearing under your hand; glass that fills reads as it coming
+   forward to meet you. */
 @media (hover: hover) and (pointer: fine) {
-  html[data-theme='bright'] .vf:hover {
+  html[data-theme='bright'] .vf:hover,
+  html[data-theme='bright'] .vf:focus-within {
+    background: #fff;
+    backdrop-filter: none;
+    border-color: #fff;
     box-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 1),
       inset 0 -1px 0 rgba(200, 232, 255, 0.9),
@@ -543,7 +556,10 @@ html[data-theme='bright'] .vf__btn:focus-visible {
       0 14px 32px -12px rgba(28, 42, 66, 0.42),
       0 32px 64px -34px rgba(28, 42, 66, 0.5);
   }
+  html[data-theme='bright'] .vf:hover::after { opacity: 0; }
 }
+html[data-theme='bright'] .vf { transition: background 0.32s var(--ease), box-shadow 0.4s var(--ease); }
+html[data-theme='bright'] .vf::after { transition: opacity 0.32s var(--ease); }
 /* the live player takes the picture's place on the same pane */
 html[data-theme='bright'] .vf :is(iframe) {
   position: relative;
@@ -575,12 +591,31 @@ html[data-theme='bright'] .after { background: none; }
    and it is what the reading is actually measured against: with the glyph
    colour removed the halo still draws, so scripts/check-glass.mjs sees the
    same ground the eye does. */
+/* The onward link at the head of a section is a control, so it gets the
+   controls' material rather than a halo — which is also the only thing that
+   carried it over the gold pieces on a phone: haloed, 所有講座 measured
+   4.37:1, and a tablet takes it clear. */
+html[data-theme='bright'] .after .section-head .more {
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.42rem;
+  background: rgba(255, 255, 255, 0.66);
+  backdrop-filter: blur(5px) saturate(1.6);
+  box-shadow: var(--glass-w-edge);
+  text-shadow: none;
+}
+html[data-theme='bright'] .after .section-head .more:hover {
+  background: var(--glass-g-bg);
+  box-shadow: var(--glass-g-edge);
+  color: var(--glass-g-ink);
+}
+
 html[data-theme='bright'] .after :is(.section-h, .more, .feature__date-d, .feature__date-m) {
   text-shadow:
-    0 0 3px rgba(255, 255, 255, 0.98),
-    0 0 9px rgba(255, 255, 255, 0.92),
-    0 0 20px rgba(255, 255, 255, 0.8),
-    0 0 38px rgba(255, 255, 255, 0.6);
+    0 0 3px rgba(255, 255, 255, 1),
+    0 0 9px rgba(255, 255, 255, 0.98),
+    0 0 20px rgba(255, 255, 255, 0.92),
+    0 0 40px rgba(255, 255, 255, 0.82),
+    0 0 72px rgba(255, 255, 255, 0.6);
 }
 
 /* One exception, and it is not a preference. The running text beside the
@@ -623,3 +658,187 @@ html[data-theme='bright'] .bh__intro:hover {
   background: rgba(255, 255, 255, 0.72);
   border-color: rgba(255, 255, 255, 0.9);
 }
+
+
+/* ============================================================
+   CONTROLS
+   ============================================================
+   One material for everything that can be pressed.
+
+   White glass at rest, gold glass when it is on or under the pointer. The
+   split is not decorative: the museum's two colours are the marble and the
+   gold, and a control that is *doing* something should be the gold one. It
+   replaces a flat red fill, which was the one thing on these pages that
+   belonged to no material at all.
+
+   Gold glass takes dark ink, not white. Gold at 72% over white composites to
+   about rgb(204,168,101); white on that is 2.5:1 and unreadable, a deep brown
+   is 7:1. The red fill it replaces could carry white and this cannot, so the
+   ink is set here rather than left to --on-accent.
+   ============================================================ */
+
+html[data-theme='bright'] {
+  --glass-w-bg: rgba(255, 255, 255, 0.5);
+  --glass-w-edge:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(184, 220, 255, 0.6),
+    0 1px 1px rgba(28, 42, 66, 0.06),
+    0 8px 20px -12px rgba(28, 42, 66, 0.35);
+  --glass-g-bg: linear-gradient(160deg, rgba(222, 176, 76, 0.66), rgba(178, 128, 38, 0.76));
+  --glass-g-edge:
+    inset 0 1px 0 rgba(255, 246, 222, 0.95),
+    inset 0 0 0 1px rgba(255, 236, 190, 0.5),
+    inset 0 -1px 0 rgba(126, 86, 16, 0.45),
+    0 1px 1px rgba(70, 48, 10, 0.12),
+    0 10px 24px -12px rgba(120, 84, 20, 0.5);
+  --glass-g-ink: #2b2008;
+}
+
+/* --- at rest --- */
+html[data-theme='bright'] :is(
+  .chip span,
+  .pn__b,
+  .sw,
+  .mt,
+  .study button,
+  .study__file span,
+  .picks .tag
+) {
+  background: var(--glass-w-bg);
+  backdrop-filter: blur(5px) saturate(1.6);
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--glass-w-edge);
+  color: var(--cream);
+  transition: background 0.28s var(--ease), box-shadow 0.28s var(--ease),
+              color 0.28s var(--ease), border-color 0.28s var(--ease);
+}
+
+/* --- on, or under the pointer --- */
+html[data-theme='bright'] :is(
+  .chip input:checked + span,
+  .chip--kind[data-kind='guide'] input:checked + span,
+  .chip--kind[data-kind='lecture'] input:checked + span,
+  .chip--kind[data-kind='record'] input:checked + span,
+  .pn__b:hover,
+  .pn__b:focus-visible,
+  .sw__opt.is-on,
+  .picks .tag[data-on],
+  .study button:hover,
+  .study__file span,
+  .mat__link
+) {
+  background: var(--glass-g-bg);
+  backdrop-filter: blur(5px) saturate(1.6);
+  border-color: rgba(255, 236, 190, 0.75);
+  box-shadow: var(--glass-g-edge);
+  color: var(--glass-g-ink);
+  filter: none;
+}
+html[data-theme='bright'] .chip input:checked + span b { opacity: 0.7; }
+
+/* the sub-pages' four onward links were a solid block of prize colour */
+html[data-theme='bright'] .mat__link:hover,
+html[data-theme='bright'] .mat__link:focus-visible {
+  background: linear-gradient(160deg, rgba(236, 196, 106, 0.82), rgba(196, 146, 48, 0.9));
+  border-color: #fff6de;
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 250, 236, 1),
+    inset 0 0 0 1px rgba(255, 242, 208, 0.7),
+    inset 0 -1px 0 rgba(126, 86, 16, 0.5),
+    0 2px 3px rgba(70, 48, 10, 0.14),
+    0 16px 32px -12px rgba(120, 84, 20, 0.6);
+}
+
+
+/* ---------- 本館推薦: one pane, one laureate ----------
+   The video and the words beside it were two panes of glass with a gap down
+   the middle, which said two things where there is one: one person, one
+   lecture. They are inside a single pane now, and the pane's own material is
+   the only frame — the video keeps a radius so the picture reads as lying on
+   the glass rather than being a hole through it. */
+html[data-theme='bright'] .after .feature__grid {
+  --rim: clamp(2px, 0.24vw, 3px);
+  padding: clamp(0.85rem, 2vw, 1.5rem);
+  border: var(--rim) solid rgba(255, 255, 255, 0.6);
+  border-image: var(--glass-frame) 30 / 1 / 0 stretch;
+  border-radius: 1.15rem;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(3px) saturate(1.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(184, 220, 255, 0.6),
+    0 1px 1px rgba(28, 42, 66, 0.08),
+    0 14px 34px -18px rgba(28, 42, 66, 0.4);
+}
+/* the two halves give up their own frames to it */
+html[data-theme='bright'] .after .feature__grid > .vf,
+html[data-theme='bright'] .after .feature__grid .feature__text {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: none;
+  backdrop-filter: none;
+  box-shadow: none;
+}
+html[data-theme='bright'] .after .feature__grid > .vf::after { display: none; }
+html[data-theme='bright'] .after .feature__grid .vf__btn {
+  border-radius: 0.6rem;
+  border-color: rgba(255, 255, 255, 0.85);
+}
+
+
+/* ---------- the six figures ----------
+   Each stands on its own small pane rather than in a ruled band, so the row
+   reads as six things counted and not as one strip of chrome. */
+html[data-theme='bright'] .after .strip { background: none; border: 0; }
+html[data-theme='bright'] .after .stats div {
+  padding: 0.7rem 0.9rem 0.6rem;
+  border-radius: 0.85rem;
+  /* Two thirds, not a half. A figure and its label are small type, and behind
+     these panes at the top of the page is the video wall — measured, the
+     lighter fill left 所主辦機構 at 4.07:1. */
+  background: rgba(255, 255, 255, 0.68);
+  backdrop-filter: blur(4px) saturate(1.6);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.92),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(184, 220, 255, 0.55),
+    0 1px 1px rgba(28, 42, 66, 0.05),
+    0 10px 24px -14px rgba(28, 42, 66, 0.34);
+}
+
+
+/* ---------- the name, condensed ----------
+   Gold rather than white once it folds into a mark: at that size it is the
+   museum's signature and not a piece of chrome, and gold is what this hall
+   signs with. */
+html[data-theme='bright'] .bh__lockup[data-small] {
+  background: var(--glass-g-bg);
+  border-radius: 0.42rem;
+  box-shadow: var(--glass-g-edge);
+}
+html[data-theme='bright'] .bh__lockup[data-small] .bh__title {
+  color: #2b2008;
+  text-shadow: 0 1px 0 rgba(255, 246, 222, 0.5);
+}
+
+
+/* ---------- the white between rooms ----------
+   Opaque in the markup and cleared on the first frame, so a page fades in
+   even when it came straight out of the cache. `visibility` rather than
+   `display` so the transition can actually run, and it never takes a click:
+   the sheet is over everything for a quarter of a second at each end. */
+html[data-theme='bright'] .roomfade {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: #fff;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.26s var(--ease), visibility 0.26s var(--ease);
+}
+html[data-theme='bright'] .roomfade[data-on] { opacity: 1; visibility: visible; }
+html[data-motion='off'] .roomfade { display: none; }

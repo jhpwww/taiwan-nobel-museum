@@ -1,0 +1,229 @@
+/* ============================================================
+   plinth.css — a piece on its drum
+   ============================================================
+   The frame, the model in it, the three gold rings and the name cut into the
+   marble. It lives here rather than inside HallBright because the prize pages
+   show the same object: one piece, standing on the same drum, lit the same
+   way. Two copies of this would have drifted apart inside a week.
+
+   It is a plain stylesheet, so no :global() — the comments below still mention
+   it because the trap they describe is real (a rule inside an Astro component
+   only matches elements that component rendered, and the spans the script
+   builds carry no scope attribute at all). Here nothing is scoped, so a plain
+   selector reaches everything.
+
+   The script that draws the rings and bends the name is src/scripts/plinth.ts.
+   ============================================================ */
+
+.bh__art {
+  /* Portrait, not square. The piece is a tall thing in a wide box: at a
+     vertical field of view the frame's height is what sets how big it draws,
+     and a square box spent most of its width on air. Twice as tall is twice
+     the piece, at the same column width. */
+  inline-size: 100%; aspect-ratio: 1 / 2; max-inline-size: 24rem;
+  display: grid; place-items: center; position: relative;
+  container-type: inline-size;      /* the label is sized against the drum */
+}
+.bh__mv {
+  inline-size: 100%; block-size: 100%;
+  pointer-events: none;              /* the anchor owns every click */
+  --poster-color: transparent;
+  background: transparent;
+  /* model-viewer draws a loading bar across the top of its own box, and it
+     does not always clear itself once the model is in. Against a dark vault
+     that never showed; on white marble it is a grey rule ruled across all six
+     pieces. There is nothing for it to report anyway — the poster is already
+     on screen while the model loads. */
+  --progress-bar-height: 0px;
+  --progress-bar-color: transparent;
+}
+.bh__poster { inline-size: 100%; block-size: 100%; object-fit: contain; }
+
+/* No CSS pedestal any more: every piece now carries its own, a marble drum
+   merged into the model itself. Drawing a second one under it made two. */
+/* the other language, set under the first — the halls name a prize the
+   same way a lecture page names its laureate */
+/* The label on the drum's face.
+ *
+ * Its box is measured off the model rather than guessed: at the hall's own
+ * camera the marble runs from 72% to 96% of the frame's height and from 16%
+ * to 84% of its width, and the middle of that is the part flat enough to
+ * carry type. So the block sits on the face's centre and keeps to the
+ * straight-on third; the rest is the cylinder turning away.
+ *
+ * It stays real text rather than being painted into the drum's texture.
+ * Baked lettering would need a model per language as well as per category —
+ * and it could not be selected, read aloud, or translated. */
+.bh__face {
+  position: absolute;
+  inset-inline: 17%;
+  /* Measured on the page, at the hall's own camera: the drum's gold line
+     crosses the frame at 75.7% and its foot at 95.7%, so the label has that
+     near-quarter of the frame to sit in and hangs from just under the line.
+
+     Worth measuring more than once. Two readings caught the gold cap's rim
+     and then the statue itself — both gold, both wider than the inlay — and
+     put the line at 54% and at 45%; the inlay is the thin wide run, one
+     pixel tall and seventy-six across, and nothing else fits that. And an
+     eyeballed foot at 92% was three and a half points shy of the silhouette.
+
+     Hung from its top rather than centred, because two of the English names
+     take two lines and a centred block grows upward as well as down —
+     'Physiology or Medicine' put its mark back on the gold line.
+
+     The plate is close to full. Taking a fifth off the drum took ten pixels
+     out of this band, and at that point the two-line English labels wanted
+     two more than were left: the mark and the second line give those back,
+     so they are a shade under the fifth larger the rest are. */
+  inset-block-start: 75.9%;
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  text-align: center;
+  text-wrap: balance;
+  pointer-events: none;      /* the anchor owns every click */
+  /* The drum is a cylinder, so the type on it is turned to its surface —
+     see the script at the foot of this file. The perspective matches the
+     model's own camera: it stands 1.55 units off an assembly whose drum is
+     0.43 units across and draws 144px wide, which is 2.7 frames of distance. */
+  perspective: 273cqw;
+  transform-style: preserve-3d;
+}
+.bh__name, .bh__name-en { transform-style: preserve-3d; }
+/* Each word stays whole; only the characters inside it are turned.
+   :global because the script builds these spans at runtime, so they never
+   carry Astro's scope attribute and a plain rule matches nothing. Which is
+   not cosmetic here: without `display: inline-block` they stay inline, and
+   transform does not apply to a non-replaced inline element — the style is
+   set, and nothing moves. Measure the rendered width, not the style string.
+   Same trap as .bh__mark above. */
+.bh__face .bh__word) {
+  display: inline-block; white-space: nowrap; transform-style: preserve-3d;
+}
+.bh__face .bh__ch) { display: inline-block; will-change: transform; }
+/* The device above the name, in the gold the hall keeps for ornament.
+   :global because the mark is drawn by another component, and Astro's scope
+   attribute stops at this file — a plain .bh__mark rule matches nothing and
+   the SVG comes out at its natural size, filling the whole plinth. */
+/* The device above the name. Drawn by the project owner as a lit gold
+   object, so it is an image rather than a glyph — and one sized by area
+   rather than by width, or the tall caduceus and the wide book would carry
+   quite different weight in the row. See scripts/build-marks.py. */
+/* The rings sit on the drum, under the type. Gold, and thin: the one they
+   replace was a single pixel of the model. */
+.bh__rings {
+  position: absolute; inset: 0;
+  inline-size: 100%; block-size: 100%;
+  pointer-events: none;
+  fill: none;
+  stroke: var(--gold-orn, #b8862a);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  /* the outer tenth of each end fades, so the ring goes round the drum
+     rather than stopping dead on its edge */
+  mask-image: linear-gradient(to right,
+    transparent 0%, #000 9%, #000 91%, transparent 100%);
+}
+.bh__mark {
+  inline-size: clamp(1.4rem, 15.85cqw, 2.62rem);
+  block-size: auto;
+  margin-block-end: 0.1em;
+}
+.bh__name {
+  font-family: var(--font-display);
+  font-size: clamp(0.94rem, 9.6cqw, 1.5rem);
+  line-height: 1.0;
+  letter-spacing: 0.04em;
+  color: var(--cream);
+}
+.bh__name-en {
+  /* The second line is the one that wraps — 'Physiology or Medicine' and
+     'Economic Sciences' both take two — so it carries the compromise, and
+     the name above it keeps its size. */
+  font-size: clamp(0.61rem, 5.2cqw, 0.93rem);
+  line-height: 1.05;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  /* one line or two, as the name needs — the two-line floor the halls use
+     elsewhere would push the type off the drum's face */
+  min-block-size: 0;
+}
+/* Latin set smaller than Han, which is ordinary bilingual typography rather
+   than a concession: a Han character at 18px carries the weight of Latin at
+   about 16. It also buys the room the two long English names need — with the
+   mark a fifth larger, 'Physiology or Medicine' and 'Economic Sciences' take
+   two lines that would otherwise hang three pixels past the drum's foot. */
+html[lang='en'] .bh__name {
+  font-size: clamp(0.82rem, 8.35cqw, 1.3rem);
+}
+.bh__piece:hover .bh__name { color: var(--accent); }
+/* Two lines' worth whether it needs them or not. The pieces are bottom
+   aligned, so one column whose count wraps — 'No lectures in this category
+   yet' does, in English — lifts its whole column out of line with the other
+   five. Same reason .bh__name-en holds two lines. */
+
+/* ============================================================
+   the way on
+   ============================================================
+   Shared with the prize pages for the same reason the plinth is: it is the
+   same object doing the same job at the foot of the same room. Scoped inside
+   the hall, the prize pages got the markup and none of the styling, and the
+   chevron drew as a solid black triangle — an SVG with no fill rule is filled
+   black by default.
+   ============================================================ */
+/* ---------- the way on ----------
+   A hairline, a bead of light running down it, one chevron and a word. The
+   bead is what carries the meaning — a mark that travels downward is read as
+   'downward' before it is read as anything else — and the hairline is the
+   same gold as the rule under the name, so the two ends of the screen belong
+   to each other. */
+.bh__cue {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  text-decoration: none;
+  padding: 0.2rem 1rem 0;
+  border-radius: var(--radius);
+}
+.bh__cue-rule {
+  position: relative;
+  inline-size: 1px;
+  block-size: clamp(1.5rem, 3.4vh, 2.3rem);
+  background: linear-gradient(to bottom,
+    transparent, rgba(184, 134, 42, 0.55) 30%, rgba(184, 134, 42, 0.55) 70%, transparent);
+}
+.bh__cue-rule i {
+  position: absolute;
+  inset-inline-start: 50%;
+  inline-size: 4px; block-size: 4px;
+  margin-inline-start: -2px;
+  border-radius: 50%;
+  background: var(--gold-bright, #d8a63c);
+  box-shadow: 0 0 6px 1px rgba(216, 166, 60, 0.75);
+  animation: bh-bead 2.6s var(--ease) infinite;
+}
+@keyframes bh-bead {
+  0%   { inset-block-start: 0;    opacity: 0; }
+  18%  { opacity: 1; }
+  72%  { opacity: 1; }
+  100% { inset-block-start: 100%; opacity: 0; }
+}
+.bh__cue-chev {
+  inline-size: 1.05rem; block-size: auto;
+  fill: none;
+  stroke: var(--gold-orn, #b8862a);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.85;
+}
+.bh__cue-txt {
+  font-size: var(--step--2);
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  color: var(--gold-orn, #b8862a);
+  text-transform: uppercase;
+}
+.bh__cue:hover .bh__cue-chev { opacity: 1; translate: 0 2px; }
+.bh__cue-chev { transition: opacity 0.3s var(--ease), translate 0.3s var(--ease); }
+html[data-motion='off'] .bh__cue-rule i { animation: none; inset-block-start: 40%; }

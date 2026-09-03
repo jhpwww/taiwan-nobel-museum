@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import '../styles/bright.css';
+import '../styles/plinth.css';
 import fonts from '../data/font-manifest.json';
 import fontsBright from '../data/font-manifest-bright.json';
 
@@ -86,10 +87,21 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <body>
     <a class="skip-link" href="#main">{t('nav.skip')}</a>
 
+    {/* The room goes white and comes back. Walking from the hall into a prize
+        page is a change of room, and a change of room in a museum is not a
+        cut — it is a moment of nothing. This is a plain overlay rather than
+        the View Transitions API because that means adopting a client router,
+        and the whole site is static files that the browser can already load
+        faster than any router would. */}
+    {bright && <div class="roomfade" data-on aria-hidden="true"></div>}
+    {bright && <script>import '../scripts/roomfade';</script>}
+
     {bare && (
       <header class="topbar topbar--ghost">
         <div class="wrap topbar__in topbar__in--end">
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
+            {/* the hall itself is one of these on every page but the hall */}
+            {segments.length > 0 && <a href={home(lang)}>{t('nav.hall')}</a>}
             <a href={browse(lang)}>{t('nav.all')}</a>
             <a href={learn(lang)}>{t('nav.learn')}</a>
             <a href={about(lang)}>{t('nav.about')}</a>

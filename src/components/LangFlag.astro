@@ -27,18 +27,23 @@ const { to } = Astro.props;
     <circle cx="15" cy="10" r="2.5" fill="#fff" />
   </svg>
 ) : (
-  /* the Union Flag. The red saltire is counterchanged — offset within the
-     white one rather than centred on it — which is the detail that separates
-     a drawn Union Flag from a guessed one. */
-  <svg class="flag" viewBox="0 0 60 30" role="img" aria-hidden="true" focusable="false">
+  /* The Union Flag, drawn 3:2 rather than at its official 1:2 — it has to
+     stand beside a 3:2 flag, and two flags of different proportions in one
+     control read as a mistake before they read as two countries. Every width
+     is the standard construction scaled by the same 4/3 the field is, so the
+     crosses keep their ratios to each other.
+     The red saltire is counterchanged — offset within the white one rather
+     than centred on it — which is the detail that separates a drawn Union
+     Flag from a guessed one. */
+  <svg class="flag" viewBox="0 0 60 40" role="img" aria-hidden="true" focusable="false">
     <clipPath id="uj-cut">
-      <path d="M30,15 h30 v15 z v15 h-30 z h-30 v-15 z v-15 h30 z" />
+      <path d="M30,20 h30 v20 z v20 h-30 z h-30 v-20 z v-20 h30 z" />
     </clipPath>
-    <path d="M0,0 v30 h60 v-30 z" fill="#012169" />
-    <path d="M0,0 L60,30 M60,0 L0,30" stroke="#fff" stroke-width="6" />
-    <path d="M0,0 L60,30 M60,0 L0,30" clip-path="url(#uj-cut)" stroke="#c8102e" stroke-width="4" />
-    <path d="M30,0 v30 M0,15 h60" stroke="#fff" stroke-width="10" />
-    <path d="M30,0 v30 M0,15 h60" stroke="#c8102e" stroke-width="6" />
+    <path d="M0,0 v40 h60 v-40 z" fill="#012169" />
+    <path d="M0,0 L60,40 M60,0 L0,40" stroke="#fff" stroke-width="8" />
+    <path d="M0,0 L60,40 M60,0 L0,40" clip-path="url(#uj-cut)" stroke="#c8102e" stroke-width="5.33" />
+    <path d="M30,0 v40 M0,20 h60" stroke="#fff" stroke-width="13.33" />
+    <path d="M30,0 v40 M0,20 h60" stroke="#c8102e" stroke-width="8" />
   </svg>
 )}
 
