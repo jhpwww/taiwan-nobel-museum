@@ -32,7 +32,7 @@
  */
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
-import { lectures, catName, catNameAlt, categoryList, introParts, INTRO } from '../data/catalog';
+import { lectures, catName, catNameAlt, categoryList } from '../data/catalog';
 import credits from '../../data/model-credits.json';
 import clips from '../data/backdrop.json';
 import { createHash } from 'node:crypto';
@@ -46,7 +46,6 @@ const counts = lectures.reduce<Record<string, number>>((a, l) => {
   a[l.prize.category] = (a[l.prize.category] ?? 0) + 1;
   return a;
 }, {});
-const [introA, introConj, introB] = introParts(lang);
 
 type Credit = { title: string; author: string; licence: string; page: string; source?: string };
 const credited = credits as Record<string, Credit>;
@@ -298,15 +297,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     </nav>
 
     <div class="bh__foot">
-      <a class="bh__intro" href={gallery(lang, INTRO)} data-cat={INTRO}>
-        <span class="bh__intro-txt">
-          <span class="bh__eyebrow">{t('hall.nobelRoom')}</span>
-          <span class="bh__intro-title">{introA}<span class="conj">{introConj}</span>{introB}</span>
-          <span class="bh__intro-desc">{t('hall.introDesc')}</span>
-        </span>
-        <span class="bh__cta" aria-hidden="true">{t('hall.introCta')} →</span>
-      </a>
-
       {/* The way on. A mouse with a rolling wheel is the usual drawing and it
           belongs to a different kind of site; this is the room's own idiom — a
           gold hairline with a bead of light running down it, under an arch cut
@@ -711,37 +701,14 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   }
   .bh__foot[data-gone] { opacity: 0; visibility: hidden; }
 
-  .bh__intro {
-    position: relative;
-    display: flex; align-items: center; gap: clamp(0.9rem, 2.5vw, 1.8rem);
-    inline-size: min(100% - 2rem, 46rem);
-    margin: clamp(1.4rem, 3.5vh, 2.4rem) auto 0;
-    padding: 0.9rem 1.2rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(3px);
-    text-decoration: none;
-    transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
-  }
-  .bh__intro:hover { border-color: var(--accent); background: #fff; }
-  .bh__intro-txt { display: grid; gap: 0.15rem; }
-  .bh__eyebrow {
-    font-size: var(--step--2); letter-spacing: 0.16em;
-    text-transform: uppercase; color: var(--accent);
-  }
-  .bh__intro-title { font-family: var(--font-han-serif); font-size: var(--step-1); color: var(--cream); }
-  .bh__intro-title :global(.conj) { font-size: 0.72em; opacity: 0.7; margin-inline: 0.12em; }
-  .bh__intro-desc { font-size: var(--step--1); color: var(--muted); }
-  .bh__cta { margin-inline-start: auto; color: var(--accent); font-size: var(--step--1); white-space: nowrap; }
 
 
   /* ---------- the phone ----------
    *
    * Three abreast and two deep, and the whole hall inside one screen — which
    * is an arithmetic problem, not a layout one. A 1.92:1 picture shown whole
-   * across a phone is a band 220px tall; the introduction and the cue want
-   * another 150; the two rows of labels another 70. What is left over is what
+   * across a phone is a band 220px tall; the way on wants another 60; the
+   * two rows of labels another 70. What is left over is what
    * the sculptures get, and on a short phone that is not much. So the frame's
    * height is that leftover, divided by two, rather than an aspect ratio —
    * a ratio would have been correct and would not have fitted.
@@ -754,7 +721,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
       /* the near floor of the band, the same 76.45% of the picture the desktop
          row stands on — it is the same photograph */
       --floor: calc(var(--band) * 0.7645);
-      --foot-h: 7.4rem;        /* the introduction and the cue, measured */
+      --foot-h: 3.9rem;        /* just the way on now, measured */
       --label-h: 2.8rem;       /* the name and the count, with their padding */
       /* The row starts inside the picture rather than under it. The sculptures
          are tall and thin, so their tops reach up into the room while the
@@ -792,12 +759,13 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
        * under the boundary, nothing is lost and almost no height is wasted. */
       --avail: calc((min(100svh, 62rem) - var(--top)
                      - var(--foot-h) - 2 * var(--label-h) - 1.2rem) / 2);
-      --art-w: max(3.4rem, min(calc((var(--row-m) / 3 - 2 * var(--pad)) * 1.3),
-               calc(var(--avail) * 0.545)));
+      /* the shared figure — see 'one piece, one size' in plinth.css — with
+         the height still allowed to bind on a short phone */
+      --art-w: max(3.4rem, min(var(--piece-w), calc(var(--avail) * 0.545)));
       --art-h: calc(var(--art-w) / 0.545);
       /* and the same, six across, for the far state */
       --back-row: min(calc(100vw - 0.5rem), 34rem);
-      --back-h: calc((var(--back-row) / 6 - 0.5rem) * 2);
+      --back-h: var(--piece-back-h);
       padding-block: 0;
       min-block-size: 100svh;
     }
@@ -811,7 +779,12 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
       inset-inline-start: 0.85rem;
       padding-block: 0.4rem 0.5rem;
     }
-    .bh__lock-rule { margin-block-end: 0.34rem; }
+    .bh__lock-rule { margin-block-end: 0.28rem; }
+    /* the English line sits under the name, not beside it — at this size the
+       gap the desktop can afford reads as a paragraph break */
+    .bh__lockup { gap: 0.02rem; }
+    .bh__title-en { margin-block-start: 0.04rem; line-height: 1.15; }
+    .bh__title { line-height: 1.06; }
     .bh__title { font-size: clamp(1.32rem, 7.4vw, 1.9rem); }
     .bh__title-en { font-size: 0.62rem; letter-spacing: 0.16em; text-indent: 0.16em; }
 
@@ -844,7 +817,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
      * which piece is which — and the name is set underneath where it can
      * actually be read. It is the same name; only the surface changes. */
     .bh__face .bh__name, .bh__face .bh__name-en { display: none; }
-    .bh__mark { inline-size: 17cqw; margin-block-end: 0; }
     .bh__n { font-size: var(--step--2); line-height: 1.3; min-block-size: 0; text-align: center; }
     .bh__cap { display: block; color: var(--cream); font-weight: 500; }
 
@@ -865,7 +837,7 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     .bh__plinths[data-state='back'] .bh__piece { padding-inline: 0.25rem; }
     .bh__plinths[data-state='back'] .bh__art {
       inline-size: 100%;
-      block-size: var(--back-h);
+      block-size: var(--piece-back-h);
     }
     .bh__plinths[data-state='back'] .bh__n { display: none; }
     .bh__plinths[data-state='back'] .bh__face,
@@ -877,16 +849,8 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     .bh__wall { --panel: var(--panel-n); --z: var(--z-n); --lift: var(--lift-n); }
 
     .bh__foot { gap: 0.3rem; inset-block-end: 0.45rem; }
-    .bh__intro {
-      inline-size: min(100% - 1rem, 30rem);
-      padding: 0.34rem 0.75rem;
-      gap: 0.5rem;
-    }
-    .bh__intro-title { font-size: var(--step--1); }
-    .bh__eyebrow { font-size: 0.6rem; }
     .bh__cue-rule { block-size: 0.95rem; }
     .bh__cue { gap: 0.16rem; padding-block-start: 0; }
-    .bh__intro-desc { display: none; }   /* the title and the call are enough here */
     .bh__cue-txt { display: none; }
   }
 </style>

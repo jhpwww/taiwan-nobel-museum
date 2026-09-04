@@ -954,3 +954,43 @@ html[data-theme='bright'] .gr__lock-name {
   text-indent: 0.07em;
   color: var(--glass-g-ink);
 }
+
+
+/* ---------- the browse page's controls ----------
+   Astro stamps its scope attribute on EVERY compound of a selector, not just
+   the last one: `.chip input:checked + span` is written out as
+   `.chip[cid] input[cid]:checked + span[cid]`, which is five class-level
+   selectors, not three. So a component's rule out-specifies a theme's by
+   roughly the number of elements in it, and the filters stayed a solid red
+   block through two attempts to make them glass — one at three, one at four.
+   Count the compounds, not the classes. */
+html[data-theme='bright'] .browse .chips .chip input:checked + span,
+html[data-theme='bright'] .browse .chips .chip--kind[data-kind] input:checked + span {
+  background: var(--glass-g-bg);
+  backdrop-filter: blur(5px) saturate(1.6);
+  border-color: rgba(255, 236, 190, 0.75);
+  box-shadow: var(--glass-g-edge);
+  color: var(--glass-g-ink);
+  font-weight: 600;
+}
+html[data-theme='bright'] .browse .chips .chip span {
+  background: var(--glass-w-bg);
+  backdrop-filter: blur(5px) saturate(1.6);
+  border-color: rgba(255, 255, 255, 0.7);
+  box-shadow: var(--glass-w-edge);
+  color: var(--cream);
+}
+/* the search field is a control too, and it sits on the room */
+html[data-theme='bright'] .browse .search {
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(6px) saturate(1.5);
+  border-color: rgba(255, 255, 255, 0.75);
+  box-shadow: var(--glass-w-edge);
+}
+html[data-theme='bright'] .browse :is(legend, .browse__n) {
+  text-shadow: 0 0 3px rgba(255, 255, 255, 1), 0 0 10px rgba(255, 255, 255, 0.95);
+}
+html[data-theme='bright'] .browse__h {
+  text-shadow: 0 0 4px rgba(255, 255, 255, 1), 0 0 16px rgba(255, 255, 255, 0.9),
+               0 0 40px rgba(255, 255, 255, 0.7);
+}

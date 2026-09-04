@@ -241,3 +241,34 @@ html[data-motion='off'] .bh__cue-rule i { animation: none; inset-block-start: 40
   .bh__face .bh__name-en { display: none; }
   .bh__mark { inline-size: 17cqw; margin-block-end: 0; }
 }
+
+
+/* ---------- one piece, one size, on a phone ----------
+   The hall shows six of these and each prize page shows one, and on a phone
+   they have to be the same object at the same size — otherwise walking from
+   the hall into a room resizes the thing you just pressed. So the size is
+   worked out once, here, from the width three-across allows, and both use it.
+
+   The far size is the six-across width, and the ratio between the two is
+   0.381 at every phone width from 320 to 768 — near enough constant that the
+   prize pages can shrink by that number rather than recompute the pair. */
+@media (max-width: 48rem) {
+  :root {
+    --piece-w: calc((min(calc(100vw - 2.4rem), 30rem) / 3 - 0.3rem) * 1.3);
+    --piece-h: calc(var(--piece-w) / 0.545);
+    --piece-back-w: calc(min(calc(100vw - 0.5rem), 34rem) / 6 - 0.5rem);
+    /* the cage's ratio here too, or the far state is framed taller than the
+       model needs and the two rooms disagree by nine pixels */
+    --piece-back-h: calc(var(--piece-back-w) / 0.545);
+    --piece-back-k: 0.381;
+  }
+
+  /* The device on the drum, twice the size and set on the middle of the face
+     rather than hung from the top of it. With the name gone from the marble
+     at this width there is nothing under the mark to hang from, and a device
+     pushed up against the gold line reads as having slipped. The face runs
+     from the line at 75.7% of the frame to the foot at 95.7%, so its middle
+     is 85.7% and the block starts half a mark above that. */
+  .bh__face { inset-block-start: calc(85.7% - 17cqw); }
+  .bh__mark { inline-size: 34cqw; margin-block-end: 0; }
+}

@@ -367,7 +367,9 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
   }
   :global(html[data-motion='off']) .gr__piece { transition: none; }
   .gr__piece .bh__art {
-    inline-size: calc(var(--gr-art) / 2);
+    /* the cage's ratio, not a half — the same figure the hall frames by, so
+       one piece is not two sizes in two rooms */
+    inline-size: calc(var(--gr-art) * 0.545);
     block-size: var(--gr-art);
     aspect-ratio: auto;
     max-inline-size: none;
@@ -417,11 +419,15 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
        margin of exactly the piece's height, so a stale value there does not
        merely draw the piece at the wrong size — it pulls the whole page up
        under the room and swallows the first paragraph. */
-    .gr, .gr__rail { --gr-art: clamp(7rem, 22svh, 10rem); }
+    /* the hall's own figure, so the piece is the same object at the same
+       size in both rooms — see 'one piece, one size' in plinth.css */
+    .gr, .gr__rail { --gr-art: var(--piece-h); }
     .gr { block-size: clamp(17rem, 50svh, 24rem); }
     /* the keys stack down the right here, so the mark rides just under the
        museum's name rather than beside it */
-    .gr__rail[data-pinned] .gr__piece { scale: 0.3; translate: 0.4rem 2.6rem; }
+    /* and when it is caught it becomes the size the hall's own pieces are
+       when they withdraw */
+    .gr__rail[data-pinned] .gr__piece { scale: var(--piece-back-k); translate: 0.4rem 2.6rem; }
     .gr__in { gap: 0.5rem; }
     .gr__title { font-size: var(--step-2); }
     .gr__cue .bh__cue-txt { display: none; }
