@@ -1,216 +1,60 @@
 /* ============================================================
-   buttons.css — the museum's four buttons
+   buttons.css — what the v2 button kit needs from this site
    ============================================================
-   One system, four jobs, no borders.
+   The look now comes from src/styles/liquid-glass-buttons.css, which is the
+   designer's file and is kept as close to as-supplied as possible. This one
+   holds only what that file cannot know about: the places where a component
+   of this site would otherwise beat it, and the two touch fixes its markup
+   does not reach. It loads AFTER the kit — an integration layer that loads
+   first is not an integration layer.
 
-   The rule that shapes all of it: a button in this museum is defined by
-   light, not by a line. No `border`, no 1px stroke, no metal frame — the
-   edge is made by a pale champagne wash that collects along the bottom of
-   the shape and a very short, very soft shadow under it, which is how a
-   thin piece of glass sits on white marble. `:focus-visible` is the one
-   exception, and only for a keyboard.
-
-   Gold is kept low. The six gold sculptures are the loudest thing in the
-   building and nothing here may compete with them, so the fills are ivory
-   and near-white with champagne only at the foot; the primary button is
-   the single place a little more saturation is allowed, and there is at
-   most one of those in view.
-
-   Hierarchy, from loudest to quietest:
-     --primary   one per screen. An action, not a destination.
-     --nav       the bar, the onward links, the external references.
-     --chip      a filter that is actually filtering something.
-     --play      the one round one, over a still.
-
-   Everything is CSS: gradients, backdrop-filter, shadow, and a 1px lift on
-   hover. No images, no libraries, no animation loop.
+   Nothing here paints. If a rule in this file sets a colour or a gradient,
+   it is in the wrong file.
    ============================================================ */
 
-:root {
-  --museum-ink: #2b2523;
-  --museum-gold-text: #6f5111;
-  --museum-red: #a9322b;
-  --museum-glass-blur: 10px;
-  --museum-ease: cubic-bezier(0.2, 0.8, 0.2, 1);
-}
+/* ---------- 1. no borders, whatever a component says ----------
+   Rule one of both kits is that a button here is defined by light, not by a
+   line. Every element these classes land on already carries a 1px border from
+   the dark site, written scoped — and Astro stamps its scope attribute on
+   EVERY compound of a selector, so a component's rule out-specifies a plain
+   class by roughly the number of elements in it. Chasing that component by
+   component is how a design rule turns back into a list of exceptions. */
+.museum-glass-btn { border: 0 !important; }
 
-.museum-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.45em;
-  box-sizing: border-box;
-  position: relative;
-  /* The one !important in the system, and it earns it. Rule one is that a
-     button here has no border; every component this class lands on has its
-     own 1px from the dark site, written scoped, which out-specifies a theme
-     by roughly the number of elements in the selector. Chasing that
-     component by component is how a design rule turns back into a list of
-     exceptions. */
-  border: 0 !important;
-  color: var(--museum-ink);
-  font: inherit;
-  line-height: 1.2;
-  text-decoration: none;
-  /* the width follows the words: 回到大廳 and Back to the hall are not the
-     same length and neither may be clipped */
-  white-space: nowrap;
-  cursor: pointer;
-  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
-  backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
-  transition:
-    transform 160ms var(--museum-ease),
-    filter 160ms var(--museum-ease),
-    box-shadow 160ms var(--museum-ease),
-    background-color 160ms var(--museum-ease);
-}
+/* ---------- 2. a finger needs 44px ----------
+   The kit grows the primary and the nav key to 44 and the play mark to 54.
+   A chip must not grow: a row of 44px lozenges is a wall. So it keeps its
+   paint and reaches out for the touch with an invisible box.
 
-/* ---------- A. the one action on the screen ---------- */
-.museum-btn--primary {
-  min-block-size: 48px;
-  padding: 0.78rem 1.35rem;
-  border-radius: 9px;
-  font-weight: 600;
-  background:
-    linear-gradient(180deg,
-      rgba(255, 255, 255, 0.78) 0%,
-      rgba(247, 229, 184, 0.56) 48%,
-      rgba(220, 175, 65, 0.27) 100%);
-  box-shadow:
-    inset 0 14px 22px -20px rgba(255, 255, 255, 0.98),
-    inset 0 -14px 22px -20px rgba(165, 112, 16, 0.42),
-    0 12px 26px -20px rgba(55, 43, 24, 0.52);
-}
-
-/* ---------- B. the bar, and every onward link ---------- */
-.museum-btn--nav {
-  min-block-size: 36px;
-  padding: 0.55rem 0.95rem;
-  border-radius: 7px;
-  background:
-    linear-gradient(180deg,
-      rgba(255, 255, 255, 0.68),
-      rgba(242, 226, 190, 0.22));
-  box-shadow:
-    inset 0 12px 18px -18px rgba(255, 255, 255, 0.98),
-    inset 0 -10px 18px -18px rgba(166, 119, 27, 0.30),
-    0 8px 20px -17px rgba(46, 43, 38, 0.42);
-}
-/* the page you are on carries a little more of the warm fill, and nothing
-   else — no ring, no underline, no second weight */
-.museum-btn--nav[aria-current='page'] {
-  background:
-    linear-gradient(180deg,
-      rgba(255, 255, 255, 0.72),
-      rgba(240, 220, 172, 0.34));
-}
-
-/* ---------- C. a filter that filters ---------- */
-.museum-btn--chip {
-  min-block-size: 30px;
-  padding: 0.38rem 0.82rem;
-  border-radius: 999px;
-  background:
-    linear-gradient(180deg,
-      rgba(255, 255, 255, 0.58),
-      rgba(239, 214, 154, 0.19));
-  box-shadow:
-    inset 0 10px 16px -16px rgba(255, 255, 255, 0.96),
-    0 7px 16px -16px rgba(48, 43, 34, 0.38);
-}
-/* chosen: a little more of the same wash, still no outline */
-.museum-btn--chip[aria-pressed='true'],
-.museum-btn--chip[data-on] {
-  background:
-    linear-gradient(180deg,
-      rgba(255, 255, 255, 0.72),
-      rgba(233, 199, 118, 0.42));
-  box-shadow:
-    inset 0 10px 16px -16px rgba(255, 255, 255, 1),
-    inset 0 -10px 16px -16px rgba(160, 112, 18, 0.32),
-    0 7px 16px -16px rgba(48, 43, 34, 0.4);
-  font-weight: 600;
-}
-
-/* ---------- D. the round one ---------- */
-.museum-btn--play {
-  inline-size: 60px;
-  block-size: 60px;
-  padding: 0;
-  border-radius: 50%;
-  /* A shade more body than the other three. These sit on a photograph rather
-     than on marble, and a pane you can see a lecturer's face through is not a
-     button — the champagne is the same, there is simply more of it. */
-  background:
-    radial-gradient(circle at 36% 28%,
-      rgba(255, 253, 246, 0.95),
-      rgba(246, 226, 168, 0.72) 58%,
-      rgba(219, 176, 76, 0.6));
-  box-shadow:
-    inset 0 14px 20px -18px rgba(255, 255, 255, 1),
-    inset 0 -14px 22px -20px rgba(144, 93, 13, 0.45),
-    0 12px 28px -18px rgba(35, 29, 21, 0.58);
-}
-.museum-btn--play svg { display: block; }
-
-/* ---------- the whole set answers the same way ---------- */
-.museum-btn:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.025) saturate(1.04);
-}
-.museum-btn:active {
-  transform: translateY(0) scale(0.985);
-  filter: brightness(0.985);
-}
-.museum-btn:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--museum-red) 72%, white);
-  outline-offset: 3px;
-}
-
-/* Where the backdrop cannot be filtered the glass would be a faint tint on
-   whatever is behind it, which over a photograph of a rotunda is not a
-   button at all. A near-opaque ivory instead. */
-@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
-  .museum-btn { background-color: rgba(250, 245, 232, 0.92); }
-}
-
-/* A finger needs 44px however thin the button looks. The two larger ones just
-   grow; a chip must not, because a row of 44px lozenges is a wall — so it
-   keeps its 30px of paint and reaches out for the touch with an invisible
-   box, which is what the spec means by transparent padding. */
+   The padding goes on the <label>, not on the chip's own pseudo-element: the
+   control is a label wrapping a hidden radio, and a pseudo-element on the
+   span inside it lands under the next row's rather than on the finger.
+   Padding out and margin back leaves the paint exactly where it was. */
 @media (max-width: 700px) {
-  .museum-btn--primary,
-  .museum-btn--nav { min-block-size: 44px; }
-  .museum-btn--play { inline-size: 52px; block-size: 52px; }
-  /* On the label, not on the chip's own pseudo-element: the control here is
-     the <label> wrapping a hidden radio, and a pseudo-element on the span
-     inside it lands under the next row's, not on the finger. Padding out and
-     margin back keeps the paint exactly where it was. */
-  .chip:has(> .museum-btn--chip) {
+  .chip:has(> .museum-glass-btn--chip) {
     padding-block: 7px;
     margin-block: -7px;
   }
-  /* and the rows are opened by the same amount, or two reaching hit areas
-     overlap and the finger lands on the row above */
-  .chips:has(> .chip > .museum-btn--chip) { row-gap: 1.05rem; }
+  /* and the rows open by the same amount, or two reaching hit areas overlap
+     and the finger lands on the row above */
+  .chips:has(> .chip > .museum-glass-btn--chip) { row-gap: 1.05rem; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .museum-btn { transition: none; }
-  .museum-btn:hover, .museum-btn:active { transform: none; }
-}
-
-
-/* ---------- the radio stays on top of its own chip ----------
+/* ---------- 3. the radio stays on top of its own chip ----------
    A filter chip is a <label> holding an invisible radio stretched across it
    and a decorated <span>. The radio was painting above the span because the
-   span was not positioned — and `.museum-btn` positions it, which silently
-   put the decoration over the control.
+   span was not positioned — and the kit's base class positions it, which
+   silently put the decoration over the control.
 
    In Chromium the label forwards the tap either way and nothing looks wrong,
    which is exactly why this is worth pinning rather than leaving to label
-   semantics: the input is put back on top, so a finger lands on the radio
+   semantics: the input goes back on top, so a finger lands on the radio
    itself and no forwarding is needed at all. */
-.chip:has(> .museum-btn--chip) input {
-  z-index: 1;
+.chip:has(> .museum-glass-btn--chip) input { z-index: 1; }
+
+/* ---------- 4. reduced motion ----------
+   The kit drops the transition; the transform is what actually moves. */
+@media (prefers-reduced-motion: reduce) {
+  .museum-glass-btn:hover,
+  .museum-glass-btn:active { transform: none; }
 }

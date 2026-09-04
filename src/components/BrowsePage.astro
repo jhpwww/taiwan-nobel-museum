@@ -45,11 +45,11 @@ const bright = process.env.THEME === 'bright';
       <fieldset>
         <legend>{t('browse.filterKind')}</legend>
         <div class="chips">
-          <label class="chip"><input type="radio" name="kind" value="" checked /><span class="museum-btn museum-btn--chip">{t('browse.filterAll')}</span></label>
+          <label class="chip"><input type="radio" name="kind" value="" checked /><span class="museum-glass-btn museum-glass-btn--chip">{t('browse.filterAll')}</span></label>
           {KINDS.map((k) => (
             <label class="chip chip--kind" data-kind={k.key}>
               <input type="radio" name="kind" value={k.key} />
-              <span class="museum-btn museum-btn--chip">{k.label} <b>{k.n}</b></span>
+              <span class="museum-glass-btn museum-glass-btn--chip">{k.label} <b>{k.n}</b></span>
             </label>
           ))}
         </div>
@@ -58,9 +58,9 @@ const bright = process.env.THEME === 'bright';
       <fieldset>
         <legend>{t('browse.filterCat')}</legend>
         <div class="chips">
-          <label class="chip"><input type="radio" name="cat" value="" checked /><span class="museum-btn museum-btn--chip">{t('browse.filterAll')}</span></label>
+          <label class="chip"><input type="radio" name="cat" value="" checked /><span class="museum-glass-btn museum-glass-btn--chip">{t('browse.filterAll')}</span></label>
           {cats.map(([k, v]) => (
-            <label class="chip" data-cat={k}><input type="radio" name="cat" value={k} /><span class="museum-btn museum-btn--chip">{v[lang]}</span></label>
+            <label class="chip" data-cat={k}><input type="radio" name="cat" value={k} /><span class="museum-glass-btn museum-glass-btn--chip">{v[lang]}</span></label>
           ))}
         </div>
       </fieldset>
@@ -68,9 +68,9 @@ const bright = process.env.THEME === 'bright';
       <fieldset>
         <legend>{t('browse.filterTopic')}</legend>
         <div class="chips">
-          <label class="chip"><input type="radio" name="tag" value="" checked /><span class="museum-btn museum-btn--chip">{t('browse.filterAll')}</span></label>
+          <label class="chip"><input type="radio" name="tag" value="" checked /><span class="museum-glass-btn museum-glass-btn--chip">{t('browse.filterAll')}</span></label>
           {tagList.map(([k, v]) => (
-            <label class="chip"><input type="radio" name="tag" value={k} /><span class="museum-btn museum-btn--chip">{v[lang]}</span></label>
+            <label class="chip"><input type="radio" name="tag" value={k} /><span class="museum-glass-btn museum-glass-btn--chip">{v[lang]}</span></label>
           ))}
         </div>
       </fieldset>
@@ -128,23 +128,21 @@ const bright = process.env.THEME === 'bright';
   .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; }
   .chip { position: relative; }
   .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
-  .chip span {
-    display: block; font-size: var(--step--1); color: var(--muted);
-    border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.28rem 0.9rem;
-    cursor: pointer; transition: all 0.25s var(--ease);
-  }
+  /* The chip is a museum button now and the button kit paints it — see
+     src/styles/liquid-glass-buttons.css. What was here was a whole second
+     appearance: a border, a fill, a hover, a chosen state and three
+     category colours, all of which beat the kit on specificity because
+     Astro stamps its scope attribute on every compound. Removing them is
+     what makes one button system true rather than nearly true.
+
+     The count keeps its lighter weight, and focus keeps its ring: the focus
+     is on the radio, which the kit's :focus-visible cannot see. */
   .chip span b { font-weight: 400; opacity: 0.62; margin-inline-start: 0.2em; }
-  .chip:hover span { border-color: var(--line-hi); color: var(--text); }
-  .chip input:checked + span {
-    color: var(--bg-0); background: var(--accent-block, var(--gold));
-    border-color: var(--accent-block, var(--gold)); font-weight: 500;
-  }
   .chip input:checked + span b { opacity: 0.75; }
-  .chip input:focus-visible + span { outline: 2px solid var(--gold-bright); outline-offset: 2px; }
-  /* the video-type chips carry their own colour so the three read apart */
-  .chip--kind[data-kind='guide']   input:checked + span { background: var(--kind-guide); border-color: var(--kind-guide); }
-  .chip--kind[data-kind='lecture'] input:checked + span { background: var(--kind-lecture); border-color: var(--kind-lecture); }
-  .chip--kind[data-kind='record']  input:checked + span { background: var(--kind-record); border-color: var(--kind-record); }
+  .chip input:focus-visible + span {
+    outline: 2px solid color-mix(in srgb, var(--museum-red) 72%, white);
+    outline-offset: 3px;
+  }
 
   .count { font-size: var(--step--1); color: var(--muted); letter-spacing: 0.1em; margin-block-end: 1.2rem; }
   .empty { color: var(--muted); }

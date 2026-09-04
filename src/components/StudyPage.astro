@@ -78,7 +78,7 @@ const index = lectures.map((l) => ({
       <article class="work__item">
         <header class="work__head">
           <a class="work__name" data-work-name href="#"></a>
-          <a class="work__go museum-btn museum-btn--nav" data-work-go href="#">{t('study.openLecture')} →</a>
+          <a class="work__go museum-glass-btn museum-glass-btn--nav" data-work-go href="#">{t('study.openLecture')} →</a>
         </header>
         <div class="work__watch">
           <label><input type="checkbox" data-wwatch="tw" /> <span>{t('study.watchedTw')}</span></label>
@@ -116,9 +116,9 @@ const index = lectures.map((l) => ({
       <h2>{t('study.exportTitle')}</h2>
       <p class="study__note">{t('study.exportNote')}</p>
       <div class="study__actions">
-        <button class="museum-btn museum-btn--nav" type="button" data-export-notes>{t('study.exportNotes')}</button>
-        <button class="museum-btn museum-btn--nav" type="button" data-export-all>{t('study.exportAll')}</button>
-        <button class="museum-btn museum-btn--primary" type="button" data-download>{t('study.download')}</button>
+        <button class="museum-glass-btn museum-glass-btn--nav" type="button" data-export-notes>{t('study.exportNotes')}</button>
+        <button class="museum-glass-btn museum-glass-btn--nav" type="button" data-export-all>{t('study.exportAll')}</button>
+        <button class="museum-glass-btn museum-glass-btn--primary" type="button" data-download>{t('study.download')}</button>
         <span data-msg class="study__msg"></span>
       </div>
       <textarea data-out rows="12" readonly aria-label={t('study.exportTitle')}></textarea>
@@ -128,12 +128,12 @@ const index = lectures.map((l) => ({
       <h2>{t('study.manageTitle')}</h2>
       <p class="study__note">{t('study.manageNote')}</p>
       <div class="study__actions">
-        <button class="museum-btn museum-btn--nav" type="button" data-backup>{t('study.backup')}</button>
+        <button class="museum-glass-btn museum-glass-btn--nav" type="button" data-backup>{t('study.backup')}</button>
         <label class="study__file">
           <input type="file" accept="application/json,.json" data-restore hidden />
-          <span>{t('study.restore')}</span>
+          <span class="museum-glass-btn museum-glass-btn--nav">{t('study.restore')}</span>
         </label>
-        <button type="button" class="danger museum-btn museum-btn--nav" data-clear>{t('study.clear')}</button>
+        <button type="button" class="danger museum-glass-btn museum-glass-btn--nav" data-clear>{t('study.clear')}</button>
       </div>
     </section>
   </div>
@@ -282,13 +282,12 @@ const index = lectures.map((l) => ({
   .picks .tag[data-on] { color: var(--on-accent); background: var(--gold); border-color: var(--gold); }
 
   .study__actions { display: flex; gap: .7rem; flex-wrap: wrap; align-items: center; margin-block-start: 1rem; }
-  .study button, .study__file span {
-    font-size: var(--step--1); color: var(--on-accent); background: var(--gold);
-    border: 0; border-radius: var(--radius-control); padding: .42rem 1.05rem; cursor: pointer;
-    transition: filter .2s;
-  }
-  .study button:hover, .study__file span:hover { filter: brightness(1.1); }
-  .study button.danger { background: transparent; color: var(--c-medicine); border: 1px solid currentColor; }
+  /* The buttons here are museum buttons and the kit paints them — what stood
+     here was a gold fill, a radius, a padding and a hover, all of which beat
+     the kit because Astro scopes every compound. The one thing left is what
+     the kit has no role for: this button destroys the visitor's notes, and it
+     says so in the ink rather than in a second shape. */
+  .study button.danger { color: var(--c-medicine); }
   .study__file { display: inline-flex; }
   .study__msg { font-size: var(--step--1); color: var(--muted); }
 

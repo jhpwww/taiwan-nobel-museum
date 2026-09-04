@@ -21,8 +21,11 @@
       public/: a stylesheet cannot write `/taiwan-nobel-museum/bright/` in
       one build and `/taiwan-nobel-museum/` in the other.
 
-   Applied so far, per the kit's Step 5: one primary and one play, both on
-   the home page. The rest of the site is still on buttons.css.
+   3. One selector added, at the chip's pressed rule — see the note there.
+
+   Applied everywhere as of 2026-09-04: the bar, every onward and external
+   link, the study tools, the browse filters and every play mark. What is
+   left in buttons.css is integration only, and it loads after this file.
    ============================================================ */
 
 .museum-glass-btn {
@@ -130,7 +133,13 @@
     0 9px 18px -18px rgba(49, 39, 25, .5);
 }
 
-.museum-glass-btn--chip[aria-pressed="true"] {
+/* The kit says a chosen chip is [aria-pressed="true"]. On this site a filter
+   chip is a radio inside a label with the button on the <span>, so nothing is
+   ever aria-pressed and `input:checked + span` is what chosen means. The
+   selector is added here rather than the colours repeated in buttons.css, so
+   the pressed paint stays in one place — the designer's. */
+.museum-glass-btn--chip[aria-pressed="true"],
+.chip input:checked + .museum-glass-btn--chip {
   color: #5f420f;
   background:
     radial-gradient(circle at 34% 18%, rgba(255, 255, 255, .90), transparent 42%),

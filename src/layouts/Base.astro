@@ -2,8 +2,9 @@
 import '../styles/global.css';
 import '../styles/bright.css';
 import '../styles/plinth.css';
-import '../styles/buttons.css';
+/* the kit paints; buttons.css is the integration layer and must follow it */
 import '../styles/liquid-glass-buttons.css';
+import '../styles/buttons.css';
 import fonts from '../data/font-manifest.json';
 import fontsBright from '../data/font-manifest-bright.json';
 
@@ -107,11 +108,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
                 and there it is named for what pressing it does rather than for
                 where it goes — on a page that is already a room in the museum,
                 '博物館大廳' reads as a place and '回到大廳' as a door. */}
-            {segments.length > 0 && <a class="museum-btn museum-btn--nav" href={home(lang)}>{t('nav.backHall')}</a>}
-            <a class="museum-btn museum-btn--nav" href={browse(lang)}>{t('nav.all')}</a>
-            <a class="museum-btn museum-btn--nav" href={learn(lang)}>{t('nav.learn')}</a>
-            <a class="museum-btn museum-btn--nav" href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
-            <a class="museum-btn museum-btn--nav" href={about(lang)}>{t('nav.about')}</a>
+            {segments.length > 0 && <a class="museum-glass-btn museum-glass-btn--nav" href={home(lang)}>{t('nav.backHall')}</a>}
+            <a class="museum-glass-btn museum-glass-btn--nav" href={browse(lang)}>{t('nav.all')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={learn(lang)}>{t('nav.learn')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={about(lang)}>{t('nav.about')}</a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
                aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
               <LangFlag to={other.lang} />
@@ -132,11 +133,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             </span>
           </a>
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
-            <a class="museum-btn museum-btn--nav" href={home(lang)}>{t('nav.backHall')}</a>
-            <a class="museum-btn museum-btn--nav" href={browse(lang)}>{t('nav.all')}</a>
-            <a class="museum-btn museum-btn--nav" href={learn(lang)}>{t('nav.learn')}</a>
-            <a class="museum-btn museum-btn--nav" href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
-            <a class="museum-btn museum-btn--nav" href={about(lang)}>{t('nav.about')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={home(lang)}>{t('nav.backHall')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={browse(lang)}>{t('nav.all')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={learn(lang)}>{t('nav.learn')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={about(lang)}>{t('nav.about')}</a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
                aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
               <LangFlag to={other.lang} />

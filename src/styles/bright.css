@@ -127,7 +127,8 @@ html[data-theme='bright'] .topbar--ghost {
   border-block-end: 0;
 }
 
-/* The bar's keys are museum-btn--nav now — see src/styles/buttons.css. What
+/* The bar's keys are museum-glass-btn--nav now — see
+   src/styles/liquid-glass-buttons.css. What
    is left here is only what the bar itself has to stop doing: the dark
    theme's underline-on-hover, and a text colour the button sets for itself.
    The tablet that used to be described here had a 1px rim on every side; the
@@ -273,17 +274,6 @@ html[data-theme='bright'] .card:hover {
 }
 
 /* ---------- the standing controls ---------- */
-html[data-theme='bright'] .pn__b {
-  background: rgba(255, 255, 255, 0.94);
-  border-color: var(--line-hi);
-  color: var(--muted);
-  box-shadow: 0 6px 22px rgba(20, 18, 16, 0.16);
-}
-html[data-theme='bright'] .pn__b:hover {
-  color: #fff;
-  background: var(--red);
-  border-color: var(--red);
-}
 
 /* ---------- text on filled marks ----------
    The dark theme fills these with gold and writes on them in near-black. Here
@@ -299,10 +289,10 @@ html[data-theme='bright'] {
 }
 html[data-theme='bright'] [data-cat] { --accent-block: var(--red); }
 
-/* marks that keep a gold fill of their own in the dark theme */
-html[data-theme='bright'] .picks .tag[data-on],
-html[data-theme='bright'] .study button,
-html[data-theme='bright'] .study__file span {
+/* marks that keep a gold fill of their own in the dark theme. The study
+   page's buttons were here too, until they became museum buttons and the
+   kit took over painting them. */
+html[data-theme='bright'] .picks .tag[data-on] {
   background: var(--red);
   border-color: var(--red);
 }
@@ -666,35 +656,11 @@ html[data-theme='bright'] {
     0 8px 20px -17px rgba(46, 43, 38, 0.44);
 }
 
-/* The standing controls: back-to-top and the like. Nav material, and nothing
-   turns red under the pointer any more. */
-html[data-theme='bright'] .pn__b {
-  border: 0;
-  color: var(--museum-ink);
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.78),
-    rgba(242, 226, 190, 0.3));
-  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
-  backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
-  box-shadow:
-    inset 0 12px 18px -18px rgba(255, 255, 255, 0.98),
-    inset 0 -10px 18px -18px rgba(166, 119, 27, 0.3),
-    0 8px 20px -17px rgba(46, 43, 38, 0.42);
-}
-html[data-theme='bright'] .pn__b:hover {
-  color: var(--museum-ink);
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.84),
-    rgba(240, 220, 172, 0.44));
-  transform: translateY(-1px);
-}
 
 /* Marks that carried a gold fill of their own. Solid colour on a page whose
    every other control is glass reads as a different site. */
 html[data-theme='bright'] :is(
   .picks .tag[data-on],
-  .study button,
-  .study__file span,
   .sw__opt.is-on
 ) {
   border: 0;
@@ -903,32 +869,15 @@ html[data-theme='bright'] .gr__lock-name {
 
 
 /* ---------- the browse page's controls ----------
-   Astro stamps its scope attribute on EVERY compound of a selector, not just
-   the last one: `.chip input:checked + span` is written out as
-   `.chip[cid] input[cid]:checked + span[cid]`, which is five class-level
-   selectors, not three. So a component's rule out-specifies a theme's by
-   roughly the number of elements in it, and the filters stayed a solid red
-   block through two attempts to make them glass — one at three, one at four.
-   Count the compounds, not the classes. */
-html[data-theme='bright'] .browse .chips .chip input:checked + span,
-html[data-theme='bright'] .browse .chips .chip--kind[data-kind] input:checked + span {
-  /* chosen: the chip's own pressed wash, and no outline of any kind */
-  background: linear-gradient(180deg,
-    rgba(255, 255, 255, 0.72),
-    rgba(233, 199, 118, 0.42));
-  border-color: transparent;
-  box-shadow:
-    inset 0 10px 16px -16px rgba(255, 255, 255, 1),
-    inset 0 -10px 16px -16px rgba(160, 112, 18, 0.32),
-    0 7px 16px -16px rgba(48, 43, 34, 0.4);
-  color: var(--museum-ink);
-  font-weight: 600;
-}
-html[data-theme='bright'] .browse .chips .chip span {
-  border-color: transparent;
-  color: var(--museum-ink);
-}
-html[data-theme='bright'] .browse .chips .chip:hover span { border-color: transparent; }
+   The filter chips are painted by the button kit and by nothing else now.
+   What stood here was a theme-level answer to the component's own chip
+   styling, written at five class-level compounds to clear it — Astro stamps
+   its scope attribute on EVERY compound of a selector, so a component's rule
+   out-specifies a theme's by roughly the number of elements in it, and these
+   filters stayed a solid red block through two attempts to make them glass.
+   The component's rules are gone, so the answer to them can go too.
+
+   Count the compounds, not the classes, if this is ever needed again. */
 /* the search field is a control too, and it sits on the room */
 html[data-theme='bright'] .browse .search {
   background: linear-gradient(180deg,

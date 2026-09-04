@@ -21,7 +21,7 @@ const t = useT(lang);
    never a primary one. Doing it here rather than at each call site is the
    same argument as the rel and the target — the behaviour cannot drift
    between components if there is only one component. */
-const klass = ['museum-btn', 'museum-btn--nav', cls].filter(Boolean).join(' ');
+const klass = ['museum-glass-btn', 'museum-glass-btn--nav', cls].filter(Boolean).join(' ');
 ---
 <a href={href} class={klass} target="_blank" rel="noopener noreferrer">
   <slot />

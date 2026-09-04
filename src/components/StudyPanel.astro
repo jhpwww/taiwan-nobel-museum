@@ -21,7 +21,7 @@ const t = useT(lang);
 <section class="sp" data-study={rec.id} aria-labelledby="sp-h">
   <header class="sp__head">
     <h3 id="sp-h" class="sp__title">{t('study.panelTitle')}</h3>
-    <a class="sp__course museum-btn museum-btn--nav" href={path(lang, 'learn')}>{t('study.forCourse')} →</a>
+    <a class="sp__course museum-glass-btn museum-glass-btn--nav" href={path(lang, 'learn')}>{t('study.forCourse')} →</a>
   </header>
 
   <p class="sp__blocked" data-blocked hidden>{t('study.blocked')}</p>
@@ -72,7 +72,7 @@ const t = useT(lang);
     </label>
 
     <div class="sp__actions">
-      <button class="museum-btn museum-btn--nav" type="button" data-copy-note data-label={t('study.copyNote')} data-ok={t('study.copied')} data-fail={t('study.copyFail')}>{t('study.copyNote')}</button>
+      <button class="museum-glass-btn museum-glass-btn--nav" type="button" data-copy-note data-label={t('study.copyNote')} data-ok={t('study.copied')} data-fail={t('study.copyFail')}>{t('study.copyNote')}</button>
       <span class="sp__saved" data-saved data-msg={t('study.saved')} data-fail={t('study.saveFail')}></span>
     </div>
   </details>
@@ -90,7 +90,7 @@ const t = useT(lang);
       <span class="sp__count" data-count="askQuestion" data-tmpl={t('study.chars')}></span>
     </label>
     <div class="sp__actions">
-      <button class="museum-btn museum-btn--nav" type="button" data-copy-ask data-label={t('study.copyAsk')} data-ok={t('study.copied')} data-fail={t('study.copyFail')}>{t('study.copyAsk')}</button>
+      <button class="museum-glass-btn museum-glass-btn--nav" type="button" data-copy-ask data-label={t('study.copyAsk')} data-ok={t('study.copied')} data-fail={t('study.copyFail')}>{t('study.copyAsk')}</button>
     </div>
   </details>
 
