@@ -1,19 +1,24 @@
 /* ============================================================
-   liquid-glass-buttons.css — the borderless kit, as supplied
+   liquid-glass-buttons.css — the v3 glass kit, as supplied
    ============================================================
-   From buttons/v2/nobel-museum-buttons-borderless-v2.zip, which replaces
-   the rimmed kit that came before it. Kept as close to the file the
-   designer sent as the project allows; the one departure is recorded here
-   rather than left to be discovered.
+   From buttons/v3/nobel-museum-buttons-glass-v3.zip, which replaces the
+   borderless kit before it and the rimmed one before that. Kept as close to
+   the file the designer sent as the project allows; the one departure is
+   recorded here rather than left to be discovered.
 
-   The kit's rule is that nothing may add a stroke, an outline, a gold frame
-   or a second contour — the relief is the glass highlight and a short soft
-   shadow, and nothing else. src/styles/buttons.css, which loads after this
-   file, exists to hold that line against the components: every element these
-   classes land on carries a 1px border from the dark site, written scoped,
-   and Astro stamps its scope attribute on every compound of a selector, so a
-   component's rule out-specifies a plain class by roughly the number of
-   elements in it.
+   v3 is drawn for this site's own bright marble: no continuous frame, but a
+   partial highlight arc at the top left, a warm refraction point at the
+   bottom right, and a short shadow. Its own rules, which nothing in this
+   project may undo:
+     · no added border, full bright frame or metal stroke
+     · the nav ::before opacity stays at or above .82
+     · never the old filter: saturate(.45) — it kills the gold refraction
+     · the red focus-visible ring is for the keyboard, not a resting border
+
+   src/styles/buttons.css loads after this file and is integration only: it
+   removes borders the components would otherwise impose, keeps a button
+   inside its container, and gives the filter chips a touch box. It paints
+   nothing.
 
    Paths: `styles/` and `assets/` are siblings here as they are in the ZIP —
    src/styles/ and src/assets/ — so the kit's own `url("../assets/…")`
@@ -24,21 +29,20 @@
 
    The :root block matters beyond the buttons. bright.css reads
    --museum-ink, --museum-glass-blur, --museum-ease and --museum-gold-text
-   for the search field, the cards and the topbar; when the previous kit's
-   properties were moved off :root those rules silently stopped resolving
-   and the browse search lost its blur entirely. They stay on :root.
+   for the search field, the cards and the topbar, so these stay on :root.
+   Moving them onto .museum-glass-btn once left those rules unresolved and
+   the browse search computed backdrop-filter: none.
 
    The one departure: a selector added at the chip's pressed rule — see the
-   note there. Nothing else, and in particular no number: the previous kit's
-   frame widths were retuned here once and the owner preferred the file as
-   sent. Values in this file are the designer's decision.
+   note there. No number in this file is touched; the values are the
+   designer's decision.
    ============================================================ */
 
 :root {
   --museum-ink: #2b2523;
   --museum-gold-text: #6f5111;
   --museum-red: #a9322b;
-  --museum-glass-blur: 9px;
+  --museum-glass-blur: 12px;
   --museum-ease: cubic-bezier(.2, .8, .2, 1);
 }
 
@@ -60,10 +64,12 @@
   white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
-  backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
-  background: rgba(255, 255, 255, .045);
-  box-shadow: 0 12px 22px -16px rgba(43, 34, 22, .46);
+  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(116%);
+  backdrop-filter: blur(var(--museum-glass-blur)) saturate(116%);
+  background: rgba(255, 255, 255, .07);
+  box-shadow:
+    0 3px 5px -4px rgba(43, 34, 22, .44),
+    0 14px 24px -18px rgba(43, 34, 22, .44);
   transition:
     transform 160ms var(--museum-ease),
     filter 160ms var(--museum-ease),
@@ -75,7 +81,7 @@
   z-index: 1;
 }
 
-/* The v2 WebP has no drawn rim; 9-slice only protects the small corners. */
+/* v3 uses disconnected highlights; 9-slice protects the small corners. */
 .museum-glass-btn--primary::before,
 .museum-glass-btn--nav::before {
   content: "";
@@ -84,7 +90,7 @@
   inset: 0;
   border-style: solid;
   border-color: transparent;
-  border-image-source: url("../assets/glass-button-skin-borderless.webp");
+  border-image-source: url("../assets/glass-button-skin-v3.webp");
   border-image-slice: 36 54 fill;
   border-image-repeat: stretch;
   pointer-events: none;
@@ -94,34 +100,38 @@
   min-height: 50px;
   padding: .78rem 1.45rem;
   border-radius: 9px;
-  background: rgba(255, 250, 239, .035);
-  box-shadow: 0 14px 25px -17px rgba(52, 40, 24, .48);
+  background: rgba(250, 236, 198, .08);
+  box-shadow:
+    0 4px 6px -4px rgba(52, 40, 24, .50),
+    0 16px 26px -18px rgba(52, 40, 24, .52);
 }
 
 .museum-glass-btn--primary::before {
   border-width: 7px 11px;
   border-image-width: 7px 11px;
-  opacity: .94;
+  opacity: 1;
 }
 
 .museum-glass-btn--nav {
   min-height: 38px;
   padding: .56rem 1rem;
   border-radius: 7px;
-  background: rgba(255, 255, 255, .035);
-  box-shadow: 0 10px 19px -15px rgba(44, 37, 28, .38);
+  background: rgba(255, 255, 255, .07);
+  box-shadow:
+    0 3px 5px -4px rgba(44, 37, 28, .40),
+    0 11px 19px -15px rgba(44, 37, 28, .42);
 }
 
 .museum-glass-btn--nav::before {
   border-width: 5px 8px;
   border-image-width: 5px 8px;
-  opacity: .62;
-  filter: saturate(.45) brightness(1.02);
+  opacity: .86;
+  filter: saturate(.88) contrast(1.05);
 }
 
 .museum-glass-btn--nav[aria-current="page"]::before {
-  opacity: .80;
-  filter: saturate(.55) brightness(1.025);
+  opacity: .98;
+  filter: saturate(1.02) contrast(1.06);
 }
 
 .museum-glass-btn--chip {
@@ -160,9 +170,11 @@
   padding: 0;
   border-radius: 50%;
   background:
-    url("../assets/glass-play-skin-borderless.webp") center / contain no-repeat,
-    rgba(255, 255, 255, .035);
-  box-shadow: 0 13px 22px -14px rgba(28, 23, 17, .58);
+    url("../assets/glass-play-skin-v3.webp") center / contain no-repeat,
+    rgba(255, 255, 255, .06);
+  box-shadow:
+    0 4px 6px -4px rgba(28, 23, 17, .58),
+    0 14px 23px -15px rgba(28, 23, 17, .62);
 }
 
 .museum-glass-btn--play svg {
@@ -175,7 +187,9 @@
 .museum-glass-btn:hover {
   transform: translateY(-1px);
   filter: brightness(1.035) saturate(1.025);
-  box-shadow: 0 16px 27px -17px rgba(45, 34, 21, .58);
+  box-shadow:
+    0 5px 7px -4px rgba(45, 34, 21, .52),
+    0 17px 28px -17px rgba(45, 34, 21, .60);
 }
 
 .museum-glass-btn:active {
@@ -197,7 +211,7 @@
 
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
   .museum-glass-btn {
-    background-color: rgba(249, 241, 220, .94);
+    background-color: rgba(249, 241, 220, .76);
   }
 }
 
