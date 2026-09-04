@@ -147,20 +147,23 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
   content: '';
   position: absolute;
   z-index: -1;
-  inset: -1.5rem -2.2rem -1.7rem -3.2rem;
+  inset: -2.2rem -5rem -2.4rem -6rem;
   pointer-events: none;
-  /* Along the row, not around a point. A single radial fell away before it
-     reached the left end and the first key or two — 回到大廳 on every page but
-     the hall, which is exactly where the row is longest — stood on the bare
-     photograph. So the haze is a bar with soft ends: full strength across the
-     middle, faded at each edge, and an ellipse over it for the vertical
-     falloff, which is what a radial was giving and a bar alone would not. */
-  background:
-    radial-gradient(100% 62% at 50% 50%,
-      rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.34) 58%, transparent 82%),
-    linear-gradient(to right,
-      transparent, rgba(255, 255, 255, 0.72) 9%,
-      rgba(255, 255, 255, 0.78) 88%, transparent);
+  /* Along the row, and still a haze.
+     A single radial fell away before it reached the left end, so the first
+     key or two — 回到大廳, which only exists on the pages where the row is
+     longest — stood on the bare photograph. The first fix stretched a bar
+     across instead, and a bar with a flat middle is not a haze: it read as a
+     white panel with edges. What is here is one wide ellipse, drawn wider
+     than the row so its own falloff is what reaches the ends, at an opacity
+     low enough that the marble is still legible through it. No plateau
+     anywhere: every stop is on its way down. */
+  background: radial-gradient(58% 96% at 50% 50%,
+    rgba(255, 255, 255, 0.56),
+    rgba(255, 255, 255, 0.44) 34%,
+    rgba(255, 255, 255, 0.24) 62%,
+    rgba(255, 255, 255, 0.08) 82%,
+    transparent 96%);
 }
 
 html[data-theme='bright'] .topbar--ghost .topbar__nav a {
@@ -250,13 +253,13 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
   }
   /* a column, so the haze stands up rather than lies down */
   html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
-    inset: -0.9rem -1.3rem -1.1rem -1.5rem;
-    background:
-      radial-gradient(62% 100% at 50% 50%,
-        rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.34) 58%, transparent 82%),
-      linear-gradient(to bottom,
-        transparent, rgba(255, 255, 255, 0.72) 8%,
-        rgba(255, 255, 255, 0.78) 90%, transparent);
+    inset: -1.4rem -2.6rem -1.6rem -3rem;
+    background: radial-gradient(96% 58% at 50% 50%,
+      rgba(255, 255, 255, 0.56),
+      rgba(255, 255, 255, 0.44) 34%,
+      rgba(255, 255, 255, 0.24) 62%,
+      rgba(255, 255, 255, 0.08) 82%,
+      transparent 96%);
   }
   /* A column of four is as tall as the room behind it. Compacted, it clears
      the pieces when they withdraw onto the hall's floor. */
@@ -361,14 +364,14 @@ html[data-theme='bright'] .pn::before {
   content: '';
   position: absolute;
   z-index: -1;
-  inset: -1.1rem -1.6rem -1.3rem -2rem;
+  inset: -1.8rem -3.4rem -2rem -4rem;
   pointer-events: none;
-  background:
-    radial-gradient(78% 78% at 62% 50%,
-      rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.36) 56%, transparent 80%),
-    linear-gradient(to right,
-      transparent, rgba(255, 255, 255, 0.7) 12%,
-      rgba(255, 255, 255, 0.76) 86%, transparent);
+  background: radial-gradient(62% 92% at 50% 50%,
+    rgba(255, 255, 255, 0.56),
+    rgba(255, 255, 255, 0.44) 34%,
+    rgba(255, 255, 255, 0.24) 62%,
+    rgba(255, 255, 255, 0.08) 82%,
+    transparent 96%);
   opacity: 0;
   transition: opacity 0.32s var(--ease);
 }
@@ -823,11 +826,37 @@ html[data-theme='bright'] .after .strip { background: none; border: 0; }
    count. The hall is fixed, so pulling the page up slides them over the
    marble below the plinths without moving the room at all. */
 html[data-theme='bright'] .after { margin-block-start: -11rem; }
+/* The pull is a fixed length; the pieces are placed off the plate, which is
+   sized from the viewport and capped at 62rem — so the band between the drums
+   and the scroll cue is not the same band on every screen, and on four of the
+   seven desktop sizes swept it was too narrow to hold the strip at all. Where
+   it is, the strip goes under the pieces and the cue keeps its place; where it
+   is not, the strip drops until it clears the drums and the cue goes behind
+   it. Over the cue rather than over the statues: the cue is an invitation to
+   scroll, and a row of figures peeking under the pieces is the same
+   invitation. Values from the sweep, not from arithmetic. */
+@media (max-height: 50rem) {
+  html[data-theme='bright'] .after { margin-block-start: -4.6rem; }
+}
+@media (min-width: 112rem) {
+  html[data-theme='bright'] .after { margin-block-start: -7.4rem; }
+}
 html[data-theme='bright'] .after .strip { padding-block-start: 0; }
-html[data-theme='bright'] .after .stats { padding-block: 0 0.5rem; }
+/* Narrow. At the page's full width the six panes were 153px each and the row
+   carried more of the screen than the pieces above it — a caption cannot be
+   wider than the thing it captions. Held to the width of the six drums. */
+html[data-theme='bright'] .after .stats {
+  padding-block: 0 0.5rem;
+  max-inline-size: 38rem;
+  gap: 0.45rem;
+  /* Six across, always. The component's auto-fit has a 6.6rem minimum, and
+     inside 38rem that only fits five — the sixth dropped to a second row and
+     the strip doubled in height. */
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
 html[data-theme='bright'] .after .stats div {
-  padding: 0.42rem 0.7rem 0.38rem;
-  border-radius: 0.7rem;
+  padding: 0.36rem 0.4rem 0.34rem;
+  border-radius: 0.6rem;
   /* Two thirds, not a half. A figure and its label are small type, and behind
      these panes at the top of the page is the video wall — measured, the
      lighter fill left 所主辦機構 at 4.07:1. */
@@ -931,8 +960,13 @@ html[data-theme='bright'] .bh__title { line-height: 1.12; }
   /* The Han tracking further up this file is written at three class-level
      compounds (`:lang(zh)` counts as one) and was still winning here, which is
      what pushed 所主辦機構 out of its pane — the letters, not the type size.
-     Matched with :lang(zh) so this one clears it. */
+     Matched with :lang(zh) so this one clears it — and with :lang(en) for the
+     same reason, against the base .stats dd further down this file, which is
+     the same weight and later in source order. Without it the English labels
+     kept 12.9px and their tracking, ran to three lines, and made the strip
+     tall enough to fall off the bottom of every phone. */
   html[data-theme='bright'] :lang(zh) .stats dd,
+  html[data-theme='bright'] :lang(en) .stats dd,
   html[data-theme='bright'] .stats dd {
     margin-block-start: 0.14rem;
     font-size: clamp(0.4rem, 2.05vw, 0.5rem);
@@ -954,10 +988,15 @@ html[data-theme='bright'] .bh__title { line-height: 1.12; }
     hyphens: auto;
     overflow-wrap: anywhere;
   }
-  html[data-theme='bright'] .after { margin-block-start: -6.6rem; }
-  /* English labels take two lines where Han takes one, so the strip is that
-     much taller; a rem more of lift on the English pages only. */
-  html[data-theme='bright']:lang(en) .after { margin-block-start: -7.6rem; }
+  /* Four rem, and it was six and a half.
+     The pull is a fixed length and the pieces are placed off the plate, which
+     is sized from the viewport — so the two drift apart as the screen changes
+     and at 360x740 the strip had climbed into the bottom row of drums. Swept
+     across seven phone sizes in both languages: at 4rem the smallest clearance
+     is on a 360x740 English page and the strip is still above the fold on all
+     of them. Both languages take the same figure now that their labels are
+     the same one line. */
+  html[data-theme='bright'] .after { margin-block-start: -4rem; }
 }
 
 /* At 320px the English labels hyphenate hard — "institutions" over three
