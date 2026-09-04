@@ -43,6 +43,16 @@
  * And each band stops short of the front, so the device sits in a clearing
  * rather than on a line. 17.5° each side of centre is the 140% of the device's
  * width that the drawn version used, at the size the hall draws it.
+ *
+ * "The front" is the camera's, not the model's. Every hall, the gallery pages
+ * and the poster renderer look at these from camera-orbit 35deg, so the point
+ * of the drum facing the viewer — and therefore the point the device is drawn
+ * over, since the device is centred in the frame — is the one at 35° round the
+ * axis, not the one at zero. Centring the clearing on the model's +Z put it a
+ * third of a turn to the left of the device, with the bands running straight
+ * behind it. FRONT below must track CAMERA in HallBright.astro,
+ * GalleryPage.astro, LecturePage.astro, HallModels.astro and
+ * render-posters.mjs; they all carry the same '35deg 98deg 1.55m'.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -62,19 +72,22 @@ const MIDDLE = 0.13806;
 const STEP = 0.016631;
 const HEIGHTS = [MIDDLE - STEP, MIDDLE, MIDDLE + STEP];
 
-/** the clearing at the front, in degrees each side of the axis */
+/** where the camera stands, in degrees round the axis — see the note above */
+const FRONT = 35;
+/** the clearing there, in degrees each side of it */
 const GAP = 21;
 const SEGMENTS = 160;     // round enough that the silhouette has no facets
 
 function band(h) {
-  const a0 = (GAP * Math.PI) / 180;
-  const a1 = 2 * Math.PI - a0;
+  const f = (FRONT * Math.PI) / 180;
+  const a0 = f + (GAP * Math.PI) / 180;
+  const a1 = f + 2 * Math.PI - (GAP * Math.PI) / 180;
   const n = SEGMENTS;
   const pos = [], nrm = [], idx = [];
   for (let i = 0; i <= n; i++) {
     /* from one side of the clearing round the back to the other */
     const a = a0 + ((a1 - a0) * i) / n;
-    const cx = Math.sin(a), cz = Math.cos(a);      // 0 rad faces the camera
+    const cx = Math.sin(a), cz = Math.cos(a);      // FRONT rad faces the camera
     const x = (R + PROUD) * cx, z = (R + PROUD) * cz;
     pos.push(x, h + HALF, z, x, h - HALF, z);
     nrm.push(cx, 0, cz, cx, 0, cz);
@@ -123,4 +136,4 @@ await io.write(OUT, doc);
 const kb = fs.statSync(OUT).size / 1024;
 console.log(`${OUT}  ${kb.toFixed(0)} KB  — three bands at ` +
   HEIGHTS.map((h) => h.toFixed(4)).join(', ') +
-  `, ${GAP}° clear each side of the front`);
+  `, ${GAP}° clear each side of ${FRONT}°, which is where the camera stands`);

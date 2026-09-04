@@ -84,6 +84,7 @@ const figures = [
           label={featured.video.guide ? t('lec.guide') : t('lec.lecture')}
           playHint={t('lec.playHint')}
           eager
+          skin="v2"
         />
       ) : (
         <div class="feature__date" aria-hidden="true">
@@ -114,7 +115,15 @@ const figures = [
   <section class="latest wrap" aria-labelledby="latest-h">
     <div class="section-head">
       <h2 id="latest-h" class="section-h">{t('hall.latest')}</h2>
-      <a class="more museum-btn museum-btn--nav" href={browse(lang)}>{t('nav.all')} <span aria-hidden="true">→</span></a>
+      {/* The home page's one primary. Everything else on it is a destination
+          the reader can reach from the hall or the bar; this is the single
+          action the page is asking for, which is what the v2 kit reserves
+          --primary for. The `more` class is gone with it: it painted the
+          link gold and hung a white halo behind it, both of which were for
+          bare text lying on the hall, not for a button. */}
+      <a class="museum-glass-btn museum-glass-btn--primary" href={browse(lang)}>
+        <span>{t('nav.all')}</span><span aria-hidden="true">→</span>
+      </a>
     </div>
     <ul class="grid" role="list">
       {latest.map((rec) => <li><LectureCard lang={lang} rec={rec} /></li>)}

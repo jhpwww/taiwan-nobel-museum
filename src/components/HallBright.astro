@@ -3,15 +3,14 @@
  * HallBright.astro — the bright museum's entrance.
  *
  * A domed neoclassical rotunda — white marble, a glazed dome, a ring of arched
- * windows, two red banners — with a curved video wall standing in the apse and
- * six gold pieces set out on the floor in front of it.
+ * windows, two red banners — with six gold pieces set out on the floor of it.
  *
- * The hall is a photograph, so the wall's placement is measured, not guessed.
- * It has to be: the wall is positioned in per cent of a plate that carries the
- * picture's own aspect ratio, so picture and wall crop together and the wall
- * never drifts off the architecture.
+ * The hall is a photograph, and what stands in it is placed in per cent of a
+ * plate that carries the picture's own aspect ratio, so a crop moves the
+ * picture and its contents together and nothing drifts off the architecture.
  *
- * Finding the eye level takes a method a Hough transform cannot give. In a
+ * The eye level is measured, and finding it takes a method a Hough transform
+ * cannot give. In a
  * rotunda most of what such a fit finds are dome ribs, and those converge on
  * the dome's own axis rather than the room's horizon. But a rotunda gives up
  * its horizon another way: its 'horizontal' lines are circles, and a circle
@@ -22,9 +21,11 @@
  * 69.2% of the plate, on the foot of the colonnade and level with the door's
  * threshold. See scripts/crop-hall.py.
  *
- * So the wall stands on that top step, its base exactly on the horizon, rising
- * to just under the doorway's arch — which is where a wall of screens would
- * stand in this room, and leaves the colonnade and the dome above it intact.
+ * A curved wall of thirty-six video panels stood in the apse, on that same
+ * measured horizon, until 2026-09-04. It is out at the owner's request, for a
+ * different treatment; the pipeline that fed it is left standing for whatever
+ * replaces it — scripts/make-backdrop-clips.py, src/data/backdrop.json and
+ * the backdrop-clips workflow.
  *
  * No drifting embers, and no dust either. Embers belonged to a dark vault and
  * read as dirt on marble; motes are invisible against a hall this bright. The
@@ -34,7 +35,6 @@ import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, catNameAlt, categoryList } from '../data/catalog';
 import credits from '../../data/model-credits.json';
-import clips from '../data/backdrop.json';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
@@ -118,115 +118,19 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
  * Everything below is in per cent of it.
  */
 const PLATE = { w: 836, h: 470 };
-const VP = { x: 50.0, y: 69.2 };   // the horizon, on the room's axis
-
-/* The wall, built in container units of the plate rather than px — so it is
-   the same wall in the same place at every viewport, which a px perspective is
-   not. Nine columns 13° apart wrap 104°, matching how far the reference wall
-   turns away at its ends. */
-const COLS = 9;
-const ROWS = 4;
-const SPREAD = 13;
-const PERSP = 34;      // cqw. Short, because the photograph is a wide-angle shot
-const DEPTH = 35;      // cqw back from the eye
-/* the chord one 13° step subtends at that depth, less a bezel's worth, so the
-   panels meet edge to edge with daylight between them */
-const PANEL = 7.9;
-
-/* How far above the horizon the foot of the wall lands, in cqw.
- *
- * Nought would be the honest answer: the top step is at eye level, so a wall
- * standing on it has its foot exactly on the horizon whatever its distance.
- * But the statues and their labels are laid out by the page, not by the room,
- * and they sit lower than the photograph's floor — a wall whose foot lands
- * among them reads as a band ruled across the labels rather than as a wall
- * behind objects. So it is raised, as a wall on a low stage would be, until it
- * clears them; the perspective itself is untouched. */
-const RISE = 7.2;
-
-/* Scaling the panel, the depth and the perspective by one factor scales what
-   is drawn by exactly that factor and nothing else — same curve, same
-   foreshortening, same wall, smaller. Which is what a phone needs: the plate
-   has to be nearly three times the viewport's width to cover it, so a wall
-   that is a third of the plate runs off both edges of the screen. */
-function wall(k: number, rise: number) {
-  const panel = PANEL * k, depth = DEPTH * k, persp = PERSP * k;
-  const scale = persp / (persp + depth);        // how far off the eye shrinks it
-  const rowH = panel * (9 / 16) * 1.04;         // cqw between row centres
-  return {
-    panel: panel.toFixed(2),
-    z: (-depth).toFixed(2),
-    persp: persp.toFixed(2),
-    /* the rows are centred on the anchor; drop them by half the wall so its
-       foot lands on the horizon, then lift it by the rise */
-    lift: (-ROWS / 2 - rise / (rowH * scale)).toFixed(3),
-  };
-}
-const WIDE = wall(1, RISE);
-const NARROW = wall(0.62, 2.5);
-
-const stills = lectures
-  .filter((l) => l.video.guide || l.video.lecture)
-  .map((l) => `https://i.ytimg.com/vi/${l.video.guide ?? l.video.lecture}/mqdefault.jpg`);
-
-type Clip = { id: string; webm: string; mp4: string };
-const reel = (clips as Clip[]).map((c) => ({ webm: asset(c.webm), mp4: asset(c.mp4) }));
-
-const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
-  const col = i % COLS;
-  const row = Math.floor(i / COLS);
-  return {
-    deg: -((COLS - 1) / 2) * SPREAD + col * SPREAD,
-    row: row - (ROWS - 1) / 2,
-    a: stills[i % stills.length],
-    b: stills[(i + 7) % stills.length],
-    delay: ((i * 2.3) % 11).toFixed(1),
-    clip: reel.length ? reel[i % reel.length] : null,
-  };
-});
 ---
 
 <section class="bh" aria-labelledby="hall-title">
   <div class="bh__scene" aria-hidden="true">
     {/* the plate holds the photograph's own aspect ratio; everything inside is
-        placed in per cent of it, so a crop moves picture and screens together */}
-    {/* the vanishing point travels to the script here — frontmatter constants
-        do not reach a client module */}
-    <div class="bh__plate" data-vp-x={VP.x} data-vp-y={VP.y}>
+        placed in per cent of it, so a crop moves picture and contents together */}
+    <div class="bh__plate">
       <picture>
         <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
         <img class="bh__photo" src={asset('media/bright-hall.jpg')} alt=""
              width={PLATE.w * 2} height={PLATE.h * 2} fetchpriority="high" decoding="async" />
       </picture>
-
-      {/* the curved wall, standing on the top step */}
-      {/* both sets of numbers are handed to the stylesheet, which picks one by
-          width — an inline `--persp` could not be overridden by a media query */}
-      <div class="bh__wallwrap"
-           style={`--vp-x:${VP.x}%; --vp-y:${VP.y}%;
-                   --persp-w:${WIDE.persp}cqw; --persp-n:${NARROW.persp}cqw`}>
-        <div class="bh__wall"
-             style={`--panel-w:${WIDE.panel}cqw; --z-w:${WIDE.z}cqw; --lift-w:${WIDE.lift};
-                     --panel-n:${NARROW.panel}cqw; --z-n:${NARROW.z}cqw; --lift-n:${NARROW.lift}`}>
-          {screens.map((s) => (
-            <span class="bh__screen" style={`--deg:${s.deg}deg; --row:${s.row}; --delay:${s.delay}s`}>
-              {s.clip ? (
-                <video class="bh__vid" muted loop playsinline preload="none"
-                       data-bh-clip={JSON.stringify(s.clip)} width="320" height="180"></video>
-              ) : (
-                <>
-                  <img src={s.a} alt="" loading="lazy" decoding="async" width="320" height="180" />
-                  <img class="b" src={s.b} alt="" loading="lazy" decoding="async" width="320" height="180" />
-                </>
-              )}
-            </span>
-          ))}
-        </div>
-        <span class="bh__glow"></span>
-      </div>
-
     </div>
-
   </div>
 
   {/* Everything the hall stands still with, on one fixed layer.
@@ -407,69 +311,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
     inline-size: 100%; block-size: 100%;
     object-fit: cover;
   }
-
-  /* The anchor is the measured horizon, and because the wrapper is a point
-     the perspective origin lands on it too — which is the whole trick. Every
-     panel is then drawn from the same eye the photograph was taken with. */
-  .bh__wallwrap {
-    position: absolute;
-    inset-inline-start: var(--vp-x);
-    inset-block-start: var(--vp-y);
-    perspective: var(--persp-w);
-    transform: translate(-50%, -50%);
-  }
-  .bh__wall {
-    position: relative; inline-size: 0; block-size: 0;
-    transform-style: preserve-3d;
-    --panel: var(--panel-w);
-    --z: var(--z-w);
-    --lift: var(--lift-w);
-  }
-  .bh__screen {
-    position: absolute;
-    /* sized against the plate, not the viewport, so the wall keeps its place
-       in the architecture at every crop */
-    inline-size: var(--panel);
-    aspect-ratio: 16 / 9;
-    margin-inline-start: calc(var(--panel) / -2);
-    margin-block-start: calc(var(--panel) * -9 / 32);
-    /* rotateY leaves the Y axis alone, so the lift is as true in the room as
-       the rows are — the wall drops, it does not tilt */
-    transform:
-      rotateY(var(--deg))
-      translateZ(var(--z))
-      translateY(calc((var(--row) + var(--lift)) * 104%));
-    background: #0d1013;
-    border: 1px solid #14181c;
-    border-radius: 1px;
-    overflow: hidden;
-    /* white marble behind a black screen wants a hard edge, not a glow */
-    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.62),
-                0 1cqw 2cqw -0.6cqw rgba(52, 40, 24, 0.28);
-  }
-  .bh__screen img, .bh__vid {
-    position: absolute; inset: 0;
-    inline-size: 100%; block-size: 100%; object-fit: cover;
-  }
-  .bh__screen .b { opacity: 0; animation: bhswap 22s var(--delay) ease-in-out infinite; }
-  @keyframes bhswap { 0%, 44% { opacity: 0 } 52%, 94% { opacity: 1 } 100% { opacity: 0 } }
-
-  /* The light the screens throw back. On a dark plate this could be strong and
-     blue; on white marble anything blue reads as a stain, so it is mostly the
-     shadow the wall casts down onto the top step, with only a trace of screen
-     light above it. Centred on the wall, which sits above the anchor. */
-  .bh__glow {
-    position: absolute; inset-inline-start: 50%; inset-block-start: -6cqw;
-    inline-size: 62cqw; block-size: 30cqw;
-    translate: -50% -50%;
-    background:
-      radial-gradient(52% 56% at 50% 44%, rgba(126, 158, 196, 0.16), transparent 74%),
-      radial-gradient(46% 40% at 50% 96%, rgba(74, 58, 36, 0.20), transparent 76%);
-    filter: blur(10px);
-    pointer-events: none;
-  }
-
-  :global(html[data-motion='off']) .bh__screen .b { animation: none; }
 
   /* ---------- the stage ----------
      The same box the hall used to be, but out of the flow, so the name, the
@@ -841,11 +682,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
        to be told to leave */
     .bh__plinths[data-state='back'] .bh__face { opacity: 0; transition: opacity 0.5s var(--ease); }
 
-    /* The same wall at 0.62 — see the note by wall() for why the factor is
-       enough on its own. Nothing else about the wall changes. */
-    .bh__wallwrap { perspective: var(--persp-n); }
-    .bh__wall { --panel: var(--panel-n); --z: var(--z-n); --lift: var(--lift-n); }
-
     .bh__foot { gap: 0.3rem; inset-block-end: 0.45rem; }
     .bh__cue-rule { block-size: 0.95rem; }
     .bh__cue { gap: 0.16rem; padding-block-start: 0; }
@@ -971,22 +807,4 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
   /* model-viewer has no animation to play until the GLB is in */
   for (const v of viewers) v.addEventListener('load', applyRotation);
 
-  /* Only the middle of the wall gets a decoder if clips ever land — thirty-six
-     simultaneous videos is not a backdrop, it is a stress test. */
-  const screens = [...document.querySelectorAll<HTMLVideoElement>('.bh__vid')];
-  if (screens.length && motionOn()) {
-    const mid = screens.length / 2;
-    screens.forEach((v, i) => {
-      if (Math.abs(i - mid) > 4) return;
-      const c = JSON.parse(v.dataset.bhClip ?? 'null');
-      if (!c) return;
-      const webm = document.createElement('source');
-      webm.src = c.webm; webm.type = 'video/webm';
-      const mp4 = document.createElement('source');
-      mp4.src = c.mp4; mp4.type = 'video/mp4';
-      v.append(webm, mp4);
-      v.load();
-      v.play().catch(() => {});
-    });
-  }
 </script>
