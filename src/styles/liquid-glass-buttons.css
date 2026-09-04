@@ -1,39 +1,40 @@
 /* ============================================================
-   liquid-glass-buttons.css — the v2 button kit, as supplied
+   liquid-glass-buttons.css — the borderless kit, as supplied
    ============================================================
-   From buttons/v2/nobel-museum-buttons-simple.zip. Kept as close to the
-   file the designer sent as the project allows; the two departures are
-   both recorded here rather than left to be discovered.
+   From buttons/v2/nobel-museum-buttons-borderless-v2.zip, which replaces
+   the rimmed kit that came before it. Kept as close to the file the
+   designer sent as the project allows; the one departure is recorded here
+   rather than left to be discovered.
 
-   1. The five custom properties were written on `:root`. They are now on
-      `.museum-glass-btn` instead. buttons.css — the v1 system, which still
-      carries every other button on the site — declares the same five names
-      at `:root`, with a 10px blur against this file's 9px. Two `:root`
-      blocks do not coexist: the later one wins for the whole document, so
-      loading this at `:root` would have quietly restyled every v1 button on
-      every page. On the class, each system keeps its own numbers and this
-      preview changes exactly the two buttons it is meant to.
+   The kit's rule is that nothing may add a stroke, an outline, a gold frame
+   or a second contour — the relief is the glass highlight and a short soft
+   shadow, and nothing else. src/styles/buttons.css, which loads after this
+   file, exists to hold that line against the components: every element these
+   classes land on carries a 1px border from the dark site, written scoped,
+   and Astro stamps its scope attribute on every compound of a selector, so a
+   component's rule out-specifies a plain class by roughly the number of
+   elements in it.
 
-   2. Nothing about the paths. `styles/` and `assets/` are siblings here as
-      they are in the ZIP — src/styles/ and src/assets/ — so the kit's own
-      `url("../assets/…")` resolves untouched, and Vite fingerprints both
-      WebPs and applies each build's base path for us. Neither WebP is in
-      public/: a stylesheet cannot write `/taiwan-nobel-museum/bright/` in
-      one build and `/taiwan-nobel-museum/` in the other.
+   Paths: `styles/` and `assets/` are siblings here as they are in the ZIP —
+   src/styles/ and src/assets/ — so the kit's own `url("../assets/…")`
+   resolves untouched, and Vite fingerprints both WebPs and applies each
+   build's base path. Neither WebP is in public/: a stylesheet cannot write
+   /taiwan-nobel-museum/bright/ in one build and /taiwan-nobel-museum/ in
+   the other.
 
-   3. One selector added, at the chip's pressed rule — see the note there.
+   The :root block matters beyond the buttons. bright.css reads
+   --museum-ink, --museum-glass-blur, --museum-ease and --museum-gold-text
+   for the search field, the cards and the topbar; when the previous kit's
+   properties were moved off :root those rules silently stopped resolving
+   and the browse search lost its blur entirely. They stay on :root.
 
-   The bevel was briefly drawn thinner, at 4px/6px and 3px/5px. The owner
-   looked at it on the site and preferred the kit's own weight, so the
-   supplied widths are back and are not to be changed again without asking:
-   the frame is the designer's decision, not this project's.
-
-   Applied everywhere as of 2026-09-04: the bar, every onward and external
-   link, the study tools, the browse filters and every play mark. What is
-   left in buttons.css is integration only, and it loads after this file.
+   The one departure: a selector added at the chip's pressed rule — see the
+   note there. Nothing else, and in particular no number: the previous kit's
+   frame widths were retuned here once and the owner preferred the file as
+   sent. Values in this file are the designer's decision.
    ============================================================ */
 
-.museum-glass-btn {
+:root {
   --museum-ink: #2b2523;
   --museum-gold-text: #6f5111;
   --museum-red: #a9322b;
@@ -61,8 +62,8 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
   backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
-  background: rgba(247, 236, 205, .18);
-  box-shadow: 0 10px 24px -20px rgba(45, 36, 24, .55);
+  background: rgba(255, 255, 255, .045);
+  box-shadow: 0 12px 22px -16px rgba(43, 34, 22, .46);
   transition:
     transform 160ms var(--museum-ease),
     filter 160ms var(--museum-ease),
@@ -74,7 +75,7 @@
   z-index: 1;
 }
 
-/* A single 9-slice WebP skin provides the specular liquid-glass detail. */
+/* The v2 WebP has no drawn rim; 9-slice only protects the small corners. */
 .museum-glass-btn--primary::before,
 .museum-glass-btn--nav::before {
   content: "";
@@ -83,8 +84,8 @@
   inset: 0;
   border-style: solid;
   border-color: transparent;
-  border-image-source: url("../assets/glass-button-skin.webp");
-  border-image-slice: 72 120 fill;
+  border-image-source: url("../assets/glass-button-skin-borderless.webp");
+  border-image-slice: 36 54 fill;
   border-image-repeat: stretch;
   pointer-events: none;
 }
@@ -93,34 +94,34 @@
   min-height: 50px;
   padding: .78rem 1.45rem;
   border-radius: 9px;
-  background: rgba(234, 195, 98, .10);
-  box-shadow: 0 14px 28px -21px rgba(61, 43, 15, .64);
+  background: rgba(255, 250, 239, .035);
+  box-shadow: 0 14px 25px -17px rgba(52, 40, 24, .48);
 }
 
 .museum-glass-btn--primary::before {
-  border-width: 16px 27px;
-  border-image-width: 16px 27px;
-  opacity: .92;
+  border-width: 7px 11px;
+  border-image-width: 7px 11px;
+  opacity: .94;
 }
 
 .museum-glass-btn--nav {
   min-height: 38px;
   padding: .56rem 1rem;
   border-radius: 7px;
-  background: rgba(255, 255, 255, .18);
-  box-shadow: 0 10px 22px -20px rgba(44, 37, 28, .52);
+  background: rgba(255, 255, 255, .035);
+  box-shadow: 0 10px 19px -15px rgba(44, 37, 28, .38);
 }
 
 .museum-glass-btn--nav::before {
-  border-width: 12px 21px;
-  border-image-width: 12px 21px;
-  opacity: .56;
-  filter: saturate(.66) brightness(1.065);
+  border-width: 5px 8px;
+  border-image-width: 5px 8px;
+  opacity: .62;
+  filter: saturate(.45) brightness(1.02);
 }
 
 .museum-glass-btn--nav[aria-current="page"]::before {
-  opacity: .73;
-  filter: saturate(.82) brightness(1.035);
+  opacity: .80;
+  filter: saturate(.55) brightness(1.025);
 }
 
 .museum-glass-btn--chip {
@@ -159,9 +160,9 @@
   padding: 0;
   border-radius: 50%;
   background:
-    url("../assets/glass-play-skin.webp") center / contain no-repeat,
-    rgba(236, 203, 121, .10);
-  box-shadow: 0 15px 30px -19px rgba(28, 23, 17, .72);
+    url("../assets/glass-play-skin-borderless.webp") center / contain no-repeat,
+    rgba(255, 255, 255, .035);
+  box-shadow: 0 13px 22px -14px rgba(28, 23, 17, .58);
 }
 
 .museum-glass-btn--play svg {
@@ -174,7 +175,7 @@
 .museum-glass-btn:hover {
   transform: translateY(-1px);
   filter: brightness(1.035) saturate(1.025);
-  box-shadow: 0 15px 29px -20px rgba(45, 34, 21, .65);
+  box-shadow: 0 16px 27px -17px rgba(45, 34, 21, .58);
 }
 
 .museum-glass-btn:active {
