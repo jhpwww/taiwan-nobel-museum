@@ -147,10 +147,20 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
   content: '';
   position: absolute;
   z-index: -1;
-  inset: -1.5rem -2.2rem -1.7rem -3rem;
+  inset: -1.5rem -2.2rem -1.7rem -3.2rem;
   pointer-events: none;
-  background: radial-gradient(62% 66% at 62% 50%,
-    rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.5) 46%, transparent 78%);
+  /* Along the row, not around a point. A single radial fell away before it
+     reached the left end and the first key or two — 回到大廳 on every page but
+     the hall, which is exactly where the row is longest — stood on the bare
+     photograph. So the haze is a bar with soft ends: full strength across the
+     middle, faded at each edge, and an ellipse over it for the vertical
+     falloff, which is what a radial was giving and a bar alone would not. */
+  background:
+    radial-gradient(100% 62% at 50% 50%,
+      rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.34) 58%, transparent 82%),
+    linear-gradient(to right,
+      transparent, rgba(255, 255, 255, 0.72) 9%,
+      rgba(255, 255, 255, 0.78) 88%, transparent);
 }
 
 html[data-theme='bright'] .topbar--ghost .topbar__nav a {
@@ -240,9 +250,13 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
   }
   /* a column, so the haze stands up rather than lies down */
   html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
-    inset: -1rem -1.4rem -1.2rem -1.8rem;
-    background: radial-gradient(70% 58% at 66% 46%,
-      rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.5) 46%, transparent 78%);
+    inset: -0.9rem -1.3rem -1.1rem -1.5rem;
+    background:
+      radial-gradient(62% 100% at 50% 50%,
+        rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.34) 58%, transparent 82%),
+      linear-gradient(to bottom,
+        transparent, rgba(255, 255, 255, 0.72) 8%,
+        rgba(255, 255, 255, 0.78) 90%, transparent);
   }
   /* A column of four is as tall as the room behind it. Compacted, it clears
      the pieces when they withdraw onto the hall's floor. */
@@ -336,6 +350,30 @@ html[data-theme='bright'] .card:hover {
 }
 
 /* ---------- the standing controls ---------- */
+
+/* The same haze as the bar's. These two stand over whatever the page has
+   reached — a card, a photograph, the room's own floor — and a transparent
+   key on a busy ground is a key that cannot be read. It goes on .pn rather
+   than on each button, so the pair share one field of light instead of
+   carrying two overlapping ones. */
+html[data-theme='bright'] .pn { position: fixed; }
+html[data-theme='bright'] .pn::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -1.1rem -1.6rem -1.3rem -2rem;
+  pointer-events: none;
+  background:
+    radial-gradient(78% 78% at 62% 50%,
+      rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.36) 56%, transparent 80%),
+    linear-gradient(to right,
+      transparent, rgba(255, 255, 255, 0.7) 12%,
+      rgba(255, 255, 255, 0.76) 86%, transparent);
+  opacity: 0;
+  transition: opacity 0.32s var(--ease);
+}
+/* it arrives with the keys, and there is nothing to light when they are away */
+html[data-theme='bright'] .pn:has(.pn__b.is-on)::before { opacity: 1; }
 
 /* ---------- text on filled marks ----------
    The dark theme fills these with gold and writes on them in near-black. Here
@@ -778,9 +816,18 @@ html[data-theme='bright'] .after .feature__grid .vf__btn {
    Each stands on its own small pane rather than in a ruled band, so the row
    reads as six things counted and not as one strip of chrome. */
 html[data-theme='bright'] .after .strip { background: none; border: 0; }
+
+/* Up under the pieces, where they belong.
+   The figures are a caption on the row of awards, not a section of the page:
+   at the foot of the spacer they were a screen away from the thing they
+   count. The hall is fixed, so pulling the page up slides them over the
+   marble below the plinths without moving the room at all. */
+html[data-theme='bright'] .after { margin-block-start: -11rem; }
+html[data-theme='bright'] .after .strip { padding-block-start: 0; }
+html[data-theme='bright'] .after .stats { padding-block: 0 0.5rem; }
 html[data-theme='bright'] .after .stats div {
-  padding: 0.7rem 0.9rem 0.6rem;
-  border-radius: 0.85rem;
+  padding: 0.42rem 0.7rem 0.38rem;
+  border-radius: 0.7rem;
   /* Two thirds, not a half. A figure and its label are small type, and behind
      these panes at the top of the page is the video wall — measured, the
      lighter fill left 所主辦機構 at 4.07:1. */
@@ -859,6 +906,67 @@ html[data-theme='bright'] .bh__cue-txt { letter-spacing: 0.2em; text-indent: 0.2
    is where it shows. */
 html[data-theme='bright'] :lang(zh) :is(h1, h2, h3) { line-height: 1.28; }
 html[data-theme='bright'] .bh__title { line-height: 1.12; }
+
+/* A phone gets one row of six, never two of three: the strip has to be in
+   the first screenful with the pieces, and a second row would push it out.
+   Fixed columns rather than auto-fit, because auto-fit's minimum is what
+   wrapped it; the type is small enough that six fit at 320px. */
+@media (max-width: 48rem) {
+  html[data-theme='bright'] .after .stats {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.2rem;
+    padding-block: 0 0.4rem;
+  }
+  html[data-theme='bright'] .after .stats div {
+    padding: 0.34rem 0.1rem 0.3rem;
+    border-radius: 0.5rem;
+  }
+  /* Sized off the viewport, not fixed: six panes across 320px are 42px of
+     usable width and 所主辦機構 is five characters wide. */
+  html[data-theme='bright'] .stats dt { font-size: clamp(0.82rem, 4.1vw, 1rem); }
+  /* One line each, or the six panes stop being a row: 所主辦機構 is five Han
+     characters and was the only one that wrapped, which made its pane taller
+     than the other five. No tracking here — at this size it is what pushed
+     the word over the edge. */
+  /* The Han tracking further up this file is written at three class-level
+     compounds (`:lang(zh)` counts as one) and was still winning here, which is
+     what pushed 所主辦機構 out of its pane — the letters, not the type size.
+     Matched with :lang(zh) so this one clears it. */
+  html[data-theme='bright'] :lang(zh) .stats dd,
+  html[data-theme='bright'] .stats dd {
+    margin-block-start: 0.14rem;
+    font-size: clamp(0.4rem, 2.05vw, 0.5rem);
+    letter-spacing: 0;
+    text-indent: 0;
+    line-height: 1.2;
+  }
+  /* Han only. Five characters fit on one line at this size and 所主辦機構 was
+     the one that wrapped; English cannot take the same rule — "host
+     institutions" is two words and nowrap pushed the whole row 47px past the
+     viewport on /en/. It wraps, and the six panes stretch to match. */
+  html[data-theme='bright'] :lang(zh) .stats dd { white-space: nowrap; }
+  /* And English is allowed to break a word rather than push the row off the
+     screen: "interviews" and "institutions" are each wider than a sixth of a
+     320px phone, and a hyphen inside a 10px caption costs less than a
+     horizontal scrollbar. Hyphenation first, an anywhere-break as the
+     fallback where the dictionary has nothing to say. */
+  html[data-theme='bright'] :lang(en) .stats dd {
+    hyphens: auto;
+    overflow-wrap: anywhere;
+  }
+  html[data-theme='bright'] .after { margin-block-start: -6.6rem; }
+  /* English labels take two lines where Han takes one, so the strip is that
+     much taller; a rem more of lift on the English pages only. */
+  html[data-theme='bright']:lang(en) .after { margin-block-start: -7.6rem; }
+}
+
+/* At 320px the English labels hyphenate hard — "institutions" over three
+   lines — and a three-column fallback was tried instead. It reads better and
+   it does not fit: three by two is 126px tall and would have to start above
+   the plinths to clear the fold. The row was asked to be visible without
+   scrolling, so the row is what is kept, and the narrowest English phone pays
+   for it in hyphens. Everything from 360px up takes two lines at most. */
+
 
 /* Figures are Latin inside Han sentences, so they get lining tabular digits
    and a little tracking of their own; without it 31 and 74 sit at different
