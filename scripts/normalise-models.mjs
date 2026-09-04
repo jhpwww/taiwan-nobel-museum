@@ -42,7 +42,10 @@ const OUT = 'public/assets/models';
  * the factor it multiplies changes. The base's materials are renamed on the
  * way in so the pass can tell them from the piece's own.
  */
-const BASE = `${SRC}/_base.glb`;
+/* The drum with its three gold bands cut into it — see
+   scripts/build-base-rings.mjs. The plain _base.glb it is built from is left
+   exactly as its author drew it. */
+const BASE = `${SRC}/_base-ringed.glb`;
 const BASE_PREFIX = 'base__';
 const BASE_TOP = 0.178;      // where the drum's top face sits, in its own units
 const BASE_MARBLE = `${BASE_PREFIX}white_marble`;
@@ -502,7 +505,7 @@ async function addBase(doc, io, cat) {
      the rotation, where the axes mean what they look like. */
   const parts = new Map();
   const find = (n, parent) => { const k = n.getName() || '';
-    if (k === 'marble_column' || k === 'gold_inlay_ring') parts.set(k, [n, parent]);
+    if (k === 'marble_column' || k === 'gold_inlay_ring' || k.startsWith('gold_band_')) parts.set(k, [n, parent]);
     n.listChildren().forEach((c) => find(c, n)); };
   scene.listChildren().forEach((n) => find(n, scene));
 
@@ -521,11 +524,16 @@ async function addBase(doc, io, cat) {
   wrap(parts.get('marble_column'),
        [1, 1 - DRUM_TRIM, 1], BASE_TOP * DRUM_TRIM);
 
-  /* The drum's own ring is dropped: the hall draws three in its place, and
-     they have to line up with the logo on the plinth, which is laid out by the
-     page rather than by the model. See .bh__rings in HallBright. */
+  /* The drum's original ring is dropped — it sits a thousandth *inside* the
+     marble and never showed. The three that replace it are cut into the drum
+     by build-base-rings.mjs, and they ride the same wrapper the column does,
+     so whatever is done to the marble is done to the bands on it. */
   const ringEntry = parts.get('gold_inlay_ring');
   if (ringEntry) ringEntry[1].removeChild(ringEntry[0]);
+  for (const k of ['gold_band_1', 'gold_band_2', 'gold_band_3']) {
+    const e = parts.get(k);
+    if (e) wrap(e, [1, 1 - DRUM_TRIM, 1], BASE_TOP * DRUM_TRIM);
+  }
 
   // the base brought its own buffer, and a GLB may only carry one
   const [keep, ...rest] = doc.getRoot().listBuffers();

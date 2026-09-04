@@ -205,7 +205,7 @@ export const ui = {
     'special.panel': '對談',
     'special.exhibition': '特展',
 
-    'about.title': '關於本站',
+    'about.title': '關於本館',
   },
   en: {
     'site.title': 'Nobel Lecture Museum',
@@ -405,7 +405,7 @@ export const ui = {
     'special.panel': 'In conversation',
     'special.exhibition': 'Exhibition',
 
-    'about.title': 'About this site',
+    'about.title': 'About the museum',
   },
 } as const;
 

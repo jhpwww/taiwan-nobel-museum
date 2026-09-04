@@ -276,9 +276,6 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
           </model-viewer>
           {/* cut into the drum, where a museum puts the label — the plinth is
               part of the model, so the type is laid over its face */}
-          {/* three gold rings round the drum, drawn to the logo's own height —
-              filled in by the script, since only it knows where that is */}
-          <svg class="bh__rings" aria-hidden="true" focusable="false"></svg>
           <span class="bh__face" aria-hidden="true">
             <img class="bh__mark" src={c.mark} alt="" width="192" height="192"
                  loading="lazy" decoding="async" />
@@ -840,8 +837,9 @@ const screens = Array.from({ length: COLS * ROWS }, (_, i) => {
       block-size: var(--piece-back-h);
     }
     .bh__plinths[data-state='back'] .bh__n { display: none; }
-    .bh__plinths[data-state='back'] .bh__face,
-    .bh__plinths[data-state='back'] .bh__rings { opacity: 0; transition: opacity 0.5s var(--ease); }
+    /* the bands are part of the drum now and go with it; only the type has
+       to be told to leave */
+    .bh__plinths[data-state='back'] .bh__face { opacity: 0; transition: opacity 0.5s var(--ease); }
 
     /* The same wall at 0.62 — see the note by wall() for why the factor is
        enough on its own. Nothing else about the wall changes. */

@@ -40,12 +40,12 @@ const kinds = videoCounts();
 const nLaureates = new Set(lectures.map((l) => l.laureate.en)).size;
 const nHosts = new Set(lectures.map((l) => l.event.host_en)).size;
 const figures = [
-  { n: lectures.length, label: t('hall.stat.lectures') },
   { n: nLaureates,      label: t('hall.stat.laureates') },
-  { n: nHosts,          label: t('hall.stat.hosts') },
-  { n: nVideos,         label: t('hall.stat.videos') },
+  { n: lectures.length, label: t('hall.stat.lectures') },
   { n: kinds.guide,     label: t('hall.stat.guide') },
+  { n: nVideos,         label: t('hall.stat.videos') },
   { n: kinds.record,    label: t('hall.stat.interview') },
+  { n: nHosts,          label: t('hall.stat.hosts') },
 ];
 ---
 

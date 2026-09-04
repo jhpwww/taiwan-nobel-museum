@@ -100,121 +100,21 @@ function split(line: HTMLElement) {
 }
 
 /**
- * Three gold rings round the drum, set to the logo rather than to the model.
+ * Bend the label onto the drum.
  *
- * They replace the single ring the base model carried, which sat under the
- * cap and had no relation to anything on the plinth. These take their height
- * from the logo itself — one on its centre line and one a quarter of its
- * height above and below — so they cannot drift when the type is resized.
- *
- * Each is a horizontal circle on the drum, so it draws as an ellipse: full
- * width across the drum, and as deep as its distance below the eye.
- *
- * Both constants are solved from two of the drum's own ellipses rather than
- * guessed at one. Its foot is 13.8px deep at 95.7% of the frame; its top
- * circle, four times nearer the eye in the model, is 3.4px deep at 72.4%.
- * Two depths at two heights give the slope, 0.1168, and where the ellipse
- * would close, 0.646. Reading the eye off the foot alone put it at 0.726 and
- * the rings came out half as deep as they should be.
- *
- * And each is broken where the logo crosses it, by 140% of the logo's width,
- * so the mark sits in a clearing rather than on top of a line.
+ * The three gold bands used to be drawn here too, as SVG arcs over the model,
+ * with their depth worked out from two constants measured off the drum's own
+ * ellipses. They are cut into the drum itself now — see
+ * scripts/build-base-rings.mjs — which is why the exaggeration that used to be
+ * on this number is gone with them. There is a real ring next to the type now,
+ * lit by the same light and turned by the same camera, so the type has to
+ * agree with that and not with a flattering version of it.
  */
 const EYE = 0.646;           // of the frame's height, where the drum is edge-on
 const ELLIPSE = 0.1168;      // how fast the ellipse opens below that
-const FOOT = 0.957;          // and where the drum's own foot sits
-
-/**
- * How deep the ellipse is at a height on the drum — and it is not the true
- * depth.
- *
- * The true depth is right and reads wrong, for the type and for the rings
- * alike. A ring two thirds of the way up the drum genuinely draws less than
- * half as deep as the foot below it, and the eye does not compare a ring to
- * the ring it would be — it compares it to the deepest ellipse in front of
- * it, which is the foot. So three faint arcs on a drum whose bottom edge
- * swings eleven pixels read as three straight lines that happen to be lying
- * on a cylinder.
- *
- * BOW opens the whole family out; the cap stops it running past the foot,
- * because a ring sagging more than the base it is cut into is a worse error
- * than one sagging too little. Both are here rather than in two places, so
- * the name and the rings cannot disagree about what surface they are on —
- * which is what made this visible twice.
- *
- * The horizontal stays exact: the turn, the foreshortening and the
- * arc-to-chord slide are all still measured. Only the vertical is opened.
- */
-const BOW = 2.6;
-const CAP = 0.85;            // of the foot's own depth
 
 function depthAt(y: number, frameH: number) {
-  const eye = frameH * EYE;
-  const here = Math.max(0, (y - eye) * ELLIPSE);
-  const foot = Math.max(0.2, (frameH * FOOT - eye) * ELLIPSE);
-  return Math.max(0.2, Math.min(here * BOW, foot * CAP));
-}
-/* the arcs stop just short of the silhouette and fade into it — a ring runs
-   out of drum there, and a stroke ending on the edge looks like it overshoots */
-const RING_REACH = 0.985;
-const RING_GAP = 1.4;        // of the logo's width
-/* of the logo's height, between the rings. A quarter to begin with; nine
-   tenths of that reads as a set of three rather than as three separate
-   lines. */
-const RING_STEP = 0.225;
-
-function drawRings(face: HTMLElement, frame: HTMLElement) {
-  const svg = frame.querySelector<SVGSVGElement>('.bh__rings');
-  const mark = face.querySelector<HTMLElement>('.bh__mark');
-  if (!svg || !mark) return;
-  const f = frame.getBoundingClientRect();
-  const m = mark.getBoundingClientRect();
-  if (!f.width || !m.height) return;
-
-  svg.setAttribute('viewBox', `0 0 ${f.width} ${f.height}`);
-  const cx = f.width / 2;
-  const R = f.width * DRUM_R;
-  const half = (m.width * RING_GAP) / 2;
-  const mid = m.top + m.height / 2 - f.top;
-  const step = m.height * RING_STEP;
-
-  /* where the gap's edge meets the ellipse, as a fraction of its depth */
-  const k = half < R ? Math.sqrt(1 - (half / R) ** 2) : 0;
-
-  /* Solve for each ring's height *on the drum*, rather than drawing it at
-     the height we want to see it.
-     Only the near half of a ring is on the drum's front, so what is drawn
-     hangs below the height it belongs to: where the gap cuts it, at x = half,
-     it has already sagged by b·k. Setting y to the logo's centre therefore
-     put the visible arc a whole b·k under it — six pixels, a fifth of the
-     logo — which is the low reading. Inverting it is one line, and b is
-     itself a function of y, so it has to be solved rather than subtracted. */
-  /* Iterated rather than inverted: the depth is capped now, so it is no
-     longer a straight line in y and there is no closed form. Four passes is
-     three more than it needs. */
-  const solve = (t: number) => {
-    let y = t;
-    for (let i = 0; i < 4; i++) y = t - depthAt(y, f.height) * k;
-    return y;
-  };
-
-  const d: string[] = [];
-  for (const t of [mid - step, mid, mid + step]) {
-    const y = solve(t);
-    const b = depthAt(y, f.height);
-    const drop = b * k;
-    const reach = R * RING_REACH;
-    const edge = y + b * Math.sqrt(Math.max(0, 1 - RING_REACH ** 2));
-    d.push(`M${(cx - reach).toFixed(1)} ${edge.toFixed(1)}`
-         + `A${R.toFixed(1)} ${b.toFixed(2)} 0 0 0 ${(cx - half).toFixed(1)} ${(y + drop).toFixed(1)}`);
-    d.push(`M${(cx + half).toFixed(1)} ${(y + drop).toFixed(1)}`
-         + `A${R.toFixed(1)} ${b.toFixed(2)} 0 0 0 ${(cx + reach).toFixed(1)} ${edge.toFixed(1)}`);
-  }
-  svg.replaceChildren(...d.map((path) => {
-    const el = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    el.setAttribute('d', path);
-    return el;
-  }));
+  return Math.max(0, (y - frameH * EYE) * ELLIPSE);
 }
 
 function curve() {
@@ -224,7 +124,6 @@ function curve() {
     const fr = frame.getBoundingClientRect();
     const R = fr.width * DRUM_R;
     if (!(R > 0)) continue;
-    drawRings(face, frame);
     for (const line of face.querySelectorAll<HTMLElement>('.bh__name, .bh__name-en')) {
       split(line);
       const chars = [...line.querySelectorAll<HTMLElement>('.bh__ch')];

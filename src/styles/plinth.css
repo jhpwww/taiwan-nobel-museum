@@ -114,21 +114,6 @@
    object, so it is an image rather than a glyph — and one sized by area
    rather than by width, or the tall caduceus and the wide book would carry
    quite different weight in the row. See scripts/build-marks.py. */
-/* The rings sit on the drum, under the type. Gold, and thin: the one they
-   replace was a single pixel of the model. */
-.bh__rings {
-  position: absolute; inset: 0;
-  inline-size: 100%; block-size: 100%;
-  pointer-events: none;
-  fill: none;
-  stroke: var(--gold-orn, #b8862a);
-  stroke-width: 1.1;
-  stroke-linecap: round;
-  /* the outer tenth of each end fades, so the ring goes round the drum
-     rather than stopping dead on its edge */
-  mask-image: linear-gradient(to right,
-    transparent 0%, #000 9%, #000 91%, transparent 100%);
-}
 .bh__mark {
   inline-size: clamp(1.4rem, 15.85cqw, 2.62rem);
   block-size: auto;
