@@ -270,7 +270,12 @@ own the pipeline and are meant to be re-run in order:
 1b. `scripts/build-models.mjs` — the atom and the balance, built here: Poly
    Pizza has no balance worth using and nothing that reads as an atom, and a
    telescope narrowed physics to astronomy. Flat-shaded low-poly on purpose,
-   to sit beside the borrowed four.
+   to sit beside the borrowed four. Both have since been superseded by the
+   owner's own award sculptures, so the script now writes nothing: `SUPPLIED`
+   lists the names whose file in `assets-src/models/` is the source and may
+   not be overwritten. Add a name to it whenever a sculpture arrives — and to
+   `ON_BASE` in normalise-models.mjs, which is what stops the piece being
+   scaled and perched as a stand-in.
 
    Both scripts write `data/model-credits.json` and **merge** rather than
    overwrite — each owns part of the six, and running either alone must leave

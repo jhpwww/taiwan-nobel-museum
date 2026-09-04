@@ -163,7 +163,7 @@ function turntable(doc, node, name) {
  * again the drum, so a wide piece overhangs the way the reference sheet's
  * quill and chart do without looking like it is sliding off.
  */
-const ON_BASE = new Set(['physics', 'chemistry', 'medicine', 'peace']);
+const ON_BASE = new Set(['physics', 'chemistry', 'medicine', 'peace', 'economics']);
 
 /**
  * Which parts of an award sculpture are meant to be re-shaded, and which are

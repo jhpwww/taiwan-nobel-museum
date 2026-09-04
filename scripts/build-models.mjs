@@ -1,17 +1,21 @@
 /**
- * build-models.mjs — the balance, which this museum makes itself.
+ * build-models.mjs — the balance, which this museum made itself.
  *
  * Poly Pizza has no balance scale worth using, and the site's flat and room
- * halls have shown a balance for economics since the first version. So it is
- * built here rather than borrowed. Flat-shaded low-poly, to sit beside the
- * Poly models without looking like a different set — the facets are the point,
- * not a shortcut. Output goes to assets-src/models/ and is then treated
- * exactly like a downloaded one: normalise-models.mjs centres, scales and
- * re-casts it in the hall's colour.
+ * halls showed a balance for economics from the first version until the
+ * project owner's own economics award arrived. So it was built here rather
+ * than borrowed. Flat-shaded low-poly, to sit beside the Poly models without
+ * looking like a different set — the facets are the point, not a shortcut.
+ * Output goes to assets-src/models/ and is then treated exactly like a
+ * downloaded one: normalise-models.mjs centres, scales and re-casts it.
  *
- * It built the atom too, until the project owner supplied a better one. That
- * model now IS the source — assets-src/models/physics.glb — so nothing here
- * may write to that name.
+ * It built the atom too. Both pieces have now been superseded by sculptures
+ * the owner drew, and THOSE FILES ARE THE SOURCE — assets-src/models/
+ * physics.glb, economics.glb — so this script may not write to those names.
+ * SUPPLIED below is the guard, and it is a guard rather than a deletion for
+ * two reasons: the balance is the only one this project has, and the owner is
+ * still working through the six, so the shape of this file has to survive
+ * literature arriving too.
  *
  *   node scripts/build-models.mjs
  */
@@ -170,22 +174,33 @@ async function write(name, build) {
               `${(fs.statSync(out).size / 1024).toFixed(0).padStart(3)}KB`);
 }
 
-fs.mkdirSync('assets-src/models', { recursive: true });
-await write('economics', balance);
+/** what this script can build, and what the owner has since drawn instead */
+const PIECES = { economics: { build: balance, title: 'Balance scale' } };
+const SUPPLIED = new Set(['physics', 'chemistry', 'medicine', 'peace', 'economics']);
 
-/* This one is ours, so it carries its own credit line rather than a borrowed
+fs.mkdirSync('assets-src/models', { recursive: true });
+
+/* These are ours, so they carry their own credit line rather than a borrowed
    one. Merged into the same file fetch-models.py writes, and neither script may
    clobber the other's entries — running either alone must leave a complete set
-   of six. Physics is not listed: its credit is now hand-kept, because its model
-   is supplied rather than generated. */
-const CREDITS = {
-  economics: { title: 'Balance scale', author: 'Nobel Lecture Museum' },
-};
+   of six. A supplied piece is skipped in both places: its model is the owner's
+   and so is its credit, which is hand-kept in data/model-credits.json. */
+const CREDITS = {};
+for (const [cat, piece] of Object.entries(PIECES)) {
+  if (SUPPLIED.has(cat)) {
+    console.log(`${cat.padEnd(11)} skipped — the owner's own sculpture stands here`);
+    continue;
+  }
+  await write(cat, piece.build);
+  CREDITS[cat] = { title: piece.title, author: 'Nobel Lecture Museum' };
+}
 
 const file = 'data/model-credits.json';
 const existing = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : {};
 for (const [cat, c] of Object.entries(CREDITS)) {
   existing[cat] = { id: `built:${cat}`, ...c, licence: 'CC0', page: '', source: 'original' };
 }
-fs.writeFileSync(file, `${JSON.stringify(existing, null, 2)}\n`);
-console.log(`\n→ ${file}`);
+if (Object.keys(CREDITS).length) {
+  fs.writeFileSync(file, `${JSON.stringify(existing, null, 2)}\n`);
+  console.log(`\n→ ${file}`);
+}

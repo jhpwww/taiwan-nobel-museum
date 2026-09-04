@@ -32,8 +32,8 @@
     "source": "original"
   },
   "economics": {
-    "id": "built:economics",
-    "title": "Balance scale",
+    "id": "supplied:economics",
+    "title": "Columns and rising arrow",
     "author": "Nobel Lecture Museum",
     "licence": "CC0",
     "page": "",
