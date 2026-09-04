@@ -30,7 +30,7 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     class="vf__btn"
     type="button"
     data-yt={id}
-    aria-label={`${playHint} — ${title}`}
+    aria-label={label ? `${playHint} — ${label} — ${title}` : `${playHint} — ${title}`}
   >
     <img
       class="vf__poster"
@@ -45,10 +45,15 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     />
     <span class="vf__frames" aria-hidden="true"></span>
     <span class="vf__scrim"></span>
-    <span class="vf__play" aria-hidden="true">
-      <svg viewBox="0 0 68 48" width="62" height="44">
-        <path class="vf__play-bg" d="M66.5 7.7a8.5 8.5 0 0 0-6-6C55.2 0 34 0 34 0S12.8 0 7.5 1.7a8.5 8.5 0 0 0-6 6A89 89 0 0 0 0 24a89 89 0 0 0 1.5 16.3 8.5 8.5 0 0 0 6 6C12.8 48 34 48 34 48s21.2 0 26.5-1.7a8.5 8.5 0 0 0 6-6A89 89 0 0 0 68 24a89 89 0 0 0-1.5-16.3z"/>
-        <path d="M27 34V14l18 10z" fill="#fff"/>
+    {/* The museum's own play mark rather than the platform's: a round pane of
+        the same glass as the buttons, with the university's red inside it.
+        The button around it is unchanged — this is the picture on the key,
+        not the key — so nothing about how or when the player loads moves.
+        The name of what will play is on the button's aria-label, because a
+        triangle cannot say 'Prof. Eric S. Maskin'. */}
+    <span class="vf__play museum-btn museum-btn--play" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="25" height="25" aria-hidden="true">
+        <path fill="var(--museum-red)" d="M8 5.5v13l10-6.5z" />
       </svg>
     </span>
     {label && <span class="vf__label">{label}</span>}
@@ -85,8 +90,7 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
       transform: translateY(-2px);
       box-shadow: var(--shadow-lift);
     }
-    .vf__btn:hover .vf__play { scale: 1.09; }
-    .vf__btn:hover .vf__play-bg { fill: #cc2027; fill-opacity: 1; }
+    .vf__btn:hover .vf__play { scale: 1.06; }
   }
 
   .vf__poster,
@@ -136,10 +140,10 @@ const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
     inset-inline-start: 50%;
     translate: -50% -50%;
     transition: scale 0.35s var(--ease);
-    filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.6));
+    /* the pane carries its own shadow; a drop-shadow on top of it read as a
+       second, blacker button behind the first */
   }
-  .vf__play-bg { fill: #16100a; fill-opacity: 0.82; transition: fill 0.3s var(--ease), fill-opacity 0.3s var(--ease); }
-  .vf__btn:focus-visible .vf__play { scale: 1.09; }
+  .vf__btn:focus-visible .vf__play { scale: 1.06; }
 
   /* same badge as LectureCard's — top-left, category block colour, dark text.
      If you restyle one, restyle the other. */

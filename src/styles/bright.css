@@ -127,41 +127,27 @@ html[data-theme='bright'] .topbar--ghost {
   border-block-end: 0;
 }
 
-/* The nav over the hall: a frosted tablet under every item, always.
-   It began as a pill that appeared on approach, which is what a bar over a
-   photograph usually does — but this bar is over a photograph AND over
-   everything that scrolls up past it, and glass that is only there on hover
-   left the labels to fight the page for the other 99% of the time. So the
-   tablets stand: a small radius rather than a full pill, because six of these
-   in a row read as a set of keys and a row of lozenges reads as pills of
-   medicine. Hover deepens the same glass rather than introducing any. */
+/* The bar's keys are museum-btn--nav now — see src/styles/buttons.css. What
+   is left here is only what the bar itself has to stop doing: the dark
+   theme's underline-on-hover, and a text colour the button sets for itself.
+   The tablet that used to be described here had a 1px rim on every side; the
+   whole system is borderless now, defined by light instead. */
 html[data-theme='bright'] .topbar--ghost .topbar__nav a {
-  padding-inline: 0.78rem;
-  padding-block: 0.36rem;
-  border-radius: 0.42rem;
   border-block-end: 0;
-  color: var(--cream);
-  background: rgba(255, 255, 255, 0.42);
-  backdrop-filter: blur(6px) saturate(1.5);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-    inset 0 -1px 0 rgba(196, 226, 255, 0.5),
-    0 1px 2px rgba(46, 58, 78, 0.06),
-    0 8px 20px -14px rgba(46, 58, 78, 0.5);
-  transition: background 0.28s var(--ease), color 0.28s var(--ease),
-              box-shadow 0.28s var(--ease);
+  color: var(--museum-ink);
 }
 html[data-theme='bright'] .topbar--ghost .topbar__nav a:hover,
 html[data-theme='bright'] .topbar--ghost .topbar__nav a:focus-visible {
-  background: rgba(255, 255, 255, 0.72);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.8),
-    inset 0 -1px 0 rgba(196, 226, 255, 0.8),
-    0 2px 4px rgba(46, 58, 78, 0.08),
-    0 10px 24px -14px rgba(46, 58, 78, 0.6);
-  color: var(--accent);
+  border-block-end-color: transparent;
+  color: var(--museum-ink);
+}
+html[data-theme='bright'] .topbar .topbar__nav a {
+  border-block-end: 0;
+  color: var(--museum-ink);
+}
+html[data-theme='bright'] .topbar .topbar__nav a:hover {
+  border-block-end-color: transparent;
+  color: var(--museum-ink);
 }
 /* The flag stands on its own, with no tablet under it.
    Which leaves it having to look pressable by itself, and a picture with no
@@ -595,19 +581,8 @@ html[data-theme='bright'] .after { background: none; }
    controls' material rather than a halo — which is also the only thing that
    carried it over the gold pieces on a phone: haloed, 所有講座 measured
    4.37:1, and a tablet takes it clear. */
-html[data-theme='bright'] .after .section-head .more {
-  padding: 0.3rem 0.8rem;
-  border-radius: 0.42rem;
-  background: rgba(255, 255, 255, 0.66);
-  backdrop-filter: blur(5px) saturate(1.6);
-  box-shadow: var(--glass-w-edge);
-  text-shadow: none;
-}
-html[data-theme='bright'] .after .section-head .more:hover {
-  background: var(--glass-g-bg);
-  box-shadow: var(--glass-g-edge);
-  color: var(--glass-g-ink);
-}
+html[data-theme='bright'] .after .section-head .more { text-shadow: none; }
+html[data-theme='bright'] .after .section-head .more:hover { color: var(--museum-ink); }
 
 html[data-theme='bright'] .after :is(.section-h, .more, .feature__date-d, .feature__date-m) {
   text-shadow:
@@ -663,103 +638,74 @@ html[data-theme='bright'] .bh__intro:hover {
 /* ============================================================
    CONTROLS
    ============================================================
-   One material for everything that can be pressed.
+   There is one button system and it is src/styles/buttons.css — four
+   modifier classes on the markup, no borders, pale champagne. What is left
+   here is only what that system cannot reach: the ink and the two marks
+   that are not buttons in the ordinary sense.
 
-   White glass at rest, gold glass when it is on or under the pointer. The
-   split is not decorative: the museum's two colours are the marble and the
-   gold, and a control that is *doing* something should be the gold one. It
-   replaces a flat red fill, which was the one thing on these pages that
-   belonged to no material at all.
+   The old block that stood here — white glass at rest, gold glass when
+   pressed, both with a 1px rim — was the second button system on the site.
+   It is gone rather than layered over, because two systems that disagree
+   about what a pressed control looks like is worse than either.
 
-   Gold glass takes dark ink, not white. Gold at 72% over white composites to
-   about rgb(204,168,101); white on that is 2.5:1 and unreadable, a deep brown
-   is 7:1. The red fill it replaces could carry white and this cannot, so the
-   ink is set here rather than left to --on-accent.
+   Champagne takes dark ink. A pale gold at these opacities composites to
+   about rgb(240,228,200) over white, on which the warm near-black is 12:1
+   and white would be 1.3:1.
    ============================================================ */
 
 html[data-theme='bright'] {
-  --glass-w-bg: rgba(255, 255, 255, 0.5);
-  --glass-w-edge:
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.5),
-    inset 0 -1px 0 rgba(184, 220, 255, 0.6),
-    0 1px 1px rgba(28, 42, 66, 0.06),
-    0 8px 20px -12px rgba(28, 42, 66, 0.35);
-  /* Gold glass is glass first. A flat gold gradient is a gold *button*, which
-     is what the first version was: too dark, too solid, and the same weight
-     everywhere. Real glass is thin in the middle and thick at the rim, so the
-     colour collects at the edge and the centre is nearly clear — a radial
-     ramp from almost-white to gold, with the deepest gold in the corners
-     where the pane is thickest. */
-  --glass-g-bg:
-    radial-gradient(115% 150% at 50% 34%,
-      rgba(255, 251, 240, 0.9) 0%,
-      rgba(250, 233, 190, 0.72) 30%,
-      rgba(230, 190, 108, 0.7) 62%,
-      rgba(198, 150, 58, 0.78) 100%);
+  --glass-g-ink: var(--museum-ink);
+  /* the two standing marks — the museum's name and the piece beside it —
+     wear the nav button's material rather than a gold plate of their own */
+  --glass-g-bg: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.74),
+    rgba(242, 226, 190, 0.34));
   --glass-g-edge:
-    inset 0 1px 0 rgba(255, 246, 222, 0.95),
-    inset 0 0 0 1px rgba(255, 236, 190, 0.5),
-    inset 0 -1px 0 rgba(126, 86, 16, 0.45),
-    0 1px 1px rgba(70, 48, 10, 0.12),
-    0 10px 24px -12px rgba(120, 84, 20, 0.5);
-  --glass-g-ink: #2b2008;
+    inset 0 12px 18px -18px rgba(255, 255, 255, 0.98),
+    inset 0 -10px 18px -18px rgba(166, 119, 27, 0.32),
+    0 8px 20px -17px rgba(46, 43, 38, 0.44);
 }
 
-/* --- at rest --- */
+/* The standing controls: back-to-top and the like. Nav material, and nothing
+   turns red under the pointer any more. */
+html[data-theme='bright'] .pn__b {
+  border: 0;
+  color: var(--museum-ink);
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.78),
+    rgba(242, 226, 190, 0.3));
+  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
+  backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
+  box-shadow:
+    inset 0 12px 18px -18px rgba(255, 255, 255, 0.98),
+    inset 0 -10px 18px -18px rgba(166, 119, 27, 0.3),
+    0 8px 20px -17px rgba(46, 43, 38, 0.42);
+}
+html[data-theme='bright'] .pn__b:hover {
+  color: var(--museum-ink);
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.84),
+    rgba(240, 220, 172, 0.44));
+  transform: translateY(-1px);
+}
+
+/* Marks that carried a gold fill of their own. Solid colour on a page whose
+   every other control is glass reads as a different site. */
 html[data-theme='bright'] :is(
-  .chip span,
-  .pn__b,
-  .sw,
-  .mt,
+  .picks .tag[data-on],
   .study button,
   .study__file span,
-  .picks .tag
+  .sw__opt.is-on
 ) {
-  background: var(--glass-w-bg);
-  backdrop-filter: blur(5px) saturate(1.6);
-  border-color: rgba(255, 255, 255, 0.7);
-  box-shadow: var(--glass-w-edge);
-  color: var(--cream);
-  transition: background 0.28s var(--ease), box-shadow 0.28s var(--ease),
-              color 0.28s var(--ease), border-color 0.28s var(--ease);
-}
-
-/* --- on, or under the pointer --- */
-html[data-theme='bright'] :is(
-  .chip input:checked + span,
-  .chip--kind[data-kind='guide'] input:checked + span,
-  .chip--kind[data-kind='lecture'] input:checked + span,
-  .chip--kind[data-kind='record'] input:checked + span,
-  .pn__b:hover,
-  .pn__b:focus-visible,
-  .sw__opt.is-on,
-  .picks .tag[data-on],
-  .study button:hover,
-  .study__file span,
-  .mat__link
-) {
-  background: var(--glass-g-bg);
-  backdrop-filter: blur(5px) saturate(1.6);
-  border-color: rgba(255, 236, 190, 0.75);
-  box-shadow: var(--glass-g-edge);
-  color: var(--glass-g-ink);
-  filter: none;
-}
-html[data-theme='bright'] .chip input:checked + span b { opacity: 0.7; }
-
-/* the sub-pages' four onward links were a solid block of prize colour */
-html[data-theme='bright'] .mat__link:hover,
-html[data-theme='bright'] .mat__link:focus-visible {
-  background: linear-gradient(160deg, rgba(236, 196, 106, 0.82), rgba(196, 146, 48, 0.9));
-  border-color: #fff6de;
-  transform: translateY(-2px);
+  border: 0;
+  color: var(--museum-ink);
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(233, 199, 118, 0.42));
   box-shadow:
-    inset 0 1px 0 rgba(255, 250, 236, 1),
-    inset 0 0 0 1px rgba(255, 242, 208, 0.7),
-    inset 0 -1px 0 rgba(126, 86, 16, 0.5),
-    0 2px 3px rgba(70, 48, 10, 0.14),
-    0 16px 32px -12px rgba(120, 84, 20, 0.6);
+    inset 0 10px 16px -16px rgba(255, 255, 255, 1),
+    inset 0 -10px 16px -16px rgba(160, 112, 18, 0.32),
+    0 7px 16px -16px rgba(48, 43, 34, 0.4);
 }
 
 
@@ -966,26 +912,35 @@ html[data-theme='bright'] .gr__lock-name {
    Count the compounds, not the classes. */
 html[data-theme='bright'] .browse .chips .chip input:checked + span,
 html[data-theme='bright'] .browse .chips .chip--kind[data-kind] input:checked + span {
-  background: var(--glass-g-bg);
-  backdrop-filter: blur(5px) saturate(1.6);
-  border-color: rgba(255, 236, 190, 0.75);
-  box-shadow: var(--glass-g-edge);
-  color: var(--glass-g-ink);
+  /* chosen: the chip's own pressed wash, and no outline of any kind */
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.72),
+    rgba(233, 199, 118, 0.42));
+  border-color: transparent;
+  box-shadow:
+    inset 0 10px 16px -16px rgba(255, 255, 255, 1),
+    inset 0 -10px 16px -16px rgba(160, 112, 18, 0.32),
+    0 7px 16px -16px rgba(48, 43, 34, 0.4);
+  color: var(--museum-ink);
   font-weight: 600;
 }
 html[data-theme='bright'] .browse .chips .chip span {
-  background: var(--glass-w-bg);
-  backdrop-filter: blur(5px) saturate(1.6);
-  border-color: rgba(255, 255, 255, 0.7);
-  box-shadow: var(--glass-w-edge);
-  color: var(--cream);
+  border-color: transparent;
+  color: var(--museum-ink);
 }
+html[data-theme='bright'] .browse .chips .chip:hover span { border-color: transparent; }
 /* the search field is a control too, and it sits on the room */
 html[data-theme='bright'] .browse .search {
-  background: rgba(255, 255, 255, 0.62);
-  backdrop-filter: blur(6px) saturate(1.5);
-  border-color: rgba(255, 255, 255, 0.75);
-  box-shadow: var(--glass-w-edge);
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.78),
+    rgba(242, 226, 190, 0.24));
+  border-color: transparent;
+  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
+  backdrop-filter: blur(var(--museum-glass-blur)) saturate(108%);
+  box-shadow:
+    inset 0 12px 18px -18px rgba(255, 255, 255, 0.98),
+    inset 0 -10px 18px -18px rgba(166, 119, 27, 0.28),
+    0 8px 20px -17px rgba(46, 43, 38, 0.4);
 }
 html[data-theme='bright'] .browse :is(legend, .browse__n) {
   text-shadow: 0 0 3px rgba(255, 255, 255, 1), 0 0 10px rgba(255, 255, 255, 0.95);
@@ -994,3 +949,29 @@ html[data-theme='bright'] .browse__h {
   text-shadow: 0 0 4px rgba(255, 255, 255, 1), 0 0 16px rgba(255, 255, 255, 0.9),
                0 0 40px rgba(255, 255, 255, 0.7);
 }
+
+
+/* ---------- what the button system has to switch off ----------
+   These four carry a fill of their own from the dark site, and a solid block
+   of prize colour under a pane of glass is the pane's own worst background.
+   The button class supplies everything else. */
+html[data-theme='bright'] .mat__link {
+  background: none;
+  border: 0;
+  color: var(--museum-ink);
+  box-shadow: none;
+  filter: none;
+}
+html[data-theme='bright'] .mat__link:hover,
+html[data-theme='bright'] .mat__link:focus-visible {
+  background: linear-gradient(180deg,
+    rgba(255, 255, 255, 0.76),
+    rgba(238, 214, 158, 0.4));
+  box-shadow:
+    inset 0 12px 18px -18px rgba(255, 255, 255, 1),
+    inset 0 -10px 18px -18px rgba(166, 119, 27, 0.36),
+    0 10px 22px -16px rgba(46, 43, 38, 0.5);
+  transform: translateY(-1px);
+  filter: none;
+}
+html[data-theme='bright'] .mat__ext { opacity: 0.6; }

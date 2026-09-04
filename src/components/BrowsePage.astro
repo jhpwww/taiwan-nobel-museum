@@ -58,11 +58,11 @@ const bright = process.env.THEME === 'bright';
       <fieldset>
         <legend>{t('browse.filterKind')}</legend>
         <div class="chips">
-          <label class="chip"><input type="radio" name="kind" value="" checked /><span>{t('browse.filterAll')}</span></label>
+          <label class="chip"><input type="radio" name="kind" value="" checked /><span class="museum-btn museum-btn--chip">{t('browse.filterAll')}</span></label>
           {KINDS.map((k) => (
             <label class="chip chip--kind" data-kind={k.key}>
               <input type="radio" name="kind" value={k.key} />
-              <span>{k.label} <b>{k.n}</b></span>
+              <span class="museum-btn museum-btn--chip">{k.label} <b>{k.n}</b></span>
             </label>
           ))}
         </div>
@@ -71,9 +71,9 @@ const bright = process.env.THEME === 'bright';
       <fieldset>
         <legend>{t('browse.filterCat')}</legend>
         <div class="chips">
-          <label class="chip"><input type="radio" name="cat" value="" checked /><span>{t('browse.filterAll')}</span></label>
+          <label class="chip"><input type="radio" name="cat" value="" checked /><span class="museum-btn museum-btn--chip">{t('browse.filterAll')}</span></label>
           {cats.map(([k, v]) => (
-            <label class="chip" data-cat={k}><input type="radio" name="cat" value={k} /><span>{v[lang]}</span></label>
+            <label class="chip" data-cat={k}><input type="radio" name="cat" value={k} /><span class="museum-btn museum-btn--chip">{v[lang]}</span></label>
           ))}
         </div>
       </fieldset>
@@ -81,9 +81,9 @@ const bright = process.env.THEME === 'bright';
       <fieldset>
         <legend>{t('browse.filterTopic')}</legend>
         <div class="chips">
-          <label class="chip"><input type="radio" name="tag" value="" checked /><span>{t('browse.filterAll')}</span></label>
+          <label class="chip"><input type="radio" name="tag" value="" checked /><span class="museum-btn museum-btn--chip">{t('browse.filterAll')}</span></label>
           {tagList.map(([k, v]) => (
-            <label class="chip"><input type="radio" name="tag" value={k} /><span>{v[lang]}</span></label>
+            <label class="chip"><input type="radio" name="tag" value={k} /><span class="museum-btn museum-btn--chip">{v[lang]}</span></label>
           ))}
         </div>
       </fieldset>

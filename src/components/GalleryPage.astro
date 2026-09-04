@@ -204,7 +204,7 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
           <ul class="mats__list" role="list">
             {links.map((l, i) => (
               <li class="mat">
-                <a class="mat__link" href={l.url} target="_blank" rel="noopener noreferrer"
+                <a class="mat__link museum-btn museum-btn--nav" href={l.url} target="_blank" rel="noopener noreferrer"
                    aria-describedby={`tip-${i}`}>
                   {lang === 'zh' ? l.zh : l.en}
                   <span class="mat__ext" aria-hidden="true">↗</span>
@@ -500,7 +500,8 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     display: flex; flex-wrap: wrap; gap: 0.65rem; padding: 0; margin: 0;
   }
 
-  /* solid, not tinted — as faint outlines these were being overlooked */
+  /* The bright museum makes these museum-btn--nav; what stays here is the
+     dark site's own treatment, and the layout the button does not set. */
   .mat__link {
     display: inline-flex; align-items: center; gap: 0.5rem;
     font-size: var(--step-0); font-weight: 500; line-height: 1.3;

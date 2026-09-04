@@ -116,9 +116,9 @@ const index = lectures.map((l) => ({
       <h2>{t('study.exportTitle')}</h2>
       <p class="study__note">{t('study.exportNote')}</p>
       <div class="study__actions">
-        <button type="button" data-export-notes>{t('study.exportNotes')}</button>
-        <button type="button" data-export-all>{t('study.exportAll')}</button>
-        <button type="button" data-download>{t('study.download')}</button>
+        <button class="museum-btn museum-btn--nav" type="button" data-export-notes>{t('study.exportNotes')}</button>
+        <button class="museum-btn museum-btn--nav" type="button" data-export-all>{t('study.exportAll')}</button>
+        <button class="museum-btn museum-btn--primary" type="button" data-download>{t('study.download')}</button>
         <span data-msg class="study__msg"></span>
       </div>
       <textarea data-out rows="12" readonly aria-label={t('study.exportTitle')}></textarea>
@@ -128,12 +128,12 @@ const index = lectures.map((l) => ({
       <h2>{t('study.manageTitle')}</h2>
       <p class="study__note">{t('study.manageNote')}</p>
       <div class="study__actions">
-        <button type="button" data-backup>{t('study.backup')}</button>
+        <button class="museum-btn museum-btn--nav" type="button" data-backup>{t('study.backup')}</button>
         <label class="study__file">
           <input type="file" accept="application/json,.json" data-restore hidden />
           <span>{t('study.restore')}</span>
         </label>
-        <button type="button" class="danger" data-clear>{t('study.clear')}</button>
+        <button type="button" class="danger museum-btn museum-btn--nav" data-clear>{t('study.clear')}</button>
       </div>
     </section>
   </div>

@@ -114,7 +114,7 @@ const figures = [
   <section class="latest wrap" aria-labelledby="latest-h">
     <div class="section-head">
       <h2 id="latest-h" class="section-h">{t('hall.latest')}</h2>
-      <a class="more" href={browse(lang)}>{t('nav.all')} →</a>
+      <a class="more museum-btn museum-btn--nav" href={browse(lang)}>{t('nav.all')} <span aria-hidden="true">→</span></a>
     </div>
     <ul class="grid" role="list">
       {latest.map((rec) => <li><LectureCard lang={lang} rec={rec} /></li>)}
