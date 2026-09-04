@@ -23,6 +23,16 @@
 
    3. One selector added, at the chip's pressed rule — see the note there.
 
+   4. The skin is drawn thinner: 4px/6px on the primary and 3px/5px on the
+      nav key, against the kit's 16/27 and 12/21. At the supplied widths the
+      bevel is a pillow rather than an edge and the owner read the whole set
+      as heavy. The skin is unchanged and still the thing making the glass —
+      the same nine-slice, the same highlight, compressed into a line. Five
+      thicknesses were rendered side by side over the hall photograph and
+      over white before choosing; two other routes, a plain 1px hairline and
+      no edge at all, both cost the glass its body, and the nav keys nearly
+      vanished against the photograph without it.
+
    Applied everywhere as of 2026-09-04: the bar, every onward and external
    link, the study tools, the browse filters and every play mark. What is
    left in buttons.css is integration only, and it loads after this file.
@@ -93,8 +103,8 @@
 }
 
 .museum-glass-btn--primary::before {
-  border-width: 16px 27px;
-  border-image-width: 16px 27px;
+  border-width: 4px 6px;
+  border-image-width: 4px 6px;
   opacity: .92;
 }
 
@@ -107,8 +117,8 @@
 }
 
 .museum-glass-btn--nav::before {
-  border-width: 12px 21px;
-  border-image-width: 12px 21px;
+  border-width: 3px 5px;
+  border-image-width: 3px 5px;
   opacity: .56;
   filter: saturate(.66) brightness(1.065);
 }

@@ -21,7 +21,21 @@
    component is how a design rule turns back into a list of exceptions. */
 .museum-glass-btn { border: 0 !important; }
 
-/* ---------- 2. a finger needs 44px ----------
+/* ---------- 2. a button stays inside its box ----------
+   The kit keeps every label on one line, which is right for the bar: 回到大廳
+   and Back to the hall are not the same length and neither may be clipped.
+   But the same rule put a 316px key in a 272px sidebar column on the lecture
+   pages, and a grid item cannot shrink below its own min-content — so the
+   column pushed the page 47px wider than the viewport and the reader got a
+   horizontal scrollbar. The label wraps only when it otherwise would not fit,
+   which no bar key ever does. */
+.museum-glass-btn {
+  max-inline-size: 100%;
+  min-inline-size: 0;
+  white-space: normal;
+}
+
+/* ---------- 3. a finger needs 44px ----------
    The kit grows the primary and the nav key to 44 and the play mark to 54.
    A chip must not grow: a row of 44px lozenges is a wall. So it keeps its
    paint and reaches out for the touch with an invisible box.
@@ -40,7 +54,7 @@
   .chips:has(> .chip > .museum-glass-btn--chip) { row-gap: 1.05rem; }
 }
 
-/* ---------- 3. the radio stays on top of its own chip ----------
+/* ---------- 4. the radio stays on top of its own chip ----------
    A filter chip is a <label> holding an invisible radio stretched across it
    and a decorated <span>. The radio was painting above the span because the
    span was not positioned — and the kit's base class positions it, which
@@ -52,7 +66,7 @@
    itself and no forwarding is needed at all. */
 .chip:has(> .museum-glass-btn--chip) input { z-index: 1; }
 
-/* ---------- 4. reduced motion ----------
+/* ---------- 5. reduced motion ----------
    The kit drops the transition; the transform is what actually moves. */
 @media (prefers-reduced-motion: reduce) {
   .museum-glass-btn:hover,
