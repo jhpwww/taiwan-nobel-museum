@@ -14,9 +14,6 @@
 /* The radius is measured off the model: at the label's height the drum draws
    144px across a 190px frame. */
 const DRUM_R = 0.379;
-/* how much the vertical bow is opened past the truth — see the note in
-   curve(), and the two failed attempts at leaving it at 1 */
-const BOW = 2.6;
 /* No character turns further than this. The type is set with a clamp, so at
    narrow widths its floor binds while the frame goes on shrinking and the line
    takes a larger share of the drum: at 1120px the ends were turning 71° and
@@ -125,6 +122,38 @@ function split(line: HTMLElement) {
  */
 const EYE = 0.646;           // of the frame's height, where the drum is edge-on
 const ELLIPSE = 0.1168;      // how fast the ellipse opens below that
+const FOOT = 0.957;          // and where the drum's own foot sits
+
+/**
+ * How deep the ellipse is at a height on the drum — and it is not the true
+ * depth.
+ *
+ * The true depth is right and reads wrong, for the type and for the rings
+ * alike. A ring two thirds of the way up the drum genuinely draws less than
+ * half as deep as the foot below it, and the eye does not compare a ring to
+ * the ring it would be — it compares it to the deepest ellipse in front of
+ * it, which is the foot. So three faint arcs on a drum whose bottom edge
+ * swings eleven pixels read as three straight lines that happen to be lying
+ * on a cylinder.
+ *
+ * BOW opens the whole family out; the cap stops it running past the foot,
+ * because a ring sagging more than the base it is cut into is a worse error
+ * than one sagging too little. Both are here rather than in two places, so
+ * the name and the rings cannot disagree about what surface they are on —
+ * which is what made this visible twice.
+ *
+ * The horizontal stays exact: the turn, the foreshortening and the
+ * arc-to-chord slide are all still measured. Only the vertical is opened.
+ */
+const BOW = 2.6;
+const CAP = 0.85;            // of the foot's own depth
+
+function depthAt(y: number, frameH: number) {
+  const eye = frameH * EYE;
+  const here = Math.max(0, (y - eye) * ELLIPSE);
+  const foot = Math.max(0.2, (frameH * FOOT - eye) * ELLIPSE);
+  return Math.max(0.2, Math.min(here * BOW, foot * CAP));
+}
 /* the arcs stop just short of the silhouette and fade into it — a ring runs
    out of drum there, and a stroke ending on the edge looks like it overshoots */
 const RING_REACH = 0.985;
@@ -160,13 +189,19 @@ function drawRings(face: HTMLElement, frame: HTMLElement) {
      put the visible arc a whole b·k under it — six pixels, a fifth of the
      logo — which is the low reading. Inverting it is one line, and b is
      itself a function of y, so it has to be solved rather than subtracted. */
-  const eye = f.height * EYE;
-  const solve = (t: number) => (t + eye * ELLIPSE * k) / (1 + ELLIPSE * k);
+  /* Iterated rather than inverted: the depth is capped now, so it is no
+     longer a straight line in y and there is no closed form. Four passes is
+     three more than it needs. */
+  const solve = (t: number) => {
+    let y = t;
+    for (let i = 0; i < 4; i++) y = t - depthAt(y, f.height) * k;
+    return y;
+  };
 
   const d: string[] = [];
   for (const t of [mid - step, mid, mid + step]) {
     const y = solve(t);
-    const b = Math.max(0.2, (y - eye) * ELLIPSE);
+    const b = depthAt(y, f.height);
     const drop = b * k;
     const reach = R * RING_REACH;
     const edge = y + b * Math.sqrt(Math.max(0, 1 - RING_REACH ** 2));
@@ -222,8 +257,8 @@ function curve() {
          stays exact — the turn, the foreshortening and the arc-to-chord
          slide are all still measured, so the line stays closed and the
          characters still turn by the angle they actually subtend. */
-      const b = Math.max(0, (mid.top + mid.height / 2 - fr.top - fr.height * EYE) * ELLIPSE);
-      const rise = (b / r) * BOW;
+      const b = depthAt(mid.top + mid.height / 2 - fr.top, fr.height);
+      const rise = b / r;
 
       chars.forEach((ch, i) => {
         const th = dx[i] / r;          // arc length, not projection

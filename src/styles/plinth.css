@@ -91,16 +91,21 @@
 }
 .bh__name, .bh__name-en { transform-style: preserve-3d; }
 /* Each word stays whole; only the characters inside it are turned.
-   :global because the script builds these spans at runtime, so they never
-   carry Astro's scope attribute and a plain rule matches nothing. Which is
-   not cosmetic here: without `display: inline-block` they stay inline, and
-   transform does not apply to a non-replaced inline element — the style is
-   set, and nothing moves. Measure the rendered width, not the style string.
-   Same trap as .bh__mark above. */
-.bh__face .bh__word) {
+   `display: inline-block` is the load-bearing declaration in this file:
+   transform does nothing to a non-replaced inline element, so without it the
+   script sets a transform on every character and not one of them moves. The
+   label goes flat and nothing else changes, which is why it has now been
+   broken twice without a single error anywhere.
+   The first time it was Astro's scoping. The second time was this file being
+   cut out of the component by a script that stripped the `:global(` prefix
+   and left the closing bracket behind — `.bh__face .bh__word)` is not a
+   selector, and a stylesheet drops an invalid rule in silence.
+   If the curve is ever flat again, look here first, and check the rendered
+   width of a character rather than the style attribute on it. */
+.bh__face .bh__word {
   display: inline-block; white-space: nowrap; transform-style: preserve-3d;
 }
-.bh__face .bh__ch) { display: inline-block; will-change: transform; }
+.bh__face .bh__ch { display: inline-block; will-change: transform; }
 /* The device above the name, in the gold the hall keeps for ornament.
    :global because the mark is drawn by another component, and Astro's scope
    attribute stops at this file — a plain .bh__mark rule matches nothing and
