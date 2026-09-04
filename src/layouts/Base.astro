@@ -108,11 +108,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
                 and there it is named for what pressing it does rather than for
                 where it goes — on a page that is already a room in the museum,
                 '博物館大廳' reads as a place and '回到大廳' as a door. */}
-            {segments.length > 0 && <a class="museum-glass-btn museum-glass-btn--nav" href={home(lang)}>{t('nav.backHall')}</a>}
-            <a class="museum-glass-btn museum-glass-btn--nav" href={browse(lang)}>{t('nav.all')}</a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={learn(lang)}>{t('nav.learn')}</a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={about(lang)}>{t('nav.about')}</a>
+            {segments.length > 0 && <a class="museum-glass-btn museum-glass-btn--nav" href={home(lang)}><span>{t('nav.backHall')}</span></a>}
+            <a class="museum-glass-btn museum-glass-btn--nav" href={browse(lang)}><span>{t('nav.all')}</span></a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={learn(lang)}><span>{t('nav.learn')}</span></a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}><span>{t('nav.prize')}</span></a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={about(lang)}><span>{t('nav.about')}</span></a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
                aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
               <LangFlag to={other.lang} />
@@ -133,11 +133,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             </span>
           </a>
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={home(lang)}>{t('nav.backHall')}</a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={browse(lang)}>{t('nav.all')}</a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={learn(lang)}>{t('nav.learn')}</a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={about(lang)}>{t('nav.about')}</a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={home(lang)}><span>{t('nav.backHall')}</span></a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={browse(lang)}><span>{t('nav.all')}</span></a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={learn(lang)}><span>{t('nav.learn')}</span></a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}><span>{t('nav.prize')}</span></a>
+            <a class="museum-glass-btn museum-glass-btn--nav" href={about(lang)}><span>{t('nav.about')}</span></a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
                aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
               <LangFlag to={other.lang} />
@@ -230,7 +230,11 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
 
       .topbar__nav {
         display: flex; align-items: center; flex-wrap: wrap;
-        row-gap: 0.15rem; column-gap: clamp(0.9rem, 2.5vw, 1.9rem);
+        /* Half what it was. The keys carry their own glass now, so the space
+           between them no longer has to do the separating — and at the old
+           width the five of them read as five separate things rather than as
+           one bar. The mobile column sets its own gaps; see bright.css. */
+        row-gap: 0.15rem; column-gap: clamp(0.45rem, 1.25vw, 0.95rem);
         justify-content: flex-end;
       }
       .topbar__nav a {

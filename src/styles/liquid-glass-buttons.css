@@ -30,8 +30,11 @@
    /taiwan-nobel-museum/bright/ in one build and /taiwan-nobel-museum/ in
    the other.
 
-   One departure: a selector added at the chip's pressed rule — see the note
-   there. No number in this file is touched; the values are the designer's.
+   Two departures. A selector added at the chip's pressed rule — see the note
+   there. And a second pass of the same skin, screen-blended, so the specular
+   reads twice as strong: asked for on 2026-09-04, and written so that it can
+   only lighten, leaving the body, the champagne and the darks as drawn. No
+   value the designer set is changed.
 
    And one thing this kit no longer carries, moved rather than added back
    here: --museum-gold-text. bright.css paints the lecture cards' host line
@@ -100,6 +103,57 @@
   border-image-source: url("../assets/glass-button-skin-borderless.webp");
   border-image-slice: 72 120 fill;
   border-image-repeat: stretch;
+  pointer-events: none;
+}
+
+/* Twice the specular, at the owner's request (2026-09-04).
+ *
+ * The skin is not redrawn and not replaced — this is the same nine-slice a
+ * second time, composited with `screen`, which can only lighten. So the
+ * highlight and the refraction gain what a second pass of the same light
+ * would give them and the glass body, the champagne and the darks are left
+ * exactly where the designer put them. `isolation: isolate` on the button
+ * keeps the blend inside it, off whatever the page is doing behind.
+ *
+ * It sits at z-index 0 like the ::before, so it lands over the glass and
+ * under the label — the label is an element child and the kit lifts those
+ * to 1. A label left as a bare text node has no z-index to be lifted and
+ * would go under both; every one on this site is wrapped.
+ */
+.museum-glass-btn--primary::after,
+.museum-glass-btn--nav::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-style: solid;
+  border-color: transparent;
+  border-image-source: url("../assets/glass-button-skin-borderless.webp");
+  border-image-slice: 72 120 fill;
+  border-image-repeat: stretch;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.museum-glass-btn--primary::after {
+  border-width: 6px 10px;
+  border-image-width: 6px 10px;
+  opacity: .86;
+}
+.museum-glass-btn--nav::after {
+  border-width: 4px 7px;
+  border-image-width: 4px 7px;
+  opacity: .68;
+}
+/* the round one gets the same second pass */
+.museum-glass-btn--play::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: url("../assets/glass-play-skin-borderless.webp") center / contain no-repeat;
+  opacity: .82;
+  mix-blend-mode: screen;
   pointer-events: none;
 }
 

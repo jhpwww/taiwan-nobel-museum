@@ -133,6 +133,26 @@ html[data-theme='bright'] .topbar--ghost {
    theme's underline-on-hover, and a text colour the button sets for itself.
    The tablet that used to be described here had a 1px rim on every side; the
    whole system is borderless now, defined by light instead. */
+/* The haze the keys stand in.
+   The same one the hall's name has — see .bh__lockup::before in
+   HallBright.astro, whose gradient this is, re-centred on a row instead of a
+   block of type. Without it the bar sits directly on whatever the room is
+   doing behind it: a column, a window, the video wall's old place, and the
+   glass takes on all of it. The keys are transparent by design, so what is
+   behind them has to be quiet rather than the keys made opaque.
+
+   It goes behind the keys and not on the bar: .topbar--ghost spans the whole
+   width, and a haze that wide would be a band across the photograph. */
+html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -1.5rem -2.2rem -1.7rem -3rem;
+  pointer-events: none;
+  background: radial-gradient(62% 66% at 62% 50%,
+    rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.5) 46%, transparent 78%);
+}
+
 html[data-theme='bright'] .topbar--ghost .topbar__nav a {
   border-block-end: 0;
   color: var(--museum-ink);
@@ -218,6 +238,12 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
     row-gap: 0.26rem;
     column-gap: 0;
   }
+  /* a column, so the haze stands up rather than lies down */
+  html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
+    inset: -1rem -1.4rem -1.2rem -1.8rem;
+    background: radial-gradient(70% 58% at 66% 46%,
+      rgba(255, 255, 255, 0.88), rgba(255, 255, 255, 0.5) 46%, transparent 78%);
+  }
   /* A column of four is as tall as the room behind it. Compacted, it clears
      the pieces when they withdraw onto the hall's floor. */
   html[data-theme='bright'] .topbar--ghost .topbar__nav a {
@@ -263,14 +289,50 @@ html[data-theme='bright'] .vf__scrim {
 html[data-theme='bright'] .card__scrim {
   background: linear-gradient(to top, rgba(20, 18, 16, 0.55), transparent 60%);
 }
+/* The card's words are on glass, and the glass fills under the pointer.
+   Same material and the same move as the video panes above — see .vf — because
+   a card IS a video pane with its caption attached, and two kinds of glass in
+   one column reads as two kinds of card. The ground goes on the body rather
+   than on the card, because the thumbnail above it is opaque anyway and a
+   backdrop-filter behind an image is work done for nothing. */
 html[data-theme='bright'] .card {
-  background: #fff;
+  background: none;
   border: 1px solid var(--line);
   box-shadow: 0 1px 2px rgba(20, 18, 16, 0.05);
+}
+html[data-theme='bright'] .vc {
+  background: none;
+}
+html[data-theme='bright'] .card .card__body,
+html[data-theme='bright'] .vc .vc__body {
+  background: rgba(255, 255, 255, 0.62);
+  -webkit-backdrop-filter: blur(9px) saturate(1.12);
+  backdrop-filter: blur(9px) saturate(1.12);
+  transition: background 0.32s var(--ease), backdrop-filter 0.32s var(--ease);
 }
 html[data-theme='bright'] .card:hover {
   border-color: var(--line-hi);
   box-shadow: var(--shadow-lift);
+}
+/* Solid, not clearer. Glass that clears as you approach reads as the thing
+   disappearing under your hand; glass that fills reads as it coming forward
+   to meet you — the same sentence as the panes, and the same behaviour. */
+@media (hover: hover) and (pointer: fine) {
+  html[data-theme='bright'] .card:hover .card__body,
+  html[data-theme='bright'] .card:focus-visible .card__body,
+  html[data-theme='bright'] .vc:hover .vc__body,
+  html[data-theme='bright'] .vc:focus-visible .vc__body {
+    background: #fff;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* A finger has no hover, so the words must be readable at rest there. */
+@media (hover: none) {
+  html[data-theme='bright'] .card .card__body,
+  html[data-theme='bright'] .vc .vc__body {
+    background: rgba(255, 255, 255, 0.9);
+  }
 }
 
 /* ---------- the standing controls ---------- */

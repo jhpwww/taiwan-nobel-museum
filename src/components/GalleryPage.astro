@@ -205,7 +205,7 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
               <li class="mat">
                 <a class="mat__link museum-glass-btn museum-glass-btn--nav" href={l.url} target="_blank" rel="noopener noreferrer"
                    aria-describedby={`tip-${i}`}>
-                  {lang === 'zh' ? l.zh : l.en}
+                  <span>{lang === 'zh' ? l.zh : l.en}</span>
                   <span class="mat__ext" aria-hidden="true">↗</span>
                   <span class="visually-hidden">{t('a11y.newTab')}</span>
                 </a>

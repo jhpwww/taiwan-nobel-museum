@@ -24,7 +24,12 @@ const t = useT(lang);
 const klass = ['museum-glass-btn', 'museum-glass-btn--nav', cls].filter(Boolean).join(' ');
 ---
 <a href={href} class={klass} target="_blank" rel="noopener noreferrer">
-  <slot />
+  {/* The label is wrapped, not passed through bare. The button kit paints its
+      glass on a positioned ::before, and a bare text node has no z-index of
+      its own to be lifted by the kit's `.museum-glass-btn > * { z-index: 1 }`
+      — so the glass paints over the words and the label goes pale. Every
+      example in the kit's own START-HERE wraps the label; this is that. */}
+  <span><slot /></span>
   {arrow && <span class="ext-arrow" aria-hidden="true">↗</span>}
   <span class="visually-hidden">{t('a11y.newTab')}</span>
 </a>

@@ -55,7 +55,19 @@ const piece = bright ? {
   bare={bright}
 >
   <article class="lec" data-cat={cat}>
-    <header class="lec__head">
+    {/* Outside the header, not inside it. .lec__head carries isolation:isolate
+      — it has to, or the room behind it at z-index:-1 would sink through the
+      page — and an isolated ancestor caps everything under it: this mark's
+      z-index of 60 was being counted inside the header rather than against
+      the page, so the first <figure class="vf"> further down the document,
+      positioned and later in source order, painted straight over it. Out
+      here its 60 means what it says, exactly as on the prize pages. */}
+  {bright && (
+    <a class="gr__lock lec__lock" href={home(lang)} aria-label={t('nav.backHall')}>
+      <span class="gr__lock-name">{t('site.tagline')}</span>
+    </a>
+  )}
+  <header class="lec__head">
       {/* The same room as the hall and the prize pages. A laureate's page is
           the innermost room of the three, not a document that fell out of
           them. */}
@@ -67,11 +79,6 @@ const piece = bright ? {
                  fetchpriority="high" decoding="async" />
           </picture>
         </div>
-      )}
-      {bright && (
-        <a class="gr__lock lec__lock" href={home(lang)} aria-label={t('nav.backHall')}>
-          <span class="gr__lock-name">{t('site.tagline')}</span>
-        </a>
       )}
       <div class="wrap lec__head-in">
         <div class="lec__crest" aria-hidden="true">

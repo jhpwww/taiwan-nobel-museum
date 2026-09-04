@@ -80,6 +80,13 @@ for (const v of VIEWS) {
       for (const el of document.querySelectorAll('.after :is(h1,h2,h3,p,a,span,dt,dd,li)')) {
         const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
         if (!own) continue;
+        /* Anything STRIP hid, and anything inside it. A badge lying on a
+           video still — the kind label, the count — is in the picture the
+           strip removed: it has its own opaque fill and is never read against
+           the room, but its box survives `visibility: hidden` and would
+           sample whatever the strip uncovered behind it. `visibility`
+           inherits, so this one test catches the children too. */
+        if (getComputedStyle(el).visibility === 'hidden') continue;
         const b = el.getBoundingClientRect();
         if (b.width < 8 || b.height < 8 || b.bottom < 0 || b.top > innerHeight) continue;
         const c = getComputedStyle(el).getPropertyValue('--check-colour') ||
