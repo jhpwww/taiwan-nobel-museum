@@ -685,7 +685,18 @@ html[data-theme='bright'] {
     inset 0 -1px 0 rgba(184, 220, 255, 0.6),
     0 1px 1px rgba(28, 42, 66, 0.06),
     0 8px 20px -12px rgba(28, 42, 66, 0.35);
-  --glass-g-bg: linear-gradient(160deg, rgba(222, 176, 76, 0.66), rgba(178, 128, 38, 0.76));
+  /* Gold glass is glass first. A flat gold gradient is a gold *button*, which
+     is what the first version was: too dark, too solid, and the same weight
+     everywhere. Real glass is thin in the middle and thick at the rim, so the
+     colour collects at the edge and the centre is nearly clear — a radial
+     ramp from almost-white to gold, with the deepest gold in the corners
+     where the pane is thickest. */
+  --glass-g-bg:
+    radial-gradient(115% 150% at 50% 34%,
+      rgba(255, 251, 240, 0.9) 0%,
+      rgba(250, 233, 190, 0.72) 30%,
+      rgba(230, 190, 108, 0.7) 62%,
+      rgba(198, 150, 58, 0.78) 100%);
   --glass-g-edge:
     inset 0 1px 0 rgba(255, 246, 222, 0.95),
     inset 0 0 0 1px rgba(255, 236, 190, 0.5),
@@ -842,3 +853,104 @@ html[data-theme='bright'] .roomfade {
 }
 html[data-theme='bright'] .roomfade[data-on] { opacity: 1; visibility: visible; }
 html[data-motion='off'] .roomfade { display: none; }
+
+
+/* ============================================================
+   TYPE
+   ============================================================
+   A pass over the whole museum rather than page by page, because the faults
+   were the same everywhere and they were all one fault: tracking meant for
+   Latin small caps applied to Han.
+
+   Latin letterforms have side bearings and a small-caps line wants 0.16–0.24em
+   to breathe. Han glyphs are already set on a square body with their own air
+   built in, so the same tracking does not open the line, it separates the
+   characters — 向下探索 at 0.3em reads as four words. Every label below is
+   given tracking by script rather than by role.
+   ============================================================ */
+
+/* Han labels: enough to letterspace, not enough to break the word */
+html[data-theme='bright'] :lang(zh) :is(
+  .eyebrow, .bh__eyebrow, .intro__eyebrow, .bh__uni, .bh__cue-txt,
+  .stats dd, .gr__n, .lec__prize a
+) {
+  letter-spacing: 0.1em;
+  text-indent: 0.1em;      /* tracking pads the right; give it back */
+}
+html[data-theme='bright'] .bh__cue-txt { letter-spacing: 0.2em; text-indent: 0.2em; }
+
+/* Display Han: 1.2 is a Latin measure. Han has no descenders to clear and a
+   full-height body, so a heading set at 1.2 floats; 1.28 with the block's own
+   optical centre reads level. Two lines of a long prize name — 生理學或醫學 —
+   is where it shows. */
+html[data-theme='bright'] :lang(zh) :is(h1, h2, h3) { line-height: 1.28; }
+html[data-theme='bright'] .bh__title { line-height: 1.12; }
+
+/* Figures are Latin inside Han sentences, so they get lining tabular digits
+   and a little tracking of their own; without it 31 and 74 sit at different
+   apparent weights. */
+html[data-theme='bright'] .stats dt {
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: 0.01em;
+  line-height: 1.05;
+}
+html[data-theme='bright'] .stats dd {
+  margin-block-start: 0.34rem;
+  font-size: var(--step--2);
+  line-height: 1.4;
+  color: var(--text);
+}
+
+/* The featured block is now one pane and one link, so its lines need a
+   hierarchy rather than five paragraphs at the same weight. */
+html[data-theme='bright'] .feature__text .eyebrow { margin-block-end: 0.15rem; }
+html[data-theme='bright'] .feature__who { line-height: 1.15; }
+html[data-theme='bright'] .feature__hook { line-height: 1.6; }
+html[data-theme='bright'] .feature__text p:not([class]) {
+  color: var(--text);
+  line-height: 1.8;         /* running Han wants more leading than Latin */
+  max-inline-size: 40ch;
+}
+
+/* A prize name over a photograph is the only place on the site where display
+   type sits on an image, so it carries a touch more weight and a tighter
+   line than the same size would on paper. */
+html[data-theme='bright'] .gr__title { line-height: 1.16; font-weight: 600; }
+html[data-theme='bright'] .gr__title-en,
+html[data-theme='bright'] .bh__title-en {
+  font-family: var(--font-body);
+  font-weight: 400;
+}
+
+/* Latin names are the one thing on these pages set in the display face at
+   text sizes; 1.15 keeps a two-word name from looking like two lines. */
+html[data-theme='bright'] :is(.card__who, .vc__who, .lec__who) { line-height: 1.15; }
+
+
+/* ---------- the museum's mark, on every room but the hall ----------
+   Global, because the prize pages and the laureate pages both wear it and a
+   rule scoped to one component reaches only the markup that component
+   rendered — on the laureate pages it arrived as bare gold text pinned to the
+   left edge of the window. */
+html[data-theme='bright'] .gr__lock {
+  position: fixed;
+  inset-block-start: 0.62rem;
+  inset-inline-start: clamp(0.7rem, 2.2vw, 1.6rem);
+  z-index: 60;
+  padding: 0.34rem 0.85rem;
+  border-radius: 0.42rem;
+  text-decoration: none;
+  background: var(--glass-g-bg);
+  backdrop-filter: blur(6px) saturate(1.5);
+  box-shadow: var(--glass-g-edge);
+  transition: filter 0.28s var(--ease), transform 0.28s var(--ease);
+}
+html[data-theme='bright'] .gr__lock:hover { filter: brightness(1.05); transform: translateY(-1px); }
+html[data-theme='bright'] .gr__lock-name {
+  font-family: var(--font-han-serif);
+  font-size: var(--step-0);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-indent: 0.07em;
+  color: var(--glass-g-ink);
+}

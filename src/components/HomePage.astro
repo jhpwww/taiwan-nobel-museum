@@ -92,7 +92,12 @@ const figures = [
         </div>
       )}
 
-      <div class="feature__text stack">
+      {/* The whole block is the way in. A single '觀看 →' at the foot asked
+          the reader to find the one live word in a paragraph they had just
+          finished reading; the paragraph is about one lecture and there is
+          only one place it can lead. */}
+      <a class="feature__text stack" href={lectureUrl(lang, featured.id)}
+         aria-label={`${featured.laureate[lang]} — ${upcoming ? t('home.upcomingCta') : t('hall.watch')}`}>
         <p class="eyebrow">{t('lec.prize', { year: featured.prize.year, category: featuredPrize })}</p>
         <h3 class="feature__who">{featured.laureate.en}</h3>
         {lang === 'zh' && <p class="gloss">{featured.laureate.zh}</p>}
@@ -102,12 +107,7 @@ const figures = [
         ) : (
           <p>{featured.description[lang]}</p>
         )}
-        <p>
-          <a class="more" href={lectureUrl(lang, featured.id)}>
-            {upcoming ? t('home.upcomingCta') : t('hall.watch')} →
-          </a>
-        </p>
-      </div>
+      </a>
     </div>
   </section>
 
@@ -153,7 +153,15 @@ const figures = [
   .feature { margin-block-start: clamp(3rem, 8vw, 5.5rem); }
   .feature__grid { display: grid; gap: clamp(1.25rem, 3vw, 2.5rem); margin-block-start: 1.8rem; }
   @media (min-width: 56rem) { .feature__grid { grid-template-columns: 1.25fr 1fr; align-items: center; } }
-  .feature__text { --gap: 0.5rem; }
+  .feature__text {
+    --gap: 0.5rem;
+    display: grid;
+    align-content: start;
+    text-decoration: none;
+    color: inherit;
+    border-radius: var(--radius);
+  }
+  .feature__text:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
   .feature__hook {
     font-family: var(--font-hook); font-size: var(--step-1);
     color: var(--accent); line-height: 1.5;

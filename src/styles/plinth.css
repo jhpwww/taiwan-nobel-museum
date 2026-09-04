@@ -227,3 +227,17 @@ html[lang='en'] .bh__name {
 .bh__cue:hover .bh__cue-chev { opacity: 1; translate: 0 2px; }
 .bh__cue-chev { transition: opacity 0.3s var(--ease), translate 0.3s var(--ease); }
 html[data-motion='off'] .bh__cue-rule i { animation: none; inset-block-start: 40%; }
+
+
+/* ---------- on a phone the drum says nothing ----------
+   Everything on the drum's face is sized in container units of the frame,
+   with a floor to keep it legible on a narrow desktop; at half the frame the
+   floor binds and the type is half again too big for the drum it is cut into.
+   So at this width the drum keeps its device and its rings and the name is
+   set where there is room for it. The hall does this and the prize pages must
+   do it too, or the same object is two objects. */
+@media (max-width: 48rem) {
+  .bh__face .bh__name,
+  .bh__face .bh__name-en { display: none; }
+  .bh__mark { inline-size: 17cqw; margin-block-end: 0; }
+}

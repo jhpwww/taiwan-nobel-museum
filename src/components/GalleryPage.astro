@@ -76,6 +76,7 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     of text under the title. */}
 <Base lang={lang} title={title} segments={['gallery', cat]} bare={bright}>
   {bright ? (
+    <>
     <header class="gr" data-cat={cat}>
       {/* the hall's own room, and no band of empty page above it */}
       <div class="gr__room" aria-hidden="true">
@@ -90,43 +91,11 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
           the way back, which is why the 'return to the hall' line under the
           title has gone: two doors out of one room, side by side, is one too
           many */}
-      <a class="gr__lock" href={home(lang)} aria-label={t('nav.hall')}>
+      <a class="gr__lock" href={home(lang)} aria-label={t('nav.backHall')}>
         <span class="gr__lock-name">{t('site.tagline')}</span>
       </a>
 
       <div class="wrap gr__in">
-        {piece && (
-          <div class="gr__piece">
-            <span class="bh__art">
-              <model-viewer
-                class="bh__mv"
-                src={piece.model}
-                alt={t('models.alt', { what: title, cat: title })}
-                poster={piece.poster}
-                camera-orbit={CAMERA}
-                camera-target="0m 0m 0m"
-                min-camera-orbit={CAMERA_LIMIT}
-                max-camera-orbit={CAMERA_LIMIT}
-                field-of-view="30deg"
-                interaction-prompt="none"
-                disable-zoom
-                environment-image="neutral"
-                exposure="1.35"
-                shadow-intensity="0.55"
-                shadow-softness="0.9"
-                autoplay
-              >
-                <img class="bh__poster" slot="poster" src={piece.poster} alt="" width="640" height="1280" />
-              </model-viewer>
-              <svg class="bh__rings" aria-hidden="true" focusable="false"></svg>
-              <span class="bh__face" aria-hidden="true">
-                <img class="bh__mark" src={piece.mark} alt="" width="192" height="192" decoding="async" />
-                <span class="bh__name">{title}</span>
-                <span class="bh__name-en">{titleAlt}</span>
-              </span>
-            </span>
-          </div>
-        )}
         <div class="gr__id">
           <h1 class="gr__title">
             {isIntro ? <>{introA}<span class="conj">{introConj}</span>{introB}</> : title}
@@ -146,6 +115,50 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
         <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
       </a>
     </header>
+
+    {/* The piece rides up with the page and then stops.
+        It is a sticky rail rather than a scripted position: sticky is the
+        compositor's own job, so the piece cannot lag a frame behind the page
+        the way a scroll-driven transform does — that lag is exactly what made
+        the hall's row shiver before it was pinned. The rail carries no height
+        of its own and is pulled back up over the room by the piece's own
+        height, so the piece stands on the floor of the photograph until the
+        museum's name catches it. */}
+    {piece && (
+      <div class="gr__rail" aria-hidden="true">
+        <div class="gr__piece">
+          <span class="bh__art">
+            <model-viewer
+              class="bh__mv"
+              src={piece.model}
+              alt={t('models.alt', { what: title, cat: title })}
+              poster={piece.poster}
+              camera-orbit={CAMERA}
+              camera-target="0m 0m 0m"
+              min-camera-orbit={CAMERA_LIMIT}
+              max-camera-orbit={CAMERA_LIMIT}
+              field-of-view="30deg"
+              interaction-prompt="none"
+              disable-zoom
+              environment-image="neutral"
+              exposure="1.35"
+              shadow-intensity="0.55"
+              shadow-softness="0.9"
+              autoplay
+            >
+              <img class="bh__poster" slot="poster" src={piece.poster} alt="" width="640" height="1280" />
+            </model-viewer>
+            <svg class="bh__rings" aria-hidden="true" focusable="false"></svg>
+            <span class="bh__face" aria-hidden="true">
+              <img class="bh__mark" src={piece.mark} alt="" width="192" height="192" decoding="async" />
+              <span class="bh__name">{title}</span>
+              <span class="bh__name-en">{titleAlt}</span>
+            </span>
+          </span>
+        </div>
+      </div>
+    )}
+    </>
   ) : (
     <header class="gh" data-cat={cat}>
       <div class="wrap gh__in">
@@ -282,8 +295,11 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
 
   /* the mark the hall's name folds into, in the same gold glass — see
      'the name, condensed' in bright.css, which this borrows outright */
+  /* Fixed, not absolute. It is the museum's name: it does not belong to the
+     top of this room, it belongs to the whole of it, and it has to be there
+     when the piece arrives beside it. */
   .gr__lock {
-    position: absolute;
+    position: fixed;
     inset-block-start: 0.62rem;
     inset-inline-start: clamp(0.7rem, 2.2vw, 1.6rem);
     z-index: 2;
@@ -308,25 +324,64 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
   .gr__in {
     display: flex;
     align-items: flex-end;
-    /* Left, not centred: the way on sits at the middle of the foot, and a
-       centred piece put the lecture count directly on top of it. */
+    /* the piece stands to the left of this on its own rail, so the words are
+       set in from it */
     justify-content: flex-start;
+    padding-inline-start: calc(var(--gr-art) / 2 + clamp(0.8rem, 3vw, 2.6rem));
     gap: clamp(0.8rem, 3vw, 2.6rem);
     /* the floor of the crop, measured on the rendered page: below this the
        picture is fading into the page and there is nothing to stand on */
     padding-block-end: clamp(1.2rem, 3.4vh, 2.2rem);
   }
-  /* The piece stands on the floor of the picture. Its frame's foot is 95.7%
-     of the way down it — the same figure the hall stands its row by — so the
-     frame is pulled down by the 4.3% that is left. */
-  .gr__piece { flex: none; margin-block-end: calc(-0.043 * var(--gr-art, 15rem)); }
+  /* The rail: no height, pulled back up over the room by exactly the piece's
+     own height plus the floor's clearance, so the piece starts standing on the
+     photograph's floor. Sticky from there, for the whole document. */
+  .gr__rail {
+    position: sticky;
+    inset-block-start: var(--gr-stick);
+    z-index: 3;
+    /* A hair of height, and the pull-up given straight back underneath.
+       The rail has to sit its own height higher than where the flow would put
+       it, and must not take that height from anything else — a bare negative
+       top margin moved the page up with it and slid the first paragraph under
+       the room. One pixel because a box of exactly zero height collapses its
+       own two margins together and lands back where it started. */
+    block-size: 1px;
+    margin-block-start: calc(-1 * (var(--gr-art) + var(--gr-floor)));
+    margin-block-end: calc(var(--gr-art) + var(--gr-floor) - 1px);
+    pointer-events: none;
+  }
+  .gr__piece {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: max(1rem, calc((100vw - 76rem) / 2));
+    transform-origin: 0 0;
+    transition: scale 0.45s var(--ease), translate 0.45s var(--ease);
+  }
+  /* Caught. Full size it would stand over the lectures for the rest of the
+     page, so at the moment the name catches it the piece becomes a mark of
+     itself and takes its place in the row of keys. */
+  .gr__rail[data-pinned] .gr__piece {
+    scale: 0.2;
+    translate: clamp(5.4rem, 7vw, 6.6rem) -0.4rem;
+  }
+  :global(html[data-motion='off']) .gr__piece { transition: none; }
   .gr__piece .bh__art {
-    inline-size: calc(var(--gr-art, 15rem) / 2);
-    block-size: var(--gr-art, 15rem);
+    inline-size: calc(var(--gr-art) / 2);
+    block-size: var(--gr-art);
     aspect-ratio: auto;
     max-inline-size: none;
   }
-  .gr { --gr-art: clamp(13rem, 38svh, 21rem); }
+  /* On both, because the rail is the header's *sibling* — it has to be, to
+     stick for the whole document rather than for the height of the room. A
+     var set on .gr alone does not reach it, and every fallback in the rail's
+     own arithmetic quietly took over: the piece parked 50px too low and its
+     rest position was measured against a height it does not have. */
+  .gr, .gr__rail {
+    --gr-art: clamp(13rem, 38svh, 21rem);
+    --gr-floor: clamp(1.2rem, 3.4vh, 2.2rem);
+    --gr-stick: 0.45rem;
+  }
   .gr__id { padding-block-end: 0.2rem; }
   .gr__title {
     font-family: var(--font-han-serif);
@@ -357,7 +412,16 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
   .gr__anchor { display: block; scroll-margin-block-start: 4rem; }
 
   @media (max-width: 40rem) {
-    .gr { --gr-art: clamp(9rem, 26svh, 13rem); block-size: clamp(17rem, 50svh, 24rem); }
+    /* On the rail as well as the room. The rail is a sibling and every one of
+       its numbers is built from --gr-art: its rest position is a negative
+       margin of exactly the piece's height, so a stale value there does not
+       merely draw the piece at the wrong size — it pulls the whole page up
+       under the room and swallows the first paragraph. */
+    .gr, .gr__rail { --gr-art: clamp(7rem, 22svh, 10rem); }
+    .gr { block-size: clamp(17rem, 50svh, 24rem); }
+    /* the keys stack down the right here, so the mark rides just under the
+       museum's name rather than beside it */
+    .gr__rail[data-pinned] .gr__piece { scale: 0.3; translate: 0.4rem 2.6rem; }
     .gr__in { gap: 0.5rem; }
     .gr__title { font-size: var(--step-2); }
     .gr__cue .bh__cue-txt { display: none; }
@@ -541,4 +605,24 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
   /* one piece rather than six, but the same object — same drum, same rings,
      same name bent onto the same cylinder */
   dressPlinths();
+
+  /* The rail does the pinning; this only says when the piece has been caught,
+     so it can become a mark. A boolean toggled on a rAF, not a position
+     recomputed on one — the sticky element itself never waits for script. */
+  const rail = document.querySelector<HTMLElement>('.gr__rail');
+  if (rail) {
+    const stick = () => parseFloat(getComputedStyle(rail).insetBlockStart) || 0;
+    let ticking = false;
+    const test = () => {
+      rail.toggleAttribute('data-pinned', rail.getBoundingClientRect().top <= stick() + 1);
+      ticking = false;
+    };
+    test();
+    addEventListener('scroll', () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(test);
+    }, { passive: true });
+    addEventListener('resize', test);
+  }
 </script>

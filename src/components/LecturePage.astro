@@ -7,7 +7,9 @@ import ExtLink from './ExtLink.astro';
 import StudyPanel from './StudyPanel.astro';
 import CompareBlock from './CompareBlock.astro';
 import { useT, type Lang } from '../i18n/ui';
-import { gallery } from '../i18n/routing';
+import { gallery, home, asset } from '../i18n/routing';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { catName, tagName, relatedTo, localDate, type Lecture, catPrizeName } from '../data/catalog';
 
 interface Props { lang: Lang; rec: Lecture }
@@ -28,6 +30,21 @@ const next = relatedTo(rec, 3);
 /** NTU 共同教育中心 collects all six NTU lectures and their material */
 const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
 
+/* the prize's own sculpture, in the bright museum — see GalleryPage for the
+   note on why anything under public/ is fingerprinted here */
+const bright = process.env.THEME === 'bright';
+const stampAsset = (rel: string) => {
+  const hash = createHash('sha256')
+    .update(readFileSync(new URL(`../../public/${rel}`, import.meta.url)))
+    .digest('hex').slice(0, 8);
+  return `${asset(rel)}?v=${hash}`;
+};
+const piece = bright ? {
+  model: stampAsset(`assets/models/gold/${cat}.glb`),
+  poster: stampAsset(`assets/models/gold/${cat}.webp`),
+  mark: stampAsset(`assets/marks/${cat}.webp`),
+} : null;
+
 ---
 
 <Base
@@ -35,11 +52,48 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
   title={`${who} — ${rec.title.en}`}
   description={rec.description[lang]}
   segments={['lecture', rec.id]}
+  bare={bright}
 >
   <article class="lec" data-cat={cat}>
     <header class="lec__head">
+      {/* The same room as the hall and the prize pages. A laureate's page is
+          the innermost room of the three, not a document that fell out of
+          them. */}
+      {bright && (
+        <div class="lec__room" aria-hidden="true">
+          <picture>
+            <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
+            <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
+                 fetchpriority="high" decoding="async" />
+          </picture>
+        </div>
+      )}
+      {bright && (
+        <a class="gr__lock lec__lock" href={home(lang)} aria-label={t('nav.backHall')}>
+          <span class="gr__lock-name">{t('site.tagline')}</span>
+        </a>
+      )}
       <div class="wrap lec__head-in">
-        <div class="lec__crest" aria-hidden="true"><Sculpture cat={cat} size={110} id={`lec-${rec.id}`} /></div>
+        <div class="lec__crest" aria-hidden="true">
+          {piece ? (
+            <span class="bh__art">
+              <model-viewer class="bh__mv" src={piece.model} alt="" poster={piece.poster}
+                camera-orbit="35deg 98deg 1.55m" camera-target="0m 0m 0m"
+                min-camera-orbit="auto auto 1.55m" max-camera-orbit="auto auto 1.55m"
+                field-of-view="30deg" interaction-prompt="none" disable-zoom
+                environment-image="neutral" exposure="1.35"
+                shadow-intensity="0.55" shadow-softness="0.9" autoplay>
+                <img class="bh__poster" slot="poster" src={piece.poster} alt="" width="640" height="1280" />
+              </model-viewer>
+              <svg class="bh__rings" aria-hidden="true" focusable="false"></svg>
+              <span class="bh__face" aria-hidden="true">
+                <img class="bh__mark" src={piece.mark} alt="" width="192" height="192" decoding="async" />
+                <span class="bh__name">{catName(cat, lang)}</span>
+                <span class="bh__name-en">{catName(cat, lang === 'zh' ? 'en' : 'zh')}</span>
+              </span>
+            </span>
+          ) : <Sculpture cat={cat} size={110} id={`lec-${rec.id}`} />}
+        </div>
         <div class="lec__id">
           <p class="eyebrow lec__prize">
             <a href={gallery(lang, cat)}>{t('lec.prize', { year: rec.prize.year, category: catPrize })}</a>
@@ -166,11 +220,45 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
 
 <style>
   .lec__head {
+    position: relative;
+    isolation: isolate;
     border-block-end: 1px solid var(--line);
     background:
       radial-gradient(70% 100% at 12% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
       var(--bg-1);
     padding-block: clamp(2rem, 6vw, 3.5rem);
+  }
+  /* The room behind it, cropped to the floor and the colonnade.
+     `picture` has to be told it is a block of full height, or the image's
+     100% resolves against an auto-height inline box, falls back to its own
+     aspect ratio, and paints 941px of rotunda into a header meant to be a
+     third of that. */
+  .lec__room { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .lec__room picture { display: block; block-size: 100%; }
+  .lec__room img {
+    inline-size: 100%; block-size: 100%;
+    object-fit: cover; object-position: 50% 80%;
+  }
+  /* enough veil to read a page of prose over, which is the difference between
+     this room and the two that only carry a title */
+  .lec__room::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.88) 58%, var(--bg-0));
+  }
+  :global(html[data-theme='bright']) .lec__head {
+    background: none;
+    border-block-end: 0;
+    padding-block: calc(clamp(2rem, 6vw, 3.5rem) + 2.4rem) clamp(2rem, 6vw, 3.5rem);
+  }
+  .lec__lock { inset-block-start: 0.62rem; }
+  /* the prize's own piece, at the size the line drawing used to be */
+  .lec__crest .bh__art {
+    inline-size: 7.5rem;
+    block-size: 13.7rem;      /* the cage's ratio — see the note in HallBright */
+    aspect-ratio: auto;
+    max-inline-size: none;
   }
   .lec__head-in { display: grid; gap: 1.5rem; }
   @media (min-width: 52rem) { .lec__head-in { grid-template-columns: auto 1fr; gap: 2.5rem; align-items: start; } }
@@ -244,3 +332,10 @@ const NTU_CGE = 'https://cge.ntu.edu.tw/cl_n_203079.html';
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
   }
 </style>
+
+
+<script>
+  import '../../vendor/model-viewer.min.js';
+  import { dressPlinths } from '../scripts/plinth';
+  dressPlinths();
+</script>

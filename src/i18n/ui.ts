@@ -15,6 +15,8 @@ export const ui = {
       '收錄臺灣橋樑計畫 31 場諾貝爾獎得主演講、導讀影片與專訪，為高中生、大學生與一般大眾打造的線上影音博物館。',
 
     'nav.hall': '博物館大廳',
+    'nav.backHall': '回到大廳',
+    'nav.prize': '關於諾獎',
     'nav.all': '所有講座',
     'nav.about': '關於本館',
     'nav.skip': '跳到主要內容',
@@ -213,6 +215,8 @@ export const ui = {
       '31 Nobel laureate lectures delivered in Taiwan, with guide videos and interviews — an online video museum for students and the curious public.',
 
     'nav.hall': 'The Great Hall',
+    'nav.backHall': 'Back to the hall',
+    'nav.prize': 'About the prize',
     'nav.all': 'All lectures',
     'nav.about': 'About',
     'nav.skip': 'Skip to main content',

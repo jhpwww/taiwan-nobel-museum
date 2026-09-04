@@ -12,7 +12,8 @@ const face: Record<string, string> = bright ? fontsBright : fonts;
 import PageNav from '../components/PageNav.astro';
 import LangFlag from '../components/LangFlag.astro';
 import { useT, HTML_LANG, LANG_LABEL, type Lang } from '../i18n/ui';
-import { home, browse, about, learn, asset, otherLang } from '../i18n/routing';
+import { home, browse, about, learn, gallery, asset, otherLang } from '../i18n/routing';
+import { INTRO } from '../data/catalog';
 
 interface Props {
   lang: Lang;
@@ -100,10 +101,14 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <header class="topbar topbar--ghost">
         <div class="wrap topbar__in topbar__in--end">
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
-            {/* the hall itself is one of these on every page but the hall */}
-            {segments.length > 0 && <a href={home(lang)}>{t('nav.hall')}</a>}
+            {/* The hall itself is one of these on every page but the hall,
+                and there it is named for what pressing it does rather than for
+                where it goes — on a page that is already a room in the museum,
+                '博物館大廳' reads as a place and '回到大廳' as a door. */}
+            {segments.length > 0 && <a href={home(lang)}>{t('nav.backHall')}</a>}
             <a href={browse(lang)}>{t('nav.all')}</a>
             <a href={learn(lang)}>{t('nav.learn')}</a>
+            <a href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
             <a href={about(lang)}>{t('nav.about')}</a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
                aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
@@ -125,9 +130,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
             </span>
           </a>
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
-            <a href={home(lang)}>{t('nav.hall')}</a>
+            <a href={home(lang)}>{t('nav.backHall')}</a>
             <a href={browse(lang)}>{t('nav.all')}</a>
             <a href={learn(lang)}>{t('nav.learn')}</a>
+            <a href={gallery(lang, INTRO)}>{t('nav.prize')}</a>
             <a href={about(lang)}>{t('nav.about')}</a>
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
                aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
