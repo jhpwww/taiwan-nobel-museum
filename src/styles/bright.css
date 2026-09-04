@@ -147,23 +147,26 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
   content: '';
   position: absolute;
   z-index: -1;
-  inset: -2.2rem -5rem -2.4rem -6rem;
+  inset: -4rem -7rem -4.5rem -8rem;
   pointer-events: none;
-  /* Along the row, and still a haze.
-     A single radial fell away before it reached the left end, so the first
-     key or two — 回到大廳, which only exists on the pages where the row is
-     longest — stood on the bare photograph. The first fix stretched a bar
-     across instead, and a bar with a flat middle is not a haze: it read as a
-     white panel with edges. What is here is one wide ellipse, drawn wider
-     than the row so its own falloff is what reaches the ends, at an opacity
-     low enough that the marble is still legible through it. No plateau
-     anywhere: every stop is on its way down. */
-  background: radial-gradient(58% 96% at 50% 50%,
-    rgba(255, 255, 255, 0.56),
-    rgba(255, 255, 255, 0.44) 34%,
-    rgba(255, 255, 255, 0.24) 62%,
-    rgba(255, 255, 255, 0.08) 82%,
-    transparent 96%);
+  /* Along the row, and a haze rather than a panel.
+     Two ways to get this wrong, both now made. A bar with a flat middle is
+     not a haze — it reads as a white board with edges. And a radial whose
+     radii are bigger than the box is not one either: the percentages in
+     `radial-gradient(x% y% …)` are of the box's WIDTH and HEIGHT while the
+     radius runs from the centre, so a y of 96% is nearly twice the half
+     height and the gradient still carries a third of its alpha when the box
+     cuts it off. Straight edge, all four sides, which is what was reported
+     twice.
+     So both radii are kept well under half the box, and the box is drawn far
+     larger than the row, which is what leaves room for the tail to reach zero
+     inside it. */
+  background: radial-gradient(46% 40% at 50% 47%,
+    rgba(255, 255, 255, 0.54),
+    rgba(255, 255, 255, 0.4) 38%,
+    rgba(255, 255, 255, 0.19) 64%,
+    rgba(255, 255, 255, 0.06) 84%,
+    transparent 100%);
 }
 
 html[data-theme='bright'] .topbar--ghost .topbar__nav a {
@@ -253,13 +256,13 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
   }
   /* a column, so the haze stands up rather than lies down */
   html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
-    inset: -1.4rem -2.6rem -1.6rem -3rem;
-    background: radial-gradient(96% 58% at 50% 50%,
-      rgba(255, 255, 255, 0.56),
-      rgba(255, 255, 255, 0.44) 34%,
-      rgba(255, 255, 255, 0.24) 62%,
-      rgba(255, 255, 255, 0.08) 82%,
-      transparent 96%);
+    inset: -3rem -4rem -3.4rem -4.6rem;
+    background: radial-gradient(40% 46% at 52% 50%,
+      rgba(255, 255, 255, 0.54),
+      rgba(255, 255, 255, 0.4) 38%,
+      rgba(255, 255, 255, 0.19) 64%,
+      rgba(255, 255, 255, 0.06) 84%,
+      transparent 100%);
   }
   /* A column of four is as tall as the room behind it. Compacted, it clears
      the pieces when they withdraw onto the hall's floor. */
@@ -269,6 +272,22 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
     font-size: var(--step--2);
   }
   html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang { padding: 0.15rem 0.1rem 0.3rem !important; }
+
+  /* ---------- the bar, folded ----------
+     On the hall, and only there, the five keys start behind one. Five keys
+     down the side of the room are five keys over the thing they are doors
+     into; while the pieces are at full size the room is what should be in the
+     window. They open when the pieces withdraw, and on a press.
+
+     Only on the hall: everywhere else the page is already a room and the bar
+     is how you leave it, so it stands open. */
+  html[data-theme='bright'][data-home] .topbar__menu { display: inline-flex; }
+  html[data-theme='bright'][data-home] .topbar--ghost .topbar__nav .topbar__key {
+    display: none;
+  }
+  html[data-theme='bright'][data-home][data-nav-open] .topbar--ghost .topbar__nav .topbar__key {
+    display: inline-flex;
+  }
 }
 
 /* the dark hall needed a scrim to keep the controls legible; a white one
@@ -352,6 +371,39 @@ html[data-theme='bright'] .card:hover {
   }
 }
 
+/* The key the bar folds behind. Hidden everywhere by default — it is shown
+   only by the phone-width rule for the hall, because that is the only place
+   anything folds. The three bars are drawn rather than typed: a glyph would
+   be set in the museum's serif and read as a character. Open, the middle bar
+   goes and the other two cross. */
+html[data-theme='bright'] .topbar__menu { display: none; padding-inline: 0.62rem; }
+html[data-theme='bright'] .topbar__bars {
+  position: relative;
+  display: block;
+  inline-size: 1.05rem;
+  block-size: 0.72rem;
+}
+html[data-theme='bright'] .topbar__bars::before,
+html[data-theme='bright'] .topbar__bars::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  block-size: 2px;
+  border-radius: 1px;
+  background: var(--museum-ink);
+  transition: translate 0.28s var(--ease), rotate 0.28s var(--ease);
+}
+html[data-theme='bright'] .topbar__bars::before { inset-block-start: 0; }
+html[data-theme='bright'] .topbar__bars::after { inset-block-end: 0; }
+/* the middle one, on the element itself */
+html[data-theme='bright'] .topbar__bars {
+  background: linear-gradient(var(--museum-ink), var(--museum-ink)) center / 100% 2px no-repeat;
+  transition: opacity 0.2s var(--ease);
+}
+html[data-theme='bright'][data-nav-open] .topbar__bars { background-image: none; }
+html[data-theme='bright'][data-nav-open] .topbar__bars::before { translate: 0 0.35rem; rotate: 45deg; }
+html[data-theme='bright'][data-nav-open] .topbar__bars::after { translate: 0 -0.35rem; rotate: -45deg; }
+
 /* ---------- the standing controls ---------- */
 
 /* The same haze as the bar's. These two stand over whatever the page has
@@ -364,14 +416,14 @@ html[data-theme='bright'] .pn::before {
   content: '';
   position: absolute;
   z-index: -1;
-  inset: -1.8rem -3.4rem -2rem -4rem;
+  inset: -3.4rem -4.4rem -3.6rem -5.2rem;
   pointer-events: none;
-  background: radial-gradient(62% 92% at 50% 50%,
-    rgba(255, 255, 255, 0.56),
-    rgba(255, 255, 255, 0.44) 34%,
-    rgba(255, 255, 255, 0.24) 62%,
-    rgba(255, 255, 255, 0.08) 82%,
-    transparent 96%);
+  background: radial-gradient(44% 44% at 52% 50%,
+    rgba(255, 255, 255, 0.54),
+    rgba(255, 255, 255, 0.4) 38%,
+    rgba(255, 255, 255, 0.19) 64%,
+    rgba(255, 255, 255, 0.06) 84%,
+    transparent 100%);
   opacity: 0;
   transition: opacity 0.32s var(--ease);
 }
@@ -847,8 +899,10 @@ html[data-theme='bright'] .after .strip { padding-block-start: 0; }
    wider than the thing it captions. Held to the width of the six drums. */
 html[data-theme='bright'] .after .stats {
   padding-block: 0 0.5rem;
-  max-inline-size: 38rem;
-  gap: 0.45rem;
+  /* Two thirds of what it was. Six panes at a sixth of 38rem still carried
+     more of the screen than the drums above them. */
+  max-inline-size: 25.3rem;
+  gap: 0.4rem;
   /* Six across, always. The component's auto-fit has a 6.6rem minimum, and
      inside 38rem that only fits five — the sixth dropped to a second row and
      the strip doubled in height. */
@@ -943,8 +997,10 @@ html[data-theme='bright'] .bh__title { line-height: 1.12; }
 @media (max-width: 48rem) {
   html[data-theme='bright'] .after .stats {
     grid-template-columns: repeat(6, minmax(0, 1fr));
-    gap: 0.2rem;
+    gap: 0.18rem;
     padding-block: 0 0.4rem;
+    /* the same two thirds, and it fits because the labels are two characters */
+    max-inline-size: min(100%, 17rem);
   }
   html[data-theme='bright'] .after .stats div {
     padding: 0.34rem 0.1rem 0.3rem;

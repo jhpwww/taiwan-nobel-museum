@@ -39,6 +39,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
      one thing in it that needs to know where the site is mounted is handed in
      here rather than hard-coded. See scripts/build-glass-frame.py. -->
 <html lang={HTML_LANG[lang]} data-theme={bright ? 'bright' : undefined}
+      data-home={segments.length === 0 ? '' : undefined}
       style={bright ? `--glass-frame: url('${asset('assets/ui/glass-frame.webp')}')` : undefined}>
   <head>
     <meta charset="utf-8" />
@@ -104,15 +105,28 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       <header class="topbar topbar--ghost">
         <div class="wrap topbar__in topbar__in--end">
           <nav class="topbar__nav" aria-label={t('nav.hall')}>
+            {/* On the hall, on a phone, the keys start folded behind this one
+                and open when the pieces withdraw — or when it is pressed. A
+                column of five over the room is a column of five over the
+                thing it is a door into; while the pieces are at full size the
+                room should be what is in the window. It is rendered on every
+                page so the markup does not fork, and hidden by CSS everywhere
+                the fold does not apply. */}
+            <button class="topbar__menu museum-glass-btn museum-glass-btn--nav" type="button"
+                    aria-expanded="false" aria-controls="topbar-keys" aria-label={t('nav.menu')}>
+              <span class="topbar__bars" aria-hidden="true"></span>
+            </button>
             {/* The hall itself is one of these on every page but the hall,
                 and there it is named for what pressing it does rather than for
                 where it goes — on a page that is already a room in the museum,
                 '博物館大廳' reads as a place and '回到大廳' as a door. */}
-            {segments.length > 0 && <a class="museum-glass-btn museum-glass-btn--nav" href={home(lang)}><span>{t('nav.backHall')}</span></a>}
-            <a class="museum-glass-btn museum-glass-btn--nav" href={browse(lang)}><span>{t('nav.all')}</span></a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={learn(lang)}><span>{t('nav.learn')}</span></a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}><span>{t('nav.prize')}</span></a>
-            <a class="museum-glass-btn museum-glass-btn--nav" href={about(lang)}><span>{t('nav.about')}</span></a>
+            {segments.length > 0 && <a class="topbar__key museum-glass-btn museum-glass-btn--nav" href={home(lang)}><span>{t('nav.backHall')}</span></a>}
+            <a class="topbar__key museum-glass-btn museum-glass-btn--nav" id="topbar-keys" href={browse(lang)}><span>{t('nav.all')}</span></a>
+            <a class="topbar__key museum-glass-btn museum-glass-btn--nav" href={learn(lang)}><span>{t('nav.learn')}</span></a>
+            <a class="topbar__key museum-glass-btn museum-glass-btn--nav" href={gallery(lang, INTRO)}><span>{t('nav.prize')}</span></a>
+            <a class="topbar__key museum-glass-btn museum-glass-btn--nav" href={about(lang)}><span>{t('nav.about')}</span></a>
+            {/* The flag never folds. It is the one control a reader may want
+                before anything else on the page makes sense to them. */}
             <a class="topbar__lang" href={other.href} lang={other.lang === 'zh' ? 'zh-Hant-TW' : 'en'}
                aria-label={LANG_LABEL[other.lang]} title={LANG_LABEL[other.lang]}>
               <LangFlag to={other.lang} />
@@ -120,6 +134,18 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
           </nav>
         </div>
       </header>
+    )}
+    {bare && (
+      <script>
+        {/* The fold is CSS; this is only the press. The hall opens the same
+            attribute when its pieces withdraw — see HallBright.astro — so the
+            two agree without either knowing about the other. */}
+        const btn = document.querySelector('.topbar__menu');
+        btn?.addEventListener('click', () => {
+          const open = document.documentElement.toggleAttribute('data-nav-open');
+          btn.setAttribute('aria-expanded', String(open));
+        });
+      </script>
     )}
 
     {!bare && (

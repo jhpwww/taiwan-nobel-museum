@@ -514,6 +514,17 @@ const PLATE = { w: 836, h: 470 };
   }
   :global(html[data-motion='off']) .bh__plinths { animation: none; }
 
+  /* A step forward: a tenth larger, and set down a little on the floor.
+     On `scale` and `translate` rather than on `transform`, which the arrival
+     animation and the retreat both own — the three are separate properties
+     and compose, so the row can be a tenth bigger and still walk in from the
+     far end and still withdraw. Everything on a piece is sized in container
+     units of its own frame, so the type and the device on the drum come with
+     it and nothing has to be scaled twice. */
+  @media (min-width: 48.0625rem) {
+    .bh__plinths { scale: 1.1; translate: 0 1.6%; }
+  }
+
   /* Gone back. On a desktop that is one scale about the vanishing point, which
      in a one-point perspective is exactly what walking away does. */
   .bh__plinths[data-state='back'] { transform: scale(0.5); }
@@ -641,6 +652,14 @@ const PLATE = { w: 836, h: 470 };
       pointer-events: none;          /* the anchor under it takes the tap */
     }
     .bh__piece { padding: 0.25rem var(--pad) 0.35rem; }
+    /* The second row comes up; the first stays exactly where it is.
+       A negative row-gap would have been the obvious way and grid clamps it to
+       zero, so it is a margin on the three pieces of the second row instead.
+       The frame is the same height for all six and the drum sits at its foot,
+       so the top of a frame holding a short piece — the dove, the quill — is
+       empty; this takes that emptiness out from under the first row's captions
+       and opens the space between the bottom drums and the figures below. */
+    .bh__piece:nth-child(n + 4) { margin-block-start: -3.4rem; }
 
     /* The name comes off the drum and stands under the piece.
      *
@@ -774,6 +793,11 @@ const PLATE = { w: 836, h: 470 };
     plinths.dataset.state = v ? 'back' : 'in';
     foot?.toggleAttribute('data-gone', v);
     lockup?.toggleAttribute('data-small', v);
+    /* the bar's keys are folded behind one while the pieces are at full size
+       and open with them — the attribute is the only thing the two share, and
+       the button in the bar sets the same one when it is pressed */
+    document.documentElement.toggleAttribute('data-nav-open', v);
+    document.querySelector('.topbar__menu')?.setAttribute('aria-expanded', String(v));
     if (before) flip(before);
   }
 
