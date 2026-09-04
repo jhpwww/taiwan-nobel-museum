@@ -16,8 +16,14 @@ interface Props {
 }
 const { href, lang, class: cls, arrow = true } = Astro.props;
 const t = useT(lang);
+/* Every off-site link in the museum comes through here, so this is where the
+   spec's rule about them lives: an external reference is a nav-weight button,
+   never a primary one. Doing it here rather than at each call site is the
+   same argument as the rel and the target — the behaviour cannot drift
+   between components if there is only one component. */
+const klass = ['museum-btn', 'museum-btn--nav', cls].filter(Boolean).join(' ');
 ---
-<a href={href} class={cls} target="_blank" rel="noopener noreferrer">
+<a href={href} class={klass} target="_blank" rel="noopener noreferrer">
   <slot />
   {arrow && <span class="ext-arrow" aria-hidden="true">↗</span>}
   <span class="visually-hidden">{t('a11y.newTab')}</span>

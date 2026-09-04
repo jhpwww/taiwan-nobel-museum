@@ -173,8 +173,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
       /* over the hall: no panel, no brand — just a readability scrim so the
          controls stay legible against both the dark vault and the content
          further down the page */
-      /* out of flow, so the hall fills the viewport behind it rather than
-         starting below a 54px band of bare body background */
+      /* Out of flow, so the hall fills the viewport behind it rather than
+         starting below a 54px band of bare body background — and therefore
+         transparent to the pointer, because a bar with no panel is a bar with
+         no surface. Fixed and full-width, its container was swallowing every
+         tap in the strip it covers: on a phone, where the keys stack into a
+         column, that strip is 200px tall and lands on the first row of
+         sculptures and on the title of every prize page. Only the keys
+         themselves take a press. */
+      .topbar--ghost { pointer-events: none; }
+      .topbar--ghost .topbar__nav a,
+      .topbar--ghost button { pointer-events: auto; }
       .topbar--ghost {
         position: fixed;
         inset-inline: 0;
