@@ -1,0 +1,56 @@
+---
+/**
+ * RoomBack.astro — the hall, held behind a page that has no hero of its own.
+ *
+ * The great hall pins its room and the prize and laureate pages band it
+ * across their heads; these are the pages that are only a page — a list, a
+ * syllabus, a colophon — and they get the room the third way: fixed behind
+ * everything, veiled enough to read a paragraph over.
+ *
+ * It carries the museum's mark as well, because a page wearing the hall's bar
+ * has no brand in it otherwise, and the mark is also the way back.
+ *
+ * Bright museum only. The dark site's pages have their own ground.
+ */
+import { home, asset } from '../i18n/routing';
+import { useT, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = useT(lang);
+---
+<div class="roomback" aria-hidden="true">
+  <picture>
+    <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
+    <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
+         fetchpriority="high" decoding="async" />
+  </picture>
+</div>
+<a class="gr__lock" href={home(lang)} aria-label={t('nav.backHall')}>
+  <span class="gr__lock-name">{t('site.tagline')}</span>
+</a>
+
+<style>
+  .roomback {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-start: 0;
+    z-index: -1;
+    block-size: min(100svh, 62rem);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .roomback picture { display: block; block-size: 100%; }
+  .roomback img {
+    inline-size: 100%; block-size: 100%;
+    object-fit: cover;
+    /* the floor and the colonnade; the dome is the hall's own opening shot */
+    object-position: 50% 82%;
+  }
+  .roomback::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom,
+      rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.9) 55%, var(--bg-0));
+  }
+</style>

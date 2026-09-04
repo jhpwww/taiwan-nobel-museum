@@ -14,9 +14,13 @@
  */
 import Base from '../layouts/Base.astro';
 import ExtLink from './ExtLink.astro';
+import RoomBack from './RoomBack.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { path, browse } from '../i18n/routing';
 import { lectures } from '../data/catalog';
+
+/* the museum's own room behind this page too — see RoomBack */
+const bright = process.env.THEME === 'bright';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -66,7 +70,8 @@ const cycle = [
 ];
 ---
 
-<Base lang={lang} title={t('learn.title')} description={t('learn.blurb')} segments={['learn']}>
+<Base lang={lang} title={t('learn.title')} description={t('learn.blurb')} segments={['learn']} bare={bright}>
+  {bright && <RoomBack lang={lang} />}
   <div class="wrap course">
     <header class="course__head">
       <p class="eyebrow">{t('learn.eyebrow')}</p>
@@ -152,6 +157,7 @@ const cycle = [
 </Base>
 
 <style>
+  :global(html[data-theme='bright']) .course { padding-block-start: 3.4rem; }
   .course { padding-block: clamp(2rem, 5vw, 3.5rem); max-inline-size: 62rem; }
   .course__head h1 { font-size: var(--step-3); color: var(--cream); margin-block-start: .3rem; }
   .course__blurb { font-size: var(--step-1); line-height: 1.9; color: var(--text); margin-block-start: 1rem; max-inline-size: 54ch; }

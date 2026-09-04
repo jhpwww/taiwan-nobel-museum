@@ -199,3 +199,18 @@
   .museum-btn { transition: none; }
   .museum-btn:hover, .museum-btn:active { transform: none; }
 }
+
+
+/* ---------- the radio stays on top of its own chip ----------
+   A filter chip is a <label> holding an invisible radio stretched across it
+   and a decorated <span>. The radio was painting above the span because the
+   span was not positioned — and `.museum-btn` positions it, which silently
+   put the decoration over the control.
+
+   In Chromium the label forwards the tap either way and nothing looks wrong,
+   which is exactly why this is worth pinning rather than leaving to label
+   semantics: the input is put back on top, so a finger lands on the radio
+   itself and no forwarding is needed at all. */
+.chip:has(> .museum-btn--chip) input {
+  z-index: 1;
+}

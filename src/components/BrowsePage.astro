@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import VideoCard from './VideoCard.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { videoList, videoCounts, categories, tags } from '../data/catalog';
-import { home, asset } from '../i18n/routing';
+import RoomBack from './RoomBack.astro';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -28,20 +28,7 @@ const bright = process.env.THEME === 'bright';
 ---
 
 <Base lang={lang} title={t('browse.title')} segments={['lectures']} bare={bright}>
-  {bright && (
-    <div class="br__room" aria-hidden="true">
-      <picture>
-        <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
-        <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
-             fetchpriority="high" decoding="async" />
-      </picture>
-    </div>
-  )}
-  {bright && (
-    <a class="gr__lock" href={home(lang)} aria-label={t('nav.backHall')}>
-      <span class="gr__lock-name">{t('site.tagline')}</span>
-    </a>
-  )}
+  {bright && <RoomBack lang={lang} />}
   <div class="wrap browse">
     <h1 class="browse__h">{t('browse.title')}</h1>
 
@@ -117,28 +104,6 @@ const bright = process.env.THEME === 'bright';
 
 <style>
   .browse { padding-block: clamp(2rem, 5vw, 3.5rem); }
-  /* The room, held behind the whole page rather than banded across the top of
-     it: this page is a list and has no hero, so the hall stands the way it
-     does in the great hall — fixed, with the page in front of it. */
-  .br__room {
-    position: fixed;
-    inset-inline: 0;
-    inset-block-start: 0;
-    z-index: -1;
-    block-size: min(100svh, 62rem);
-    overflow: hidden;
-  }
-  .br__room picture { display: block; block-size: 100%; }
-  .br__room img {
-    inline-size: 100%; block-size: 100%;
-    object-fit: cover; object-position: 50% 82%;
-  }
-  .br__room::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(to bottom,
-      rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.9) 55%, var(--bg-0));
-  }
   .browse__h { font-size: var(--step-3); color: var(--cream); }
   :global(html[data-theme='bright']) .browse { padding-block-start: 3.4rem; }
 

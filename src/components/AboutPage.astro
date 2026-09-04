@@ -2,7 +2,11 @@
 import Base from '../layouts/Base.astro';
 import { useT, type Lang } from '../i18n/ui';
 import ExtLink from './ExtLink.astro';
+import RoomBack from './RoomBack.astro';
 import { specialEvents, hosts } from '../data/catalog';
+
+/* the museum's own room behind this page too — see RoomBack */
+const bright = process.env.THEME === 'bright';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -11,7 +15,8 @@ const special = specialEvents;
 const hostList = Object.entries(hosts);
 ---
 
-<Base lang={lang} title={t('about.title')} segments={['about']}>
+<Base lang={lang} title={t('about.title')} segments={['about']} bare={bright}>
+  {bright && <RoomBack lang={lang} />}
   <div class="wrap-narrow about">
     <h1>{t('about.title')}</h1>
 
@@ -96,6 +101,7 @@ const hostList = Object.entries(hosts);
 </Base>
 
 <style>
+  :global(html[data-theme='bright']) .about { padding-block-start: 3.4rem; }
   .about { padding-block: clamp(2rem, 5vw, 3.5rem) 0; }
   .about h1 { font-size: var(--step-3); color: var(--cream); margin-block-end: 1.5rem; }
   .about h2 {
