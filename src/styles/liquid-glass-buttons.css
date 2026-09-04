@@ -1,19 +1,22 @@
 /* ============================================================
-   liquid-glass-buttons.css — the v3 glass kit, as supplied
+   liquid-glass-buttons.css — the original golden glass, de-framed
    ============================================================
-   From buttons/v3/nobel-museum-buttons-glass-v3.zip, which replaces the
-   borderless kit before it and the rimmed one before that. Kept as close to
-   the file the designer sent as the project allows; the one departure is
-   recorded here rather than left to be discovered.
+   From buttons/v4/nobel-museum-original-liquid-glass-borderless.zip. It is
+   not a redesign: it keeps the original demo's golden glass body, its
+   highlight, refraction, transparency and relief, and takes away only the
+   metal ring and the concentric frames around the rectangular and round
+   skins. It replaces v3 outright — the two are never loaded together, and
+   v3's WebPs are deleted.
 
-   v3 is drawn for this site's own bright marble: no continuous frame, but a
-   partial highlight arc at the top left, a warm refraction point at the
-   bottom right, and a short shadow. Its own rules, which nothing in this
-   project may undo:
-     · no added border, full bright frame or metal stroke
-     · the nav ::before opacity stays at or above .82
-     · never the old filter: saturate(.45) — it kills the gold refraction
-     · the red focus-visible ring is for the keyboard, not a resting border
+   Its own rules, which nothing in this project may undo:
+     · no visible border, metal frame, dark outline or concentric ring
+     · the transparent border here is only the nine-slice's own mechanism
+       and must never carry a colour of its own
+     · the skin is not to be redrawn, nor replaced by a CSS frosted glass
+       or a gradient
+     · the highlight, the refraction, the glass body and the pale champagne
+       are not to be weakened or removed
+     · a dark ground is out of scope for now; accept it on the white marble
 
    src/styles/buttons.css loads after this file and is integration only: it
    removes borders the components would otherwise impose, keeps a button
@@ -27,22 +30,23 @@
    /taiwan-nobel-museum/bright/ in one build and /taiwan-nobel-museum/ in
    the other.
 
-   The :root block matters beyond the buttons. bright.css reads
-   --museum-ink, --museum-glass-blur, --museum-ease and --museum-gold-text
-   for the search field, the cards and the topbar, so these stay on :root.
-   Moving them onto .museum-glass-btn once left those rules unresolved and
-   the browse search computed backdrop-filter: none.
+   One departure: a selector added at the chip's pressed rule — see the note
+   there. No number in this file is touched; the values are the designer's.
 
-   The one departure: a selector added at the chip's pressed rule — see the
-   note there. No number in this file is touched; the values are the
-   designer's decision.
+   And one thing this kit no longer carries, moved rather than added back
+   here: --museum-gold-text. bright.css paints the lecture cards' host line
+   with it, and this :root does not declare it, so it now lives in
+   bright.css where its only consumer is. Three of the four remaining
+   properties are read there too — --museum-ink, --museum-glass-blur and
+   --museum-ease, for the search field, the cards and the topbar — so they
+   stay on :root here. Moving them onto .museum-glass-btn once left those
+   rules unresolved and the browse search computed backdrop-filter: none.
    ============================================================ */
 
 :root {
   --museum-ink: #2b2523;
-  --museum-gold-text: #6f5111;
   --museum-red: #a9322b;
-  --museum-glass-blur: 12px;
+  --museum-glass-blur: 10px;
   --museum-ease: cubic-bezier(.2, .8, .2, 1);
 }
 
@@ -64,12 +68,12 @@
   white-space: nowrap;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(116%);
-  backdrop-filter: blur(var(--museum-glass-blur)) saturate(116%);
-  background: rgba(255, 255, 255, .07);
+  -webkit-backdrop-filter: blur(var(--museum-glass-blur)) saturate(112%);
+  backdrop-filter: blur(var(--museum-glass-blur)) saturate(112%);
+  background: rgba(255, 246, 220, .06);
   box-shadow:
-    0 3px 5px -4px rgba(43, 34, 22, .44),
-    0 14px 24px -18px rgba(43, 34, 22, .44);
+    0 3px 5px -4px rgba(67, 49, 20, .40),
+    0 13px 23px -18px rgba(67, 49, 20, .56);
   transition:
     transform 160ms var(--museum-ease),
     filter 160ms var(--museum-ease),
@@ -81,7 +85,10 @@
   z-index: 1;
 }
 
-/* v3 uses disconnected highlights; 9-slice protects the small corners. */
+/*
+ * Transparent border is only the 9-slice layout mechanism.
+ * The replacement skin itself contains no metallic perimeter.
+ */
 .museum-glass-btn--primary::before,
 .museum-glass-btn--nav::before {
   content: "";
@@ -90,8 +97,8 @@
   inset: 0;
   border-style: solid;
   border-color: transparent;
-  border-image-source: url("../assets/glass-button-skin-v3.webp");
-  border-image-slice: 36 54 fill;
+  border-image-source: url("../assets/glass-button-skin-borderless.webp");
+  border-image-slice: 72 120 fill;
   border-image-repeat: stretch;
   pointer-events: none;
 }
@@ -100,38 +107,30 @@
   min-height: 50px;
   padding: .78rem 1.45rem;
   border-radius: 9px;
-  background: rgba(250, 236, 198, .08);
-  box-shadow:
-    0 4px 6px -4px rgba(52, 40, 24, .50),
-    0 16px 26px -18px rgba(52, 40, 24, .52);
 }
 
 .museum-glass-btn--primary::before {
-  border-width: 7px 11px;
-  border-image-width: 7px 11px;
-  opacity: 1;
+  border-width: 6px 10px;
+  border-image-width: 6px 10px;
+  opacity: .86;
 }
 
 .museum-glass-btn--nav {
   min-height: 38px;
   padding: .56rem 1rem;
   border-radius: 7px;
-  background: rgba(255, 255, 255, .07);
-  box-shadow:
-    0 3px 5px -4px rgba(44, 37, 28, .40),
-    0 11px 19px -15px rgba(44, 37, 28, .42);
 }
 
 .museum-glass-btn--nav::before {
-  border-width: 5px 8px;
-  border-image-width: 5px 8px;
-  opacity: .86;
-  filter: saturate(.88) contrast(1.05);
+  border-width: 4px 7px;
+  border-image-width: 4px 7px;
+  opacity: .68;
+  filter: saturate(.90);
 }
 
 .museum-glass-btn--nav[aria-current="page"]::before {
-  opacity: .98;
-  filter: saturate(1.02) contrast(1.06);
+  opacity: .78;
+  filter: saturate(1);
 }
 
 .museum-glass-btn--chip {
@@ -139,14 +138,13 @@
   padding: .4rem .84rem;
   border-radius: 999px;
   font-size: .875rem;
-  font-weight: 520;
   background:
-    radial-gradient(circle at 34% 18%, rgba(255, 255, 255, .86), transparent 42%),
-    linear-gradient(180deg, rgba(255, 255, 255, .52), rgba(226, 188, 93, .20));
+    radial-gradient(circle at 34% 18%, rgba(255, 255, 255, .82), transparent 42%),
+    linear-gradient(180deg, rgba(255, 255, 255, .50), rgba(226, 188, 93, .20));
   box-shadow:
     inset 0 10px 18px -17px rgba(255, 255, 255, .98),
-    inset 0 -10px 18px -18px rgba(143, 91, 8, .38),
-    0 9px 18px -18px rgba(49, 39, 25, .5);
+    inset 0 -10px 18px -18px rgba(143, 91, 8, .34),
+    0 9px 18px -18px rgba(49, 39, 25, .48);
 }
 
 /* The kit says a chosen chip is [aria-pressed="true"]. On this site a filter
@@ -158,8 +156,8 @@
 .chip input:checked + .museum-glass-btn--chip {
   color: #5f420f;
   background:
-    radial-gradient(circle at 34% 18%, rgba(255, 255, 255, .90), transparent 42%),
-    linear-gradient(180deg, rgba(250, 231, 177, .64), rgba(208, 153, 38, .34));
+    radial-gradient(circle at 34% 18%, rgba(255, 255, 255, .88), transparent 42%),
+    linear-gradient(180deg, rgba(250, 231, 177, .60), rgba(208, 153, 38, .31));
 }
 
 .museum-glass-btn--play {
@@ -168,28 +166,38 @@
   min-width: 64px;
   min-height: 64px;
   padding: 0;
+  overflow: hidden;
   border-radius: 50%;
-  background:
-    url("../assets/glass-play-skin-v3.webp") center / contain no-repeat,
-    rgba(255, 255, 255, .06);
+  background: rgba(255, 246, 220, .05);
   box-shadow:
-    0 4px 6px -4px rgba(28, 23, 17, .58),
-    0 14px 23px -15px rgba(28, 23, 17, .62);
+    0 4px 6px -4px rgba(48, 34, 13, .48),
+    0 15px 25px -17px rgba(48, 34, 13, .62);
+}
+
+.museum-glass-btn--play::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  border-radius: inherit;
+  background: url("../assets/glass-play-skin-borderless.webp") center / contain no-repeat;
+  opacity: .82;
+  pointer-events: none;
 }
 
 .museum-glass-btn--play svg {
   width: 27px;
   height: 27px;
   transform: translateX(1.5px);
-  filter: drop-shadow(0 1px 1px rgba(65, 13, 10, .2));
+  filter: drop-shadow(0 1px 1px rgba(65, 13, 10, .20));
 }
 
 .museum-glass-btn:hover {
   transform: translateY(-1px);
-  filter: brightness(1.035) saturate(1.025);
+  filter: brightness(1.025) saturate(1.025);
   box-shadow:
-    0 5px 7px -4px rgba(45, 34, 21, .52),
-    0 17px 28px -17px rgba(45, 34, 21, .60);
+    0 4px 6px -4px rgba(67, 49, 20, .44),
+    0 16px 26px -18px rgba(67, 49, 20, .62);
 }
 
 .museum-glass-btn:active {
@@ -206,7 +214,6 @@
 .museum-glass-btn:disabled {
   cursor: not-allowed;
   opacity: .48;
-  filter: saturate(.45);
 }
 
 @supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
@@ -235,7 +242,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .museum-glass-btn {
-    transition: none;
-  }
+  .museum-glass-btn { transition: none; }
 }

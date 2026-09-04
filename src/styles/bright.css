@@ -954,6 +954,11 @@ html[data-theme='bright'] .cards a:hover {
     rgba(255, 255, 255, 0.82),
     rgba(240, 220, 172, 0.36));
 }
+/* The v4 button kit's :root no longer declares --museum-gold-text — it was
+   never a button colour, only this one line of ink on a lecture card, and it
+   was reaching across from the kit by accident. Same value, kept where its
+   only reader is, so the next kit swap cannot silently blank it. */
+html[data-theme='bright'] { --museum-gold-text: #6f5111; }
 html[data-theme='bright'] .cards__host { color: var(--museum-gold-text); }
 
 /* the learning area's three cards, for the same reason */
