@@ -40,14 +40,11 @@
     "source": "original"
   },
   "literature": {
-    "id": "9RjoPxajS8Z",
-    "title": "Quill and parchment",
-    "author": "Bruno Oliveira",
-    "licence": "CC-BY",
-    "glb": "https://static.poly.pizza/e530ed57-848a-41d6-b9da-46a77d49f33a.glb",
-    "page": "https://poly.pizza/m/9RjoPxajS8Z",
-    "tris": "766",
-    "bytes": 28276,
-    "source": "poly"
+    "id": "supplied:literature",
+    "title": "Open book and quill",
+    "author": "Nobel Lecture Museum",
+    "licence": "CC0",
+    "page": "",
+    "source": "original"
   }
 }

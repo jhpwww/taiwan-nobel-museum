@@ -999,16 +999,19 @@ html[data-theme='bright'] .bh__title { line-height: 1.12; }
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: 0.18rem;
     padding-block: 0 0.4rem;
-    /* the same two thirds, and it fits because the labels are two characters */
-    max-inline-size: min(100%, 17rem);
+    /* two thirds, plus what the larger figures need back */
+    max-inline-size: min(100%, 21rem);
   }
   html[data-theme='bright'] .after .stats div {
-    padding: 0.34rem 0.1rem 0.3rem;
+    padding: 0.26rem 0.1rem 0.24rem;
     border-radius: 0.5rem;
   }
-  /* Sized off the viewport, not fixed: six panes across 320px are 42px of
-     usable width and 所主辦機構 is five characters wide. */
-  html[data-theme='bright'] .stats dt { font-size: clamp(0.82rem, 4.1vw, 1rem); }
+  /* Half again. Sized off the viewport rather than fixed, so it holds at 320px
+     as well as at 430 — and written with .after in it, because the component's
+     own `.stats dt` carries the scope attribute on both compounds and beats a
+     two-class theme rule. The figure had been the component's --step-1 all
+     along, whatever this line said. */
+  html[data-theme='bright'] .after .stats dt { font-size: clamp(1.23rem, 6.15vw, 1.5rem); }
   /* One line each, or the six panes stop being a row: 所主辦機構 is five Han
      characters and was the only one that wrapped, which made its pane taller
      than the other five. No tracking here — at this size it is what pushed
@@ -1025,7 +1028,7 @@ html[data-theme='bright'] .bh__title { line-height: 1.12; }
   html[data-theme='bright'] :lang(en) .stats dd,
   html[data-theme='bright'] .stats dd {
     margin-block-start: 0.14rem;
-    font-size: clamp(0.4rem, 2.05vw, 0.5rem);
+    font-size: clamp(0.5rem, 2.4vw, 0.6rem);
     letter-spacing: 0;
     text-indent: 0;
     line-height: 1.2;
@@ -1034,7 +1037,14 @@ html[data-theme='bright'] .bh__title { line-height: 1.12; }
      the one that wrapped; English cannot take the same rule — "host
      institutions" is two words and nowrap pushed the whole row 47px past the
      viewport on /en/. It wraps, and the six panes stretch to match. */
-  html[data-theme='bright'] :lang(zh) .stats dd { white-space: nowrap; }
+  /* Twice, and only the Han. Two characters at this size still cross a sixth
+     of a 320px screen with room to spare; the English words are six to twelve
+     letters and take the smaller step above, which is as far as they go
+     before "institutions" stops fitting on its line. */
+  html[data-theme='bright'] :lang(zh) .stats dd {
+    white-space: nowrap;
+    font-size: clamp(0.8rem, 4.1vw, 1rem);
+  }
   /* And English is allowed to break a word rather than push the row off the
      screen: "interviews" and "institutions" are each wider than a sixth of a
      320px phone, and a hyphen inside a 10px caption costs less than a

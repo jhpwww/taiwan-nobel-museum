@@ -156,14 +156,16 @@ function turntable(doc, node, name) {
 }
 
 /**
- * The owner is modelling the six award sculptures one at a time, each drawn to
- * stand on that drum. Those go on unchanged. The rest are the borrowed and
- * built pieces still standing in for them, and they have to be sat on it:
- * scaled to the height the first award came in at, and no wider than half
- * again the drum, so a wide piece overhangs the way the reference sheet's
- * quill and chart do without looking like it is sliding off.
+ * All six award sculptures are the owner's own now, each drawn to stand on
+ * that drum, and every one of them goes on unchanged. ON_BASE is what says so.
+ *
+ * The perch below is what sat a borrowed piece on the drum instead — scaled to
+ * the height the first award came in at, and no wider than half again the
+ * drum. Nothing takes that path any more. It is kept because a seventh prize
+ * is not impossible and because a model can always be pulled for revision, and
+ * an empty ON_BASE would otherwise leave the hall with nothing to draw.
  */
-const ON_BASE = new Set(['physics', 'chemistry', 'medicine', 'peace', 'economics']);
+const ON_BASE = new Set(['physics', 'chemistry', 'medicine', 'peace', 'economics', 'literature']);
 
 /**
  * Which parts of an award sculpture are meant to be re-shaded, and which are
@@ -475,6 +477,9 @@ function subdivide(doc) {
  * sculptures, which arrive smooth, welded and dense. Nothing in ON_BASE
  * belongs here.
  */
+/* Inert while every piece is an award: the call below is gated on
+   !ON_BASE.has(cat) and ON_BASE now holds all six. Kept for the same reason
+   the perch is — a borrowed stand-in would need it again. */
 const SUBDIVIDE = new Set(['medicine', 'literature']);
 
 /** merge the drum into `doc` at its origin, its materials marked as the base's */

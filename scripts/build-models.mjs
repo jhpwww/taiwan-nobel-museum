@@ -176,7 +176,7 @@ async function write(name, build) {
 
 /** what this script can build, and what the owner has since drawn instead */
 const PIECES = { economics: { build: balance, title: 'Balance scale' } };
-const SUPPLIED = new Set(['physics', 'chemistry', 'medicine', 'peace', 'economics']);
+const SUPPLIED = new Set(['physics', 'chemistry', 'medicine', 'peace', 'economics', 'literature']);
 
 fs.mkdirSync('assets-src/models', { recursive: true });
 

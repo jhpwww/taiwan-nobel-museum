@@ -190,7 +190,13 @@ const creditComment = (c: Credit) =>
 
   <aside class="mh__credit">
     <h2>{t('models.creditTitle')}</h2>
-    <p>{t('models.creditNote', { borrowed: borrowedCount, own: cats.length - borrowedCount })}</p>
+    {/* Nothing is borrowed any more — the owner has drawn all six — and a
+        sentence that begins "0 of the six" is a sentence about a thing that
+        is not there. The other line stays, because a model can be pulled for
+        revision and a borrowed one stood in before. */}
+    <p>{borrowedCount === 0
+      ? t('models.creditNoteOwn')
+      : t('models.creditNote', { borrowed: borrowedCount, own: cats.length - borrowedCount })}</p>
     <ul role="list">
       {cats.map((c) => (
         <li>

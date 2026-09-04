@@ -40,7 +40,15 @@ RAW.mkdir(parents=True, exist_ok=True)
 # running either script alone must still leave a complete set
 CREDITS = pathlib.Path('data/model-credits.json')
 out = json.loads(CREDITS.read_text(encoding='utf-8')) if CREDITS.exists() else {}
+# The owner has drawn all six awards, so every name here is now a supplied
+# model and this script has nothing left to download. It refuses rather than
+# overwrites: assets-src/models/<cat>.glb IS the source for each of them.
+SUPPLIED = {'physics', 'chemistry', 'medicine', 'peace', 'economics', 'literature'}
+
 for cat, mid in PICKS.items():
+    if cat in SUPPLIED:
+        print(f"{cat:11} skipped — the owner's own sculpture stands here")
+        continue
     meta = poly.model(mid)
     if not meta:
         raise SystemExit(f'{cat}: could not read model page for {mid}')
