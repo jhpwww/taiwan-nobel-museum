@@ -1,7 +1,7 @@
 ---
 import { useT, type Lang } from '../i18n/ui';
 import { lecture as lectureUrl } from '../i18n/routing';
-import { catName, videoCount, localDate, type Lecture, catPrizeName } from '../data/catalog';
+import { catName, videoCount, localDate, guideBadgeKey, type Lecture, catPrizeName } from '../data/catalog';
 import posters from '../data/posters.json';
 
 interface Props { lang: Lang; rec: Lecture; featured?: boolean }
@@ -33,7 +33,10 @@ const nVideos = videoCount(rec);
   <span class="card__media">
     <img src={poster} alt="" width="480" height="360" loading="lazy" decoding="async" />
     <span class="card__scrim"></span>
-    {rec.video.guide && <span class="card__badge">{t('lec.guide')}</span>}
+    {/* 'goes', not 'plays': this picture opens the laureate's page, so the
+        mark says what is waiting there rather than what will start. See
+        guideBadgeKey in src/data/catalog.ts. */}
+    {rec.video.guide && <span class="card__badge">{t(guideBadgeKey('goes'))}</span>}
     <span class="card__count">{nVideos} <svg viewBox="0 0 24 24" width="11" height="11" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>
   </span>
 

@@ -2,13 +2,14 @@
 import Base from '../layouts/Base.astro';
 import LectureCard from './LectureCard.astro';
 import Sculpture from './Sculpture.astro';
+import Explore from './Explore.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { home, asset } from '../i18n/routing';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import {
   byCategory, catName, categories, factsAsOf, intro, introParts, INTRO,
-  type GalleryKey, type CategoryKey,
+  generalLinks, type GalleryKey, type CategoryKey,
 } from '../data/catalog';
 
 interface Props { lang: Lang; cat: GalleryKey }
@@ -28,21 +29,10 @@ const meta = isIntro ? null : categories[cat as CategoryKey];
 const isEmpty = !isIntro && recs.length === 0;
 const [introA, introConj, introB] = introParts(lang);
 
-const INTRO_LINKS = [
-  { url: 'https://www.nobelprize.org/alfred-nobel/',
-    zh: '諾貝爾其人', en: 'Alfred Nobel, the man',
-    dzh: '炸藥的發明者，與他留下的遺囑。', den: 'The inventor of dynamite, and the will he left behind.' },
-  { url: 'https://www.nobelprize.org/prizes/facts/nobel-prize-facts/',
-    zh: '諾貝爾獎小知識', en: 'Nobel Prize facts',
-    dzh: '最年輕、最年長、得過 2 次的人：官方統計。', den: 'Youngest, oldest, twice-awarded: the official numbers.' },
-  { url: 'https://www.nobelprize.org/the-nobel-prize-organisation/',
-    zh: '獎項如何評選', en: 'How the prizes are decided',
-    dzh: '提名、審議、保密 50 年的評選過程。', den: 'Nomination, deliberation, and 50 years of secrecy.' },
-  { url: 'https://www.nobelprize.org/educational/',
-    zh: '諾貝爾教育資源', en: 'Nobel Prize education',
-    dzh: '官方為學生製作的互動教材與遊戲（英文）。', den: 'Interactive teaching material and games from the official site.' },
-];
-const links = isIntro ? INTRO_LINKS : meta!.links;
+/* the four that belong to the prize rather than to any one of its rooms —
+   see generalLinks in src/data/catalog.ts, where the video index reads them
+   from too */
+const links = isIntro ? generalLinks : meta!.links;
 
 /* ---------------------------------------------------------------
  * The bright museum shows the prize's own sculpture here, standing on the
@@ -122,13 +112,15 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     {/* Pinned to the last line of the screen and over everything, the way the
         hall's is — see .bh__foot in HallBright. Out of the header, because it
         no longer belongs to the header's box. */}
-    <a class="bh__cue gr__cue" href="#gr-body" aria-label={t('hall.scroll')} data-gr-cue>
-      <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
-      <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
-        <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
-      </svg>
-      <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
-    </a>
+    <div class="gr__foot" data-gr-cue>
+      <a class="bh__cue gr__cue" href="#gr-body" aria-label={t('hall.scroll')}>
+        <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
+        <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
+          <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
+        </svg>
+        <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
+      </a>
+    </div>
 
     {/* The piece rides up with the page and then stops.
         It is a sticky rail rather than a scripted position: sticky is the
@@ -138,6 +130,24 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
         of its own and is pulled back up over the room by the piece's own
         height, so the piece stands on the floor of the photograph until the
         museum's name catches it. */}
+    {/* The introduction room has no sculpture — it is about the prize itself,
+        not about one of the six — and it stood with an empty floor beside its
+        title while every other room had something on it. The laurel takes that
+        place: the same rail, the same size, the same rest and the same catch
+        into a mark. Its centre is open, so what is inside the wreath is the
+        rotunda seen through it, which is a better thing to put there than
+        anything that could have been drawn in. */}
+    {bright && isIntro && (
+      <div class="gr__rail" aria-hidden="true">
+        <div class="gr__piece">
+          <span class="bh__art gr__wreath">
+            <img src={stamp('assets/ui/wreath.webp')} alt="" width="638" height="640"
+                 fetchpriority="high" decoding="async" />
+          </span>
+        </div>
+      </div>
+    )}
+
     {piece && (
       <div class="gr__rail" aria-hidden="true">
         <div class="gr__piece">
@@ -219,26 +229,6 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
         </div>
       </div>
 
-      <div class="wrap">
-        <nav class="mats" aria-label={t('cat.materials')}>
-          <ul class="mats__list" role="list">
-            {links.map((l, i) => (
-              <li class="mat">
-                <a class="mat__link museum-glass-btn museum-glass-btn--nav" href={l.url} target="_blank" rel="noopener noreferrer"
-                   aria-describedby={`tip-${i}`}>
-                  <span>{lang === 'zh' ? l.zh : l.en}</span>
-                  <span class="mat__ext" aria-hidden="true">↗</span>
-                  <span class="visually-hidden">{t('a11y.newTab')}</span>
-                </a>
-                <span class="mat__tip" id={`tip-${i}`} role="tooltip">
-                  <span class="mat__tip-d">{lang === 'zh' ? l.dzh : l.den}</span>
-                  <span class="mat__tip-h">{new URL(l.url).hostname.replace(/^www\./, '')}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </nav>
-      </div>
     </section>
   )}
 
@@ -259,23 +249,15 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
       </section>
     )}
 
-    {isIntro && (
-      <section class="materials" aria-label={intro[lang]}>
-        <ul class="cards" role="list">
-          {links.map((l) => (
-            <li>
-              <a href={l.url} target="_blank" rel="noopener noreferrer">
-                <span class="cards__t">{lang === 'zh' ? l.zh : l.en}</span>
-                <span class="cards__d">{lang === 'zh' ? l.dzh : l.den}</span>
-                <span class="cards__host">{new URL(l.url).hostname.replace(/^www\./, '')} ↗</span>
-                <span class="visually-hidden">{t('a11y.newTab')}</span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )}
   </div>
+
+  {/* Every room ends by pointing outward. It used to happen halfway up the
+      page, in a strip of keys wedged under the statistics and titled 延伸材料;
+      a reader who has not yet reached the lectures is not looking for
+      somewhere else to go. Same links, same descriptions — a section at the
+      foot, and cards rather than keys, because a card can carry the line of
+      description each of these has. */}
+  <Explore lang={lang} links={links} note={isIntro ? undefined : t('explore.noteCat')} />
   </div>
 </Base>
 
@@ -420,9 +402,29 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
       -0.4rem;
   }
   :global(html[data-motion='off']) .gr__piece { transition: none; }
+  /* The laurel is a flat emblem, not a model in a cage, so it fills the frame
+     rather than being fitted into 0.56 of it — and it is set on the floor of
+     the room the same way the drums are, by its own foot rather than by its
+     box's. */
+  .gr__wreath {
+    display: grid;
+    place-items: center;
+    container-type: normal;      /* nothing inside is sized against it */
+  }
+  .gr__wreath img {
+    inline-size: auto;
+    block-size: 78%;
+    max-inline-size: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 14px 26px rgba(70, 52, 16, 0.26));
+  }
+
   .gr__piece .bh__art {
-    /* the cage's ratio, not a half — the same figure the hall frames by, so
-       one piece is not two sizes in two rooms */
+    /* The cage's ratio, which is not the hall's 1:2 — the two rooms frame the
+       same model differently on purpose, the hall to fit six in a row and this
+       to fill one. What used to follow from that was a label at two different
+       heights on the drum; it does not any more, because the label is placed
+       off the model rather than off the frame. See .bh__face in plinth.css. */
     inline-size: calc(var(--gr-art) * 0.545);
     block-size: var(--gr-art);
     aspect-ratio: auto;
@@ -458,16 +460,26 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
      the same treatment as the hall's, and for the same two reasons: it belongs
      to the window rather than to the header's box, and the page that rises
      over it was painting on top of it. */
-  .gr__cue {
+  /* A full-width strip with the cue centred in it, exactly as the hall does
+     it — see .bh__foot in HallBright.
+     Full width because of the haze: the cue's own ::before reaches 4.8rem past
+     it on each side, and on an element placed at `inset-inline-start: 50%`
+     that reach lands outside the viewport and pushes the document 77px wider
+     at every desktop size. Centred inside a box that already spans the screen,
+     it cannot. */
+  .gr__foot {
     position: fixed;
+    inset-inline: 0;
     inset-block-end: clamp(0.7rem, 2vh, 1.5rem);
-    inset-inline-start: 50%;
-    translate: -50% 0;
     z-index: 45;
+    display: grid;
+    justify-items: center;
+    pointer-events: none;
     transition: opacity 0.55s var(--ease), visibility 0.55s var(--ease);
   }
+  .gr__foot > * { pointer-events: auto; }
   /* nothing left below to point at */
-  .gr__cue[data-gone] { opacity: 0; visibility: hidden; }
+  .gr__foot[data-gone] { opacity: 0; visibility: hidden; }
   .gr__anchor { display: block; scroll-margin-block-start: 4rem; }
 
   @media (max-width: 40rem) {

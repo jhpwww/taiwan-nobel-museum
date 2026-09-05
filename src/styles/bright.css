@@ -137,16 +137,35 @@ html[data-theme='bright'] {
      this is the line that has to follow. */
   --cue-clear: calc(3.1rem + clamp(1.5rem, 3.4vh, 2.3rem) + clamp(0.7rem, 2vh, 1.5rem));
 
+  /* The hall's own frame, repeated: the figures below have to know how tall a
+     piece is, and --frame-w and --frame-h are declared on .bh, which is not
+     an ancestor of anything on the page. Same expressions — see 'the margin at
+     each end' in HallBright, where they are solved. */
+  --hall-frame-w: min(24rem, calc((100vw - 1.6272rem) / 1.161 / 6 - 0.8rem));
+  --hall-frame-h: calc(var(--hall-frame-w) * 2);
+  /* What a piece carries BELOW the foot of its marble: the 4.3% of the frame
+     that runs past the drum line, the gap under it, the two lines of the
+     caption, and the piece's own bottom padding — all of it a tenth larger,
+     because the row is scaled. This is the line the figures have to clear, and
+     measuring to the drum instead is how the strip came to sit on top of
+     '9 場講座' at seven desktop sizes out of ten. */
+  --hall-label-h: calc(2 * 1.715 * var(--step--1));
+  --piece-below-drum: calc(1.1 * (0.043 * var(--hall-frame-h) + 1rem
+                                  + var(--hall-label-h)));
+
   /* How far the row of pieces steps down the floor from where it is composed.
-     A tenth of the plate's height would be the whole answer if every screen
-     had room for it; a short wide one does not — at 1366x768 the drums stand
-     at 83% of the screen and the strip and the way on together want more than
-     the 17% left. So the step is whatever the floor can afford, which on a
-     tall screen is the full nudge and on a short one is nothing. */
-  --piece-drop: min(
-    calc(var(--room-plate) * 0.055),
+     15.5% of the plate's height where a screen has room for it; a short wide
+     one does not, and there the step becomes whatever fits — down to 6% of the
+     plate the other way, which is as far up as the drums may come before they
+     stop standing on the floor of the photograph and start floating over it.
+     Beyond that the screen simply cannot hold six pieces, their captions, the
+     figures and the way on, and it is the way on that goes over the figures —
+     it is pinned, it is topmost, and it carries its own field of light. */
+  --piece-drop: clamp(
+    calc(var(--room-plate) * -0.06),
     calc(100svh - var(--cue-clear) - 0.6rem - var(--strip-h) - 0.5rem
-         - 0.77175 * var(--room-plate))
+         - var(--piece-below-drum) - 0.77175 * var(--room-plate)),
+    calc(var(--room-plate) * 0.155)
   );
   /* Where the drums' feet land, in the viewport.
      0.77175 is not a guess: the row is anchored so its feet sit on the near
@@ -154,6 +173,8 @@ html[data-theme='bright'] {
      vanishing point at 69.2%, which lands the feet at 0.692 + 1.1(0.7645 -
      0.692) of the plate. See 'the hall's own measurements' in HallBright. */
   --drum-foot: calc(0.77175 * var(--room-plate) + var(--piece-drop));
+  /* and where the piece itself ends, caption and all */
+  --piece-foot: calc(var(--drum-foot) + var(--piece-below-drum));
 
   /* ---- and the prize page's own room, which shows one of the six ----
      These lived on .gr and .gr__rail inside GalleryPage. They are here now
@@ -262,6 +283,22 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a {
   border-block-end: 0;
   color: var(--museum-ink);
 }
+/* ---------- the size of a key ----------
+   15% off the height, on every screen: the kit's --nav is 38px on a desktop
+   and 44 on a phone, and a bar of five over a photograph reads better thin.
+   32.3 and 37.4 are those two figures less a seventh; both are well past the
+   24px WCAG 2.5.8 asks of a target, and every key is 75px or more across.
+
+   And 15% off the width on a desktop, which is 15% off the *key*, not off the
+   type — so it is the padding that gives, from 1rem a side to 0.57rem. Solved
+   against the Han labels, which are the ones the museum leads with: 91.4px
+   becomes 77.6. The English labels are longer, so the same padding takes 11%
+   off them rather than 15 — a per cent of a box cannot be set on a box whose
+   width is its content. */
+html[data-theme='bright'] .topbar__nav :is(.topbar__key, .museum-glass-btn--nav) {
+  min-height: 32.3px;
+  padding-inline: 0.57rem;
+}
 html[data-theme='bright'] .topbar--ghost .topbar__nav a:hover,
 html[data-theme='bright'] .topbar--ghost .topbar__nav a:focus-visible {
   border-block-end-color: transparent;
@@ -343,6 +380,15 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
     row-gap: 0.26rem;
     column-gap: 0;
   }
+  /* Half the gutter, for this bar only. .wrap holds every page's content
+     1.25rem off each edge; the keys are chrome standing on a photograph, not
+     content, and at the full gutter the column floated in the middle of the
+     room's right-hand wall rather than against its edge. The museum's name is
+     its own fixed element and does not sit in this box, so nothing on the left
+     moves with it. */
+  html[data-theme='bright'] .topbar--ghost .wrap {
+    inline-size: min(100% - 1.25rem, 76rem);
+  }
   /* a column, so the haze stands up rather than lies down */
   html[data-theme='bright'] .topbar--ghost .topbar__nav::before {
     inset: -3rem -4rem -3.4rem -4.6rem;
@@ -382,25 +428,84 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
   html[data-theme='bright'] .topbar--ghost .topbar__nav .topbar__menu {
     display: inline-flex;
   }
+
+  /* ---------- and it folds, rather than snapping ----------
+     The keys were display:none and display:inline-flex, which is not a state
+     change the browser can carry — five keys appeared at once, fully formed,
+     and vanished the same way.
+
+     So they are always laid out and always in the column; what changes is
+     their height, their opacity and where they sit. Height rather than
+     max-height: the key is 31.8px by the rule above and by nothing else, so
+     the two ends of the transition are both real lengths and the column
+     closes to exactly nothing. The negative top margin is the row-gap given
+     back — a gap is on the container, so five collapsed keys would otherwise
+     leave five gaps' worth of daylight between the fold key and the flag.
+
+     visibility, not opacity alone: a key at zero opacity is still in the tab
+     order, and a keyboard visitor would fall into four invisible links.
+
+     They arrive one after another, 40ms apart, which is what makes it read as
+     a fold opening rather than a block appearing. Closing has no stagger:
+     going away should be quicker than arriving, or the bar feels reluctant. */
   html[data-theme='bright'] .topbar--ghost .topbar__nav .topbar__key {
-    display: none;
+    display: inline-flex;
+    overflow: hidden;
+    min-height: 0;
+    block-size: 0;
+    padding-block: 0;
+    margin-block-start: -0.26rem;
+    opacity: 0;
+    visibility: hidden;
+    translate: 0 -0.5rem;
+    scale: 0.94;
+    transition:
+      block-size 0.34s var(--museum-ease, var(--ease)),
+      margin-block-start 0.34s var(--museum-ease, var(--ease)),
+      padding-block 0.34s var(--museum-ease, var(--ease)),
+      opacity 0.24s var(--ease),
+      translate 0.3s var(--ease),
+      scale 0.3s var(--ease),
+      visibility 0.34s var(--ease);
   }
   html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key {
-    display: inline-flex;
+    block-size: 31.8px;
+    margin-block-start: 0;
+    opacity: 1;
+    visibility: visible;
+    translate: none;
+    scale: 1;
+  }
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key:nth-child(2) { transition-delay: 0.02s; }
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key:nth-child(3) { transition-delay: 0.06s; }
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key:nth-child(4) { transition-delay: 0.10s; }
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key:nth-child(5) { transition-delay: 0.14s; }
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key:nth-child(6) { transition-delay: 0.18s; }
+  /* the three bars turning into a cross is the same gesture and takes the same
+     curve; the flag below the column moves with the keys rather than jumping */
+  html[data-theme='bright'] .topbar--ghost .topbar__nav .topbar__lang {
+    transition: translate 0.34s var(--ease);
   }
 
-  /* Open, the keys are shorter by 15%.
-     Five keys at the phone's 44px minimum plus their gaps is a column 240px
-     tall — a third of a short phone's screen, standing over the room. 37.4px
-     is what the kit's touch minimum becomes when that is taken off; it is
-     still well past the 24px WCAG 2.5.8 asks for, and the keys are 80 to 120
-     wide, so nothing here is hard to hit. The one that folds them takes it
-     too, or the column has a taller key at the top of it. */
-  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav
-    :is(.topbar__key, .topbar__menu) {
-    min-height: 37.4px;
+  /* A phone's keys are shorter again.
+     Five keys at the kit's 44px touch minimum plus their gaps is a column 240px
+     tall — a third of a short phone's screen, standing over the room. 44 less
+     a seventh is 37.4, and less a seventh again is 31.8, which is where the
+     two rounds of this land. Still past the 24px WCAG 2.5.8 asks of a target,
+     and each key is 83px or more across. The one that folds them takes the
+     same height, or the column has a taller key at the top of it — and it
+     takes it whether the column is open or shut, so nothing resizes as it
+     opens. */
+  html[data-theme='bright'] .topbar--ghost .topbar__nav .topbar__menu,
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key {
+    min-height: 31.8px;
   }
 }
+
+/* Someone who has asked for less motion gets the fold as a fact rather than
+   as a movement: the keys are there or they are not. */
+html[data-motion='off'] .topbar--ghost .topbar__nav .topbar__key,
+html[data-motion='off'] .topbar--ghost .topbar__nav .topbar__lang { transition: none; }
 
 /* the dark hall needed a scrim to keep the controls legible; a white one
    does not, and the gradient would only smear grey across the marble */
@@ -541,6 +646,27 @@ html[data-theme='bright'] .pn::before {
 }
 /* it arrives with the keys, and there is nothing to light when they are away */
 html[data-theme='bright'] .pn:has(.pn__b.is-on)::before { opacity: 1; }
+
+/* And the same again under the way on. It is pinned to the foot of the window
+   now, so what is behind it is whatever the page has reached — a card, a
+   paragraph, the room's own floor — and a gold hairline one pixel wide is the
+   thinnest mark on the site. No z-index of its own: on the hall the cue has
+   none and the haze lands behind it inside .bh__foot's layer, and on a prize
+   page .gr__cue carries 45 and makes its own, so -1 is inside it either way. */
+html[data-theme='bright'] .bh__cue { position: relative; }
+html[data-theme='bright'] .bh__cue::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  inset: -2.4rem -4.8rem -2.2rem;
+  pointer-events: none;
+  background: radial-gradient(42% 42% at 50% 50%,
+    rgba(255, 255, 255, 0.54),
+    rgba(255, 255, 255, 0.4) 38%,
+    rgba(255, 255, 255, 0.19) 64%,
+    rgba(255, 255, 255, 0.06) 84%,
+    transparent 100%);
+}
 
 /* ---------- text on filled marks ----------
    The dark theme fills these with gold and writes on them in near-black. Here
@@ -998,20 +1124,27 @@ html[data-theme='bright'] .after .strip { background: none; border: 0; }
  * as the screen changes. On four of the seven desktop sizes swept the strip
  * landed on the way on, and it was the strip that painted over it.
  *
- * So it is arithmetic now, in the room's own measurements. The first term is
- * where the figures belong — two of their own heights below the feet of the
- * drums they count. The second is the floor: the way on is pinned to the
- * bottom of the screen and stands over everything, so the strip has to finish
- * above it. min() takes the more negative, which is the higher of the two.
+ * So it is arithmetic now, in the room's own measurements. The inner min()
+ * picks between where the figures belong — two of their own heights below the
+ * pieces — and as low as the pinned way on leaves room for. The outer max() is
+ * the floor under both: the strip may never rise above the pieces' captions,
+ * which is what it did when this measured to the drum's foot rather than to
+ * the foot of the piece, hiding '7 場講座' and '2 場講座' outright and taking
+ * the clicks off the bottom of all six sculptures.
  *
- * On a screen tall enough the first term wins and the gap is exactly the two
- * asked for; on a short wide one the second binds and the strip sits closer
- * under the drums than that. There is no third answer — at 1366x768 the drums,
- * the figures and the way on together want more room than the screen has. */
+ * On a tall screen the gap is exactly the two asked for. On a short wide one
+ * the pieces come up as far as they may and the strip still clears them, and
+ * what gives instead is the way on, which floats over the figures — it is
+ * pinned, topmost, and carries its own haze, so it reads as chrome over the
+ * page rather than as two things fighting. */
 html[data-theme='bright'] .after {
-  margin-block-start: min(
-    calc(var(--drum-foot) + 2 * var(--strip-h) - var(--room-hall)),
-    calc(100svh - var(--cue-clear) - 0.6rem - var(--strip-h) - var(--room-hall))
+  margin-block-start: max(
+    /* never above the pieces' own captions, whatever else happens */
+    calc(var(--piece-foot) + 0.5rem - var(--room-hall)),
+    min(
+      calc(var(--piece-foot) + 2 * var(--strip-h) - var(--room-hall)),
+      calc(100svh - var(--cue-clear) - 0.6rem - var(--strip-h) - var(--room-hall))
+    )
   );
 }
 html[data-theme='bright'] .after .strip { padding-block-start: 0; }
@@ -1066,10 +1199,18 @@ html[data-theme='bright'] .bh__lockup[data-small] .bh__title {
    even when it came straight out of the cache. `visibility` rather than
    `display` so the transition can actually run, and it never takes a click:
    the sheet is over everything for a quarter of a second at each end. */
+/* Thirty, not 999.
+   The fade is a change of room, and the chrome is not in the room: the bar's
+   keys, the standing controls, the way on and the museum's mark are pinned to
+   the window and stay put through it. At 999 the sheet blinked them out and
+   back on every navigation, which read as the whole browser flickering rather
+   than as one room giving way to another. Thirty is above the page (1) and
+   above the hall (0) and below every piece of pinned chrome — .pn at 35, the
+   way on at 45, the bar at 50, the marks at 60. */
 html[data-theme='bright'] .roomfade {
   position: fixed;
   inset: 0;
-  z-index: 999;
+  z-index: 30;
   background: #fff;
   pointer-events: none;
   opacity: 0;
@@ -1359,6 +1500,29 @@ html[data-theme='bright'] .cards a:hover {
    never a button colour, only this one line of ink on a lecture card, and it
    was reaching across from the kit by accident. Same value, kept where its
    only reader is, so the next kit swap cannot silently blank it. */
+/* ---------- the page's ground, half-way ----------
+   The room is fixed behind every subpage and the sheet is what rises over it.
+   Opaque, that sheet wiped the photograph out entirely a screenful in; at half
+   alpha the room stays in the building — colonnade and marble showing through
+   the page the way they do on the hall. .about carried a white of its own
+   inside the sheet and had to give it up, or the two stacked back to opaque.
+
+   What this costs is measured, not assumed: scripts/check-glass.mjs now walks
+   the prize and laureate pages as well as the hall. */
+html[data-theme='bright'] :is(.gr__sheet, .lec__sheet) {
+  background: rgba(255, 255, 255, 0.5);
+  /* And the secondary ink goes darker inside them, because half a sheet of
+     white is half a sheet: the darkest thing the room puts under this page is
+     the shadow under the colonnade, which composites to rgb(172,160,150), and
+     --muted at #5c554e reads 2.87:1 on it. #38332e reads 5.05:1. Measured on
+     the rendered page at 320px, where the band of photograph is at its
+     largest share of the screen — see the note above. The body ink was
+     already clear: #2b2523 on that same ground is 5.95:1. */
+  --muted: #38332e;
+  --muted-dim: #443e38;
+}
+html[data-theme='bright'] .about { background: none; }
+
 html[data-theme='bright'] { --museum-gold-text: #6f5111; }
 html[data-theme='bright'] .cards__host { color: var(--museum-gold-text); }
 

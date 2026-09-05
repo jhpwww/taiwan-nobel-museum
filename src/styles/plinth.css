@@ -75,7 +75,21 @@
      out of this band, and at that point the two-line English labels wanted
      two more than were left: the mark and the second line give those back,
      so they are a shade under the fifth larger the rest are. */
-  inset-block-start: 75.9%;
+  /* Measured off the MODEL, not off the frame.
+   *
+   * 75.9% of the frame was right in exactly one room. model-viewer fits the
+   * 0.56-wide cage by width whenever the frame is narrower than that, so the
+   * model draws 100cqw/0.56 tall and is centred in whatever height the frame
+   * has — and the two rooms frame it differently: the hall's frame is 1:2 and
+   * a prize page's is 1:1.83. Same drum, same label, two different heights on
+   * it, which is what was reported.
+   *
+   * So the line is written in the model's own terms and holds in any frame:
+   * half the frame, plus 29% of the model's height — 0.759 of the model less
+   * the half of it that is above centre. 51.8cqw is that 29% expressed in the
+   * container's width, since the model's height IS 100cqw/0.56.
+   */
+  inset-block-start: calc(50% + 51.8cqw);
   display: grid;
   justify-items: center;
   gap: 0;
@@ -115,13 +129,19 @@
    rather than by width, or the tall caduceus and the wide book would carry
    quite different weight in the row. See scripts/build-marks.py. */
 .bh__mark {
-  inline-size: clamp(1.4rem, 15.85cqw, 2.62rem);
+  /* The floor is 0.95rem, and it was 1.4. A floor exists so the device stays
+     legible on a narrow desktop; at 1.4rem it also bound on a phone, where the
+     frame is 95 to 146px, and the whole label block grew past the foot of the
+     drum it is cut into. Now it binds only below a 96px frame, which is a
+     320px phone and nothing else. */
+  inline-size: clamp(0.95rem, 15.85cqw, 2.62rem);
   block-size: auto;
   margin-block-end: 0.1em;
 }
 .bh__name {
   font-family: var(--font-display);
-  font-size: clamp(0.94rem, 9.6cqw, 1.5rem);
+  /* floors lowered with the mark's, and for the same reason */
+  font-size: clamp(0.62rem, 9.6cqw, 1.5rem);
   line-height: 1.0;
   letter-spacing: 0.04em;
   color: var(--cream);
@@ -130,7 +150,7 @@
   /* The second line is the one that wraps — 'Physiology or Medicine' and
      'Economic Sciences' both take two — so it carries the compromise, and
      the name above it keeps its size. */
-  font-size: clamp(0.61rem, 5.2cqw, 0.93rem);
+  font-size: clamp(0.42rem, 5.2cqw, 0.93rem);
   line-height: 1.05;
   letter-spacing: 0.02em;
   color: var(--muted);
@@ -144,7 +164,7 @@
    mark a fifth larger, 'Physiology or Medicine' and 'Economic Sciences' take
    two lines that would otherwise hang three pixels past the drum's foot. */
 html[lang='en'] .bh__name {
-  font-size: clamp(0.82rem, 8.35cqw, 1.3rem);
+  font-size: clamp(0.54rem, 8.35cqw, 1.3rem);
 }
 .bh__piece:hover .bh__name { color: var(--accent); }
 /* Two lines' worth whether it needs them or not. The pieces are bottom
@@ -219,18 +239,17 @@ html[lang='en'] .bh__name {
 html[data-motion='off'] .bh__cue-rule i { animation: none; inset-block-start: 40%; }
 
 
-/* ---------- on a phone the drum says nothing ----------
-   Everything on the drum's face is sized in container units of the frame,
-   with a floor to keep it legible on a narrow desktop; at half the frame the
-   floor binds and the type is half again too big for the drum it is cut into.
-   So at this width the drum keeps its device and its rings and the name is
-   set where there is room for it. The hall does this and the prize pages must
-   do it too, or the same object is two objects. */
-@media (max-width: 48rem) {
-  .bh__face .bh__name,
-  .bh__face .bh__name-en { display: none; }
-  .bh__mark { inline-size: 17cqw; margin-block-end: 0; }
-}
+/* ---------- one drum, one label, at every size ----------
+   The name used to come off the marble on a phone and be set underneath, with
+   the device doubled to fill the space it left. That was written when a phone
+   drew each piece at 95px across and the type's own floor made the label half
+   again too big for the drum it was cut into.
+
+   The pieces are 146px across now — 70% of the hall's own 209 — so the floors
+   barely bind and the label sits on the marble at the size the drum expects.
+   One treatment, and the same object in every room, which is what the phone
+   customisation cost.
+*/
 
 
 /* ---------- one piece, one size, on a phone ----------
@@ -253,12 +272,6 @@ html[data-motion='off'] .bh__cue-rule i { animation: none; inset-block-start: 40
     --piece-back-k: 0.381;
   }
 
-  /* The device on the drum, twice the size and set on the middle of the face
-     rather than hung from the top of it. With the name gone from the marble
-     at this width there is nothing under the mark to hang from, and a device
-     pushed up against the gold line reads as having slipped. The face runs
-     from the line at 75.7% of the frame to the foot at 95.7%, so its middle
-     is 85.7% and the block starts half a mark above that. */
-  .bh__face { inset-block-start: calc(85.7% - 17cqw); }
-  .bh__mark { inline-size: 34cqw; margin-block-end: 0; }
+  /* The device and the name are the desktop's, at the desktop's own
+     container units — see 'one drum, one label' above. Nothing to set here. */
 }

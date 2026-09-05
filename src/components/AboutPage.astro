@@ -4,6 +4,7 @@ import { useT, type Lang } from '../i18n/ui';
 import ExtLink from './ExtLink.astro';
 import RoomBack from './RoomBack.astro';
 import { specialEvents, hosts } from '../data/catalog';
+import { asset } from '../i18n/routing';
 
 /* the museum's own room behind this page too — see RoomBack */
 const bright = process.env.THEME === 'bright';
@@ -18,7 +19,26 @@ const hostList = Object.entries(hosts);
 <Base lang={lang} title={t('about.title')} segments={['about']} bare={bright}>
   {bright && <RoomBack lang={lang} />}
   <div class="wrap-narrow about">
-    <h1>{t('about.title')}</h1>
+    {/* The medal the project struck for itself: the bell tower and the palms
+        inside a ring of the six prizes, NOBEL LAUREATE LECTURES round the top
+        and NATIONAL TAIWAN UNIVERSITY round the foot.
+        This page had a bare heading and eleven hundred words under it, which
+        is the one page in the museum with nothing to look at. The medal is
+        what the page is about, so it opens with it — set beside the title on a
+        desktop and above it on a phone, at a size that reads as an object
+        rather than as a logo. */}
+    <header class="abt__hero">
+      <picture class="abt__medal">
+        <source media="(max-width: 40rem)" srcset={asset('assets/ui/medal-sm.webp')} />
+        <img src={asset('assets/ui/medal.webp')} alt={t('about.medalAlt')}
+             width="720" height="720" fetchpriority="high" decoding="async" />
+      </picture>
+      <div class="abt__id">
+        <p class="abt__eyebrow">{t('site.university')}</p>
+        <h1>{t('about.title')}</h1>
+        <p class="abt__sub">{t('site.tagline')}</p>
+      </div>
+    </header>
 
     {lang === 'zh' ? (
       <div class="prose stack" style="--gap:1.2rem">
@@ -67,6 +87,10 @@ const hostList = Object.entries(hosts);
         <p>
           「諾貝爾獎」（Nobel Prize）名稱與獎章為諾貝爾基金會（Nobel Foundation）之商標。本站為教育用途之獨立專案，
           與諾貝爾基金會無隸屬關係，亦未獲其背書。
+        </p>
+        <p>
+          本站所使用之所有 3D 模型，其著作權均屬吳俊輝（Jiun-Huei Proty Wu）所有。
+          未經授權，不得以任何形式使用、重製、修改、散布或作其他用途。
         </p>
         <h2>隱私</h2>
         <p>
@@ -133,6 +157,10 @@ const hostList = Object.entries(hosts);
           "Nobel Prize" and the medal are trademarks of the Nobel Foundation. This is an independent
           educational project, not affiliated with or endorsed by the Nobel Foundation.
         </p>
+        <p>
+          All 3D models used on this website are copyrighted by Jiun-Huei Proty Wu. Unauthorized
+          use, reproduction, modification, distribution, or any other form of use is prohibited.
+        </p>
         <h2>Privacy</h2>
         <p>
           No accounts, no tracking cookies, no third-party advertising. Embeds use YouTube's
@@ -163,7 +191,55 @@ const hostList = Object.entries(hosts);
 <style>
   :global(html[data-theme='bright']) .about { padding-block-start: 3.4rem; }
   .about { padding-block: clamp(2rem, 5vw, 3.5rem) 0; }
-  .about h1 { font-size: var(--step-3); color: var(--cream); margin-block-end: 1.5rem; }
+  .about h1 { font-size: var(--step-3); color: var(--cream); }
+
+  /* ---------- the medal, and the name under it ----------
+     Two columns on a desktop, the medal first and no wider than a third of the
+     measure — a struck object beside its own title, which is how a medal is
+     photographed for a catalogue. One column on a phone, medal centred over
+     the words, because a 15rem disc beside a heading at 390px leaves the
+     heading four characters wide. */
+  .abt__hero {
+    display: grid;
+    gap: clamp(1.1rem, 3vw, 2.2rem);
+    align-items: center;
+    justify-items: center;
+    text-align: center;
+    margin-block-end: clamp(1.8rem, 4vw, 2.6rem);
+  }
+  @media (min-width: 40.0625rem) {
+    .abt__hero {
+      grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+      justify-items: start;
+      text-align: start;
+    }
+  }
+  .abt__medal { display: block; line-height: 0; }
+  .abt__medal img {
+    inline-size: clamp(8.5rem, 26vw, 14rem);
+    block-size: auto;
+    /* it is struck metal, so it sits on the page rather than in it */
+    filter: drop-shadow(0 10px 22px rgba(70, 52, 16, 0.28));
+  }
+  .abt__id { display: grid; gap: 0.28rem; }
+  .abt__eyebrow {
+    margin: 0;
+    font-size: var(--step--2);
+    letter-spacing: 0.3em;
+    text-indent: 0.3em;      /* tracking pads the right; give it back */
+    text-transform: uppercase;
+    color: var(--gold-orn, #b8862a);
+  }
+  .abt__sub {
+    margin: 0;
+    font-family: var(--font-han-serif);
+    font-size: var(--step-0);
+    letter-spacing: 0.12em;
+    text-indent: 0.12em;
+    color: var(--muted);
+  }
+  /* the first heading of the prose no longer needs to clear a bare h1 */
+  .about .prose > h2:first-child { margin-block-start: 0; }
   .about h2 {
     font-size: var(--step-1); color: var(--cream);
     margin-block: 2.5rem 0.9rem; padding-block-start: 1.5rem; border-block-start: 1px solid var(--line);

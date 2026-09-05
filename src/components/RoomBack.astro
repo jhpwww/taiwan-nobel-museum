@@ -31,6 +31,11 @@ const t = useT(lang);
 </a>
 
 <style>
+  /* The same band the prize and laureate pages stand in, and the same
+     measurement — see --gr-room-h in bright.css. On a phone that is the hall's
+     own strip: the whole photograph across the width of the screen, uncropped,
+     rather than a tall crop of it. Fixed here already; what changed is only
+     how much of the picture is shown and how tall the band is. */
   .roomback {
     position: fixed;
     inset-inline: 0;
@@ -39,6 +44,12 @@ const t = useT(lang);
     block-size: min(100svh, 62rem);
     overflow: hidden;
     pointer-events: none;
+  }
+  @media (max-width: 48rem) {
+    .roomback { block-size: var(--gr-room-h); }
+    /* the band carries the picture's own ratio, so `cover` shows all of it and
+       there is nothing left for object-position to choose */
+    .roomback img { object-position: 50% 50%; }
   }
   .roomback picture { display: block; block-size: 100%; }
   .roomback img {

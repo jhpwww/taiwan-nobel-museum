@@ -27,20 +27,49 @@
 import { chromium } from 'playwright';
 import { PNG } from 'pngjs';
 
-const URL = process.env.URL ?? 'http://localhost:4322/taiwan-nobel-museum/bright/';
+const BASE = (process.env.URL ?? 'http://localhost:4322/taiwan-nobel-museum/bright/').replace(/\/$/, '');
+
+/*
+ * Every room whose page is read in front of the hall rather than on a ground
+ * of its own — which since the sheets went to half alpha is all of them. The
+ * root is the box the page's own words live in; everything outside it is
+ * chrome, and chrome carries its own tablet.
+ */
+const PAGES = [
+  { path: '/',                  root: '.after' },
+  { path: '/gallery/physics/',  root: '.gr__sheet' },
+  { path: '/gallery/nobel/',    root: '.gr__sheet' },
+  { path: '/lecture/geim/',     root: '.lec__sheet' },
+  { path: '/lectures/',         root: '.browse' },
+  { path: '/learn/',            root: '.course' },
+  { path: '/about/',            root: '.about' },
+  { path: '/en/gallery/physics/', root: '.gr__sheet' },
+  { path: '/en/lecture/geim/',  root: '.lec__sheet' },
+];
 
 /* everything that is not the ground: the type itself, and the pictures whose
    own darkness is not what any word is read against */
-const STRIP = `
-  .after *, .bh__intro * { color: transparent !important; }
-  .after img, .after picture, .after video, .after iframe,
-  .after .vf__btn, .after .card__media { visibility: hidden !important; }
+/* Everything, not just what is inside the root.
+   The root chooses which BOXES are measured; it cannot choose which pixels
+   land in them. A page's own footer is outside every root there is, and on a
+   short page the sampler read 國立臺灣大學 through the box of a percentage
+   forty lines above it and called the museum's own type a dark ground. So the
+   type goes everywhere and only the measuring is scoped. */
+const strip = (root) => `
+  *, .bh__intro * { color: transparent !important; }
+  img, picture, video, iframe, svg,
+  .vf__btn, .card__media { visibility: hidden !important; }
   /* fixed chrome stands over the page rather than under it, and each piece of
      it carries its own frosted tablet — it is not ground for anything */
-  .topbar, .pn, .bh__lockup { display: none !important; }
+  .topbar, .pn, .bh__lockup, .gr__lock, .bh__cue,
+  /* the prize's own piece: it is pinned over the page like the museum's name,
+     and a gold statue is not a ground anything is read against */
+  .gr__rail { display: none !important; }
   /* an element's own rules and borders are its decoration, not the ground its
      words are read against */
-  .after .section-h::after { display: none !important; }
+  ${root} .section-h::after, ${root} .sec-h::after, ${root} .xp__h::after {
+    display: none !important;
+  }
   astro-dev-toolbar { display: none !important; }`;
 
 const lum = (r, g, b) => {
@@ -59,13 +88,30 @@ const browser = await chromium.launch();
 let worst = { r: Infinity };
 
 for (const v of VIEWS) {
+ for (const pg of PAGES) {
   const page = await browser.newPage({
     viewport: v.viewport, deviceScaleFactor: v.dsf,
     isMobile: v.mobile, hasTouch: v.mobile,
   });
-  await page.goto(URL, { waitUntil: 'networkidle' });
+  const res = await page.goto(BASE + pg.path, { waitUntil: 'networkidle' });
+  if (!res || res.status() !== 200) {
+    console.error(`  ${pg.path} — HTTP ${res ? res.status() : 'no response'}`);
+    await page.close();
+    process.exitCode = 1;
+    continue;
+  }
   await page.waitForTimeout(2500);
-  await page.addStyleTag({ content: STRIP });
+  /* Each box's own ink, recorded before the type is blanked. A badge on a
+     filled mark carries WHITE, and measuring white against the dark ink this
+     used to assume made every one of them fail — 專訪 on its red pill read
+     2.14:1 when what it actually is is white on red. */
+  await page.evaluate((r) => {
+    window.__root = r;
+    for (const el of document.querySelectorAll(`${r} :is(h1,h2,h3,p,a,span,dt,dd,li)`)) {
+      el.dataset.ckInk = getComputedStyle(el).color;
+    }
+  }, pg.root);
+  await page.addStyleTag({ content: strip(pg.root) });
 
   const doc = await page.evaluate(() => document.documentElement.scrollHeight);
   const step = Math.round(v.viewport.height * 0.7);
@@ -77,7 +123,8 @@ for (const v of VIEWS) {
     /* every box that carries its own words, and the colour it sets for them */
     const boxes = await page.evaluate(() => {
       const out = [];
-      for (const el of document.querySelectorAll('.after :is(h1,h2,h3,p,a,span,dt,dd,li)')) {
+      for (const el of document.querySelectorAll(
+        `${window.__root} :is(h1,h2,h3,p,a,span,dt,dd,li)`)) {
         const own = [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent.trim());
         if (!own) continue;
         /* Anything STRIP hid, and anything inside it. A badge lying on a
@@ -89,10 +136,9 @@ for (const v of VIEWS) {
         if (getComputedStyle(el).visibility === 'hidden') continue;
         const b = el.getBoundingClientRect();
         if (b.width < 8 || b.height < 8 || b.bottom < 0 || b.top > innerHeight) continue;
-        const c = getComputedStyle(el).getPropertyValue('--check-colour') ||
-                  el.dataset.checkColour || '';
         out.push({ x: b.left, y: b.top, w: b.width, h: b.height,
-                   colour: c, tag: el.tagName, text: (el.textContent || '').trim().slice(0, 16) });
+                   ink: el.dataset.ckInk || '', tag: el.tagName,
+                   text: (el.textContent || '').trim().slice(0, 16) });
       }
       return out;
     });
@@ -100,9 +146,8 @@ for (const v of VIEWS) {
 
     const png = PNG.sync.read(await page.screenshot());
     const s = v.dsf;
-    /* the body colour every one of these resolves to in the bright theme; the
-       accents on it are all darker still, so this is the generous reading */
-    const tl = lum(0x26, 0x22, 0x1e);
+    /* the body colour, for anything whose own ink could not be read */
+    const fallback = lum(0x26, 0x22, 0x1e);
 
     for (const b of boxes) {
       let darkL = 1, dark = null;
@@ -115,18 +160,24 @@ for (const v of VIEWS) {
           if (L < darkL) { darkL = L; dark = [png.data[i], png.data[i + 1], png.data[i + 2]]; }
         }
       if (!dark) continue;
+      /* Its own ink against the darkest thing under it. For nearly everything
+         that is warm near-black on marble; for a badge it is white on a fill,
+         and the fill is exactly what should be measured. */
+      const m = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(b.ink || '');
+      const tl = m ? lum(+m[1], +m[2], +m[3]) : fallback;
       const r = ratio(tl, darkL);
-      if (r < worst.r) worst = { r, dark, view: v.name, y, text: b.text, tag: b.tag };
+      if (r < worst.r) worst = { r, dark, view: v.name, y, text: b.text, tag: b.tag, path: pg.path };
     }
   }
   await page.close();
+ }
 }
 
 await browser.close();
 
 const AA = 4.5;
-console.log(`worst ground anywhere on the page:`);
-console.log(`  ${worst.view}  at scroll ${worst.y}  <${worst.tag}> "${worst.text}"`);
+console.log(`worst ground anywhere in the museum:`);
+console.log(`  ${worst.path}  ${worst.view}  at scroll ${worst.y}  <${worst.tag}> "${worst.text}"`);
 console.log(`  rgb(${worst.dark.join(',')})  ${worst.r.toFixed(2)}:1  ` +
             `${worst.r >= AA ? 'ok' : 'FAILS AA (needs ' + AA + ':1)'}`);
-process.exit(worst.r >= AA ? 0 : 1);
+process.exit(worst.r >= AA && !process.exitCode ? 0 : 1);

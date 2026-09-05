@@ -9,7 +9,7 @@ import LectureCard from './LectureCard.astro';
 import VideoFacade from './VideoFacade.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { browse, lecture as lectureUrl } from '../i18n/routing';
-import { lectures, byDateDesc, catName, totalVideos, nextUpcoming, recommended, localDate, catPrizeName, videoCounts } from '../data/catalog';
+import { lectures, byDateDesc, catName, nextUpcoming, recommended, localDate, catPrizeName, videoCounts } from '../data/catalog';
 
 interface Props { lang: Lang; style?: 'flat' | 'room' | 'gl' | 'models' }
 const { lang, style = 'flat' } = Astro.props;
@@ -31,7 +31,13 @@ const featuredPrize = catPrizeName(featured.prize.category, lang);
 const featuredDate = localDate(featured.event.date, lang, true);
 const featuredHost = lang === 'zh' ? featured.event.host_zh : featured.event.host_en;
 
-const nVideos = totalVideos();
+/* The number of films this museum shows, which is the number the index of
+   films lists — 導讀 + 講座 + 專訪, the three figures standing next to it in
+   this very row. It was totalVideos(), which counts something else: every
+   file on the site, including the second upload of six lectures, two extra
+   sittings and five opening-ceremony clips, none of which is a row in the
+   index. 74 beside a page that says 62 is not a richer count, it is a
+   contradiction. */
 /* Six figures rather than three, and each one counted rather than repeated:
    the first pair used to be the same number under two labels. Laureates are
    distinct people — a laureate who came twice is one laureate — and the three
@@ -41,7 +47,7 @@ const nLaureates = new Set(lectures.map((l) => l.laureate.en)).size;
 const nHosts = new Set(lectures.map((l) => l.event.host_en)).size;
 const figures = [
   { n: nLaureates,      label: t('hall.stat.laureates') },
-  { n: nVideos,         label: t('hall.stat.videos') },
+  { n: kinds.all,       label: t('hall.stat.videos') },
   { n: lectures.length, label: t('hall.stat.lectures') },
   { n: kinds.guide,     label: t('hall.stat.guide') },
   { n: kinds.record,    label: t('hall.stat.interview') },

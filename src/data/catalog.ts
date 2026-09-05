@@ -257,3 +257,53 @@ export const localDate = (iso: string, lang: Lang, long = false) =>
   new Date(iso).toLocaleDateString(lang === 'zh' ? 'zh-TW' : 'en-GB', {
     year: 'numeric', month: long ? 'long' : 'short', day: 'numeric',
   });
+
+
+/* ============================================================
+   What a mark on a picture is allowed to say
+   ============================================================
+   A still frame with a label over it is one of two quite different things,
+   and until now the museum used one word for both.
+
+     · The picture PLAYS. Pressing it starts the video. The mark names what
+       will play: 導讀影片.
+     · The picture GOES somewhere. Pressing it opens a page. The mark names
+       what is waiting on that page: 有導讀影片.
+
+   A card in a grid is the second kind, and it was wearing the first kind's
+   word — it promised a guide video to anyone who pressed it and delivered a
+   laureate's page instead.
+
+   This is written as a function rather than fixed at each call site so that
+   the next picture anyone adds has to say which kind it is, and gets the
+   right word for free.
+   ============================================================ */
+export type BadgeAction = 'plays' | 'goes';
+
+/** the i18n key for the 'this is / this has a guide video' mark */
+export const guideBadgeKey = (action: BadgeAction) =>
+  action === 'plays' ? 'lec.guide' : 'lec.guideHas';
+
+
+/* ============================================================
+   The prize itself, for any room that wants to point at it
+   ============================================================
+   These four were written inside GalleryPage, where only the introduction
+   room could reach them. The video index closes with the same four now, so
+   they live here — one list, in one place, for every room that ends by
+   pointing outward.
+   ============================================================ */
+export const generalLinks = [
+  { url: 'https://www.nobelprize.org/alfred-nobel/',
+    zh: '諾貝爾其人', en: 'Alfred Nobel, the man',
+    dzh: '炸藥的發明者，與他留下的遺囑。', den: 'The inventor of dynamite, and the will he left behind.' },
+  { url: 'https://www.nobelprize.org/prizes/facts/nobel-prize-facts/',
+    zh: '諾貝爾獎小知識', en: 'Nobel Prize facts',
+    dzh: '最年輕、最年長、得過 2 次的人：官方統計。', den: 'Youngest, oldest, twice-awarded: the official numbers.' },
+  { url: 'https://www.nobelprize.org/the-nobel-prize-organisation/',
+    zh: '獎項如何評選', en: 'How the prizes are decided',
+    dzh: '提名、審議、保密 50 年的評選過程。', den: 'Nomination, deliberation, and 50 years of secrecy.' },
+  { url: 'https://www.nobelprize.org/educational/',
+    zh: '諾貝爾教育資源', en: 'Nobel Prize education',
+    dzh: '官方為學生製作的互動教材與遊戲（英文）。', den: 'Interactive teaching material and games from the official site.' },
+];

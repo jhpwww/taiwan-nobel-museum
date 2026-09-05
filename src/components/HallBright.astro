@@ -197,19 +197,27 @@ const PLATE = { w: 836, h: 470 };
     ))}
     </nav>
 
-    <div class="bh__foot">
-      {/* The way on. A mouse with a rolling wheel is the usual drawing and it
-          belongs to a different kind of site; this is the room's own idiom — a
-          gold hairline with a bead of light running down it, under an arch cut
-          from the same stroke as the windows behind it. */}
-      <a class="bh__cue" href="#more" aria-label={t('hall.scroll')}>
-        <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
-        <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
-          <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
-        </svg>
-        <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
-      </a>
-    </div>
+  </div>
+
+  {/* The way on. A mouse with a rolling wheel is the usual drawing and it
+      belongs to a different kind of site; this is the room's own idiom — a
+      gold hairline with a bead of light running down it, under an arch cut
+      from the same stroke as the windows behind it.
+
+      Outside the stage, and that is load-bearing. .bh__stage is fixed with
+      z-index 0, which makes it a stacking context, and a stacking context caps
+      everything inside it: the foot's z-index of 45 was being counted against
+      its siblings on the stage rather than against the page, so .after — one
+      z-index above the stage — painted over the chevron AND took its clicks.
+      Out here the 45 means what it says. */}
+  <div class="bh__foot">
+    <a class="bh__cue" href="#more" aria-label={t('hall.scroll')}>
+      <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
+      <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
+        <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
+      </svg>
+      <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
+    </a>
   </div>
 </section>
 
@@ -684,21 +692,10 @@ const PLATE = { w: 836, h: 470 };
        and opens the space between the bottom drums and the figures below. */
     .bh__piece:nth-child(n + 4) { margin-block-start: -3.4rem; }
 
-    /* The name comes off the drum and stands under the piece.
-     *
-     * Everything on the drum's face is sized in container units of the frame,
-     * with a floor to keep it legible on a narrow desktop — and on a phone the
-     * frame is half the size, so the floor binds and the type is 58% too big
-     * for the drum it is cut into: 生理學或醫學 ran off both sides of its own
-     * plinth and into the line below. Sized properly it would be nine pixels,
-     * which is not a label, it is a texture.
-     *
-     * So at this size the drum keeps its device and its rings — enough to know
-     * which piece is which — and the name is set underneath where it can
-     * actually be read. It is the same name; only the surface changes. */
-    .bh__face .bh__name, .bh__face .bh__name-en { display: none; }
+    /* The name is cut into the drum here too — see 'one drum, one label' in
+       plinth.css. What stays under the piece is the count alone, which is not
+       a name and was never on the marble. */
     .bh__n { font-size: var(--step--2); line-height: 1.3; min-block-size: 0; text-align: center; }
-    .bh__cap { display: block; color: var(--cream); font-weight: 500; }
 
     /* Gone back, on a phone: one line of six rather than the same six further
        off. Six across a 390px screen is 64px each, at which a name cut into a

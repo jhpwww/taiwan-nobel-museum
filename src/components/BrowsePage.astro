@@ -2,8 +2,9 @@
 import Base from '../layouts/Base.astro';
 import VideoCard from './VideoCard.astro';
 import { useT, type Lang } from '../i18n/ui';
-import { videoList, videoCounts, categories, tags } from '../data/catalog';
+import { videoList, videoCounts, categories, tags, generalLinks } from '../data/catalog';
 import RoomBack from './RoomBack.astro';
+import Explore from './Explore.astro';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -100,6 +101,10 @@ const bright = process.env.THEME === 'bright';
       ))}
     </ul>
   </div>
+
+  {/* The index of films ends where the prize pages end: pointing at the prize
+      itself. Same four links, same treatment — see Explore.astro. */}
+  <Explore lang={lang} links={generalLinks} note={t('explore.noteAll')} />
 </Base>
 
 <style>

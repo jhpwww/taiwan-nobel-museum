@@ -18,7 +18,7 @@ export const ui = {
     'nav.menu': '導覽選單',
     'nav.backHall': '回到大廳',
     'nav.prize': '關於諾獎',
-    'nav.all': '所有講座',
+    'nav.all': '所有影片',
     'nav.about': '關於本館',
     'nav.skip': '跳到主要內容',
     'nav.toTop': '回到最上方',
@@ -45,6 +45,10 @@ export const ui = {
     'cat.emptyLink': '認識歷屆諾貝爾文學獎得主',
     'cat.aboutPrize': '關於這個獎項',
     'cat.materials': '延伸材料',
+    'about.medalAlt': '本館紀念章：中央為臺大鐘塔與椰林，外環刻有「NOBEL LAUREATE LECTURES」與「NATIONAL TAIWAN UNIVERSITY」，周圍環繞六座獎項的象徵圖樣。',
+    'explore.title': '延伸探索',
+    'explore.noteCat': '以下連結全部指向諾貝爾基金會（Nobel Foundation）官方網站。',
+    'explore.noteAll': '想更了解這座獎項本身，可以從這裡開始。',
     'cat.materialsNote': '以下連結全部指向諾貝爾基金會（Nobel Foundation）官方網站，可查詢歷屆得主、得獎理由與統計資料。',
     'cat.asOf': '統計數字取自諾貝爾獎官方應用程式介面（Nobel Prize API），資料日期 {date}。',
     /* The owner's own six words, and no measure word on any of them. These
@@ -68,6 +72,12 @@ export const ui = {
     'cat.lectures': '本展廳的講座',
 
     'lec.guide': '導讀影片',
+    /* The same fact, said from the other side of the click. See BADGE in
+       src/data/catalog.ts: a mark on a picture that PLAYS names what will
+       play; a mark on a picture that GOES SOMEWHERE names what is waiting
+       there. '導讀影片' on a card promised a guide video to whoever pressed
+       it, and delivered a page. */
+    'lec.guideHas': '有導讀影片',
     'lec.guideNote': '約 90 秒，這場演講的概覽',
     'lec.lecture': '完整講座',
     'lec.lectureNote': '演講全長，英語發音',
@@ -94,7 +104,7 @@ export const ui = {
     'lec.playHint': '點擊播放（YouTube）',
     'lec.noVideo': '影片尚未提供',
 
-    'browse.title': '所有講座',
+    'browse.title': '所有影片',
     'browse.filterCat': '獎項類別',
     'browse.filterTopic': '主題',
     'study.pageTitle': '我的學習紀錄',
@@ -223,7 +233,7 @@ export const ui = {
     'nav.menu': 'Menu',
     'nav.backHall': 'Back to the hall',
     'nav.prize': 'About the prize',
-    'nav.all': 'All lectures',
+    'nav.all': 'All videos',
     'nav.about': 'About',
     'nav.skip': 'Skip to main content',
     'nav.toTop': 'Back to top',
@@ -250,6 +260,10 @@ export const ui = {
     'cat.emptyLink': 'Meet the Nobel Laureates in Literature',
     'cat.aboutPrize': 'About this prize',
     'cat.materials': 'Go further',
+    'about.medalAlt': 'The museum\u2019s medal: the NTU bell tower and palms at its centre, NOBEL LAUREATE LECTURES and NATIONAL TAIWAN UNIVERSITY struck around the rim, with the devices of the six prizes ringing them.',
+    'explore.title': 'Go further',
+    'explore.noteCat': 'Every link below goes to the Nobel Foundation\u2019s own site.',
+    'explore.noteAll': 'A place to start if you want to know more about the prize itself.',
     'cat.materialsNote': 'Every link below goes to the Nobel Foundation\u2019s own site, where you can look up laureates, citations and statistics.',
     'cat.asOf': 'Figures from the official Nobel Prize API, as of {date}.',
     'hall.stat.lectures': 'lectures',
@@ -270,6 +284,7 @@ export const ui = {
     'cat.lectures': 'Lectures in this gallery',
 
     'lec.guide': 'Guide video',
+    'lec.guideHas': 'Has a guide video',
     'lec.guideNote': '90 seconds: an overview of the lecture',
     'lec.lecture': 'Full lecture',
     'lec.lectureNote': 'The complete talk, in English',
@@ -296,7 +311,7 @@ export const ui = {
     'lec.playHint': 'Click to play (YouTube)',
     'lec.noVideo': 'Video not yet available',
 
-    'browse.title': 'All lectures',
+    'browse.title': 'All videos',
     'browse.filterCat': 'Prize category',
     'browse.filterTopic': 'Topic',
     'study.pageTitle': 'My study record',
