@@ -33,6 +33,12 @@ const [introA, introConj, introB] = introParts(lang);
    see generalLinks in src/data/catalog.ts, where the video index reads them
    from too */
 const links = isIntro ? generalLinks : meta!.links;
+/** the same four (or five) as cards, in this page's language */
+const exploreItems = links.map((l) => ({
+  url: l.url,
+  title: lang === 'zh' ? l.zh : l.en,
+  desc: lang === 'zh' ? l.dzh : l.den,
+}));
 
 /* ---------------------------------------------------------------
  * The bright museum shows the prize's own sculpture here, standing on the
@@ -232,8 +238,9 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     </section>
   )}
 
+  {!isIntro && (
   <div class="wrap gh__body" data-cat={cat}>
-    {!isIntro && (
+    {(
       <section aria-labelledby="h-lectures">
         <h2 id="h-lectures" class="sec-h">{t('cat.lectures')}</h2>
         {isEmpty ? (
@@ -250,6 +257,7 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     )}
 
   </div>
+  )}
 
   {/* Every room ends by pointing outward. It used to happen halfway up the
       page, in a strip of keys wedged under the statistics and titled 延伸材料;
@@ -257,7 +265,9 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
       somewhere else to go. Same links, same descriptions — a section at the
       foot, and cards rather than keys, because a card can carry the line of
       description each of these has. */}
-  <Explore lang={lang} links={links} note={isIntro ? undefined : t('explore.noteCat')} />
+  <Explore lang={lang} items={exploreItems}
+           note={isIntro ? undefined : t('explore.noteCat')}
+           heading={!isIntro} />
   </div>
 </Base>
 
@@ -317,6 +327,11 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
      page; the lectures below it had nothing but the body's white, which a
      fixed room paints over. */
   .gr__sheet { position: relative; background: var(--bg-0); }
+  /* The introduction room has no lectures and no statistics — its four cards
+     are the whole page. With the heading gone (see Explore) they need the
+     breathing room a section heading would have given them, and the room above
+     needs to end on something rather than on an empty band. */
+  .gr__sheet:has(.xp[data-bare]) { padding-block-start: clamp(1.6rem, 4vw, 2.6rem); }
 
   /* the mark the hall's name folds into, in the same gold glass — see
      'the name, condensed' in bright.css, which this borrows outright */

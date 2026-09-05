@@ -104,7 +104,12 @@ const bright = process.env.THEME === 'bright';
 
   {/* The index of films ends where the prize pages end: pointing at the prize
       itself. Same four links, same treatment — see Explore.astro. */}
-  <Explore lang={lang} links={generalLinks} note={t('explore.noteAll')} />
+  <Explore lang={lang} note={t('explore.noteAll')}
+           items={generalLinks.map((l) => ({
+             url: l.url,
+             title: lang === 'zh' ? l.zh : l.en,
+             desc: lang === 'zh' ? l.dzh : l.den,
+           }))} />
 </Base>
 
 <style>

@@ -20,34 +20,47 @@
  */
 import { useT, type Lang } from '../i18n/ui';
 
-export interface ExploreLink {
+/** one card: where it goes, what it is called, and a line about it */
+export interface ExploreItem {
   url: string;
-  zh: string; en: string;
-  dzh: string; den: string;
+  title: string;
+  desc?: string;
 }
 
-interface Props { lang: Lang; links: ExploreLink[]; note?: string }
-const { lang, links, note } = Astro.props;
+interface Props {
+  lang: Lang;
+  items: ExploreItem[];
+  note?: string;
+  /** the introduction room is entirely about the prize; a heading saying so
+      again is a heading saying nothing */
+  heading?: boolean;
+  /** wrap the section in the page's own gutter (off where a page supplies it) */
+  wrap?: boolean;
+}
+const { lang, items, note, heading = true, wrap = true } = Astro.props;
 const t = useT(lang);
+const Wrap = wrap ? 'div' : Fragment;
 ---
 
-<section class="xp" aria-labelledby="xp-h">
-  <div class="wrap">
-    <h2 id="xp-h" class="xp__h">{t('explore.title')}</h2>
+<section class="xp" aria-labelledby={heading ? 'xp-h' : undefined}
+         aria-label={heading ? undefined : t('explore.title')}
+         data-bare={heading ? undefined : ''}>
+  <Wrap class={wrap ? 'wrap' : undefined}>
+    {heading && <h2 id="xp-h" class="xp__h">{t('explore.title')}</h2>}
     {note && <p class="xp__note">{note}</p>}
     <ul class="cards" role="list">
-      {links.map((l) => (
+      {items.map((l) => (
         <li>
           <a href={l.url} target="_blank" rel="noopener noreferrer">
-            <span class="cards__t">{lang === 'zh' ? l.zh : l.en}</span>
-            <span class="cards__d">{lang === 'zh' ? l.dzh : l.den}</span>
+            <span class="cards__t">{l.title}</span>
+            {l.desc && <span class="cards__d">{l.desc}</span>}
             <span class="cards__host">{new URL(l.url).hostname.replace(/^www\./, '')} ↗</span>
             <span class="visually-hidden">{t('a11y.newTab')}</span>
           </a>
         </li>
       ))}
     </ul>
-  </div>
+  </Wrap>
 </section>
 
 <style>
@@ -56,6 +69,10 @@ const t = useT(lang);
     margin-block-start: clamp(2.5rem, 7vw, 4.5rem);
     padding-block: clamp(1.8rem, 5vw, 2.8rem) clamp(2rem, 5vw, 3rem);
   }
+  /* headingless — the introduction room is about the prize from its title
+     down, so a band saying '延伸探索' over four cards about the prize is a
+     label on a label */
+  .xp[data-bare] { border-block-start: 0; margin-block-start: 0; padding-block-start: 0; }
   .xp__h { font-size: var(--step-2); color: var(--cream); }
   .xp__h::after {
     content: ''; display: block; inline-size: 3rem;

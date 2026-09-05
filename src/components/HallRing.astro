@@ -1,0 +1,191 @@
+---
+/**
+ * HallRing.astro — six lectures, framed and turning in the air of the hall.
+ *
+ * A ring of stills orbiting the room's axis, behind the sculptures. It is
+ * ambience, not navigation: the panels are aria-hidden and take no clicks,
+ * because a target that moves is a target nobody can hit, and everything they
+ * show is one press away in the row of pieces standing in front of them.
+ *
+ * WHAT IS IN THE RING
+ * The six lectures NTU itself hosted — the ones the About page names, and the
+ * only six with a second, NTU-hosted recording of the same talk. That is a
+ * fact in the data rather than a hand-picked list, so the ring cannot drift
+ * out of step with the catalogue.
+ *
+ * HOW IT TURNS
+ * One `rotateY` on the parent, six children at fixed angles inside a
+ * `preserve-3d` box. The browser z-sorts them and perspective sizes them, so
+ * nothing has to be computed per frame and the whole thing is one composited
+ * layer — which is why it can run behind six model-viewers without costing
+ * anything. A scroll-driven or script-driven version would land a frame late
+ * against a room that never moves, which is the same shiver the row of pieces
+ * had before it was pinned.
+ *
+ * WHERE IT SITS
+ * Inside .bh__plate, so it is placed in per cent of the photograph like
+ * everything else in this hall and a crop moves picture and contents together.
+ * Before .bh__stage in the document, so it paints behind the pieces.
+ */
+import { lectures } from '../data/catalog';
+import posters from '../data/posters.json';
+import { asset } from '../i18n/routing';
+
+/* the six NTU lectures, oldest first, so the ring reads as the series ran */
+const six = lectures
+  .filter((l) => l.video.lecture_ntu)
+  .sort((a, b) => a.event.date.localeCompare(b.event.date));
+
+/* ---- round 5: a cloud, not a carousel ----
+ * Six panels at one height on one circle is a fairground ride. What makes the
+ * reference read as things floating is that no two are at the same height or
+ * quite square to the axis. These are fixed per panel rather than random, so
+ * the arrangement is the same on every visit and can be judged as a
+ * composition; the numbers are in cqw of the plate and in degrees, and they
+ * sum to nothing so the ring stays centred on the room's axis.
+ */
+const DRIFT = [0, -3.4, 2.6, -1.4, 3.2, -1.0];      // cqw, up is negative
+const TILT  = [0.9, -1.6, 1.4, -0.8, 1.7, -1.6];    // degrees about the axis
+
+const frames = posters as Record<string, string>;
+const still = (id: string, yt: string) =>
+  `https://i.ytimg.com/vi/${yt}/${frames[id] ?? 'hqdefault'}.jpg`;
+---
+
+<div class="hr" aria-hidden="true" data-hall-ring>
+  <div class="hr__ring">
+    {six.map((l, i) => (
+      <div class="hr__panel" style={`--i:${i}; --drift:${DRIFT[i]}cqw; --tilt:${TILT[i]}deg`}>
+        <span class="hr__pane">
+          <img class="hr__still" src={still(l.id, l.video.lecture!)} alt=""
+               width="480" height="270" loading="lazy" decoding="async" />
+          <img class="hr__frame" src={asset('assets/ui/frame.webp')} alt=""
+               width="720" height="432" loading="lazy" decoding="async" />
+        </span>
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  /* ---------- the ring's measurements ----------
+     All in cqw of the plate, which is the photograph's own frame — so the ring
+     keeps its place in the architecture at every window size, exactly as the
+     row of pieces does. */
+  .hr {
+    --n: 6;                    /* panels */
+    --pane-w: 15cqw;
+    --radius: 27cqw;
+    --dur: 96s;
+    position: absolute;
+    inset-inline-start: 50%;
+    /* mid-air: above the horizon at 69.2% and below the springing of the
+       dome, which is where the room has nothing of its own */
+    inset-block-start: 46%;
+    inline-size: 0;
+    block-size: 0;
+    /* Shorter than it looks. A long perspective flattens the ring into six
+       equal rectangles; 78cqw is about two and a half panel-widths of eye
+       distance, which is close enough that the near panel is visibly larger
+       than the far one and far enough that nothing shears. */
+    perspective: 78cqw;
+    pointer-events: none;
+  }
+  .hr__ring {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    animation: hr-turn var(--dur) linear infinite;
+  }
+  @keyframes hr-turn {
+    from { transform: rotateY(0deg); }
+    to   { transform: rotateY(-360deg); }
+  }
+  .hr__panel {
+    position: absolute;
+    inline-size: var(--pane-w);
+    aspect-ratio: 1619 / 971;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    margin-block-start: calc(var(--pane-w) * -971 / 1619 / 2);
+    margin-inline-start: calc(var(--pane-w) / -2);
+    transform:
+      rotateY(calc(360deg / var(--n) * var(--i)))
+      translateZ(var(--radius))
+      translateY(var(--drift, 0px))
+      rotateZ(var(--tilt, 0deg));
+    transform-style: preserve-3d;
+  }
+  .hr__pane { position: absolute; inset: 0; display: block; }
+  /* the aperture, measured off the frame's own alpha channel:
+     left 11.43%, right 11.61%, top 14.11%, bottom 13.39% of 1619x971 — an
+     opening of 1.770:1, which is 16:9 to within half a per cent */
+  /* ---------- round 2: the panel had to become an object ----------
+     The first build put a bare still in the air and the frame vanished
+     entirely: the neon is drawn to be added to a dark ground, and `screen` on
+     white marble is a no-op. Composited normally the glow reads, and what was
+     a photograph pasted on the room becomes a pane hanging in it.
+
+     Three things make it hang. A shadow, so the room knows it is there. A
+     little of the room through it, because glass is what the reference is made
+     of and an opaque rectangle is a poster. And less contrast than the gold in
+     front of it — aerial perspective is the one cue a flat ring cannot fake
+     any other way. */
+  /* ---------- round 3: distance ----------
+     Perspective sizes the far panels and the browser sorts them, and that is
+     all the depth a flat ring gets for free — every panel arrives at the same
+     strength whether it is two metres away or ten, which is what made the ring
+     read as six stickers on one plane.
+     Air is what is missing. Each panel dims on the way round and brightens
+     coming back, once per revolution, phase-shifted by its own place in the
+     six — so the animation needs no clock of its own and cannot drift from the
+     turn, because both run on the same duration. A negative delay of (i/6 - 1)
+     revolutions puts panel i at its brightest exactly when it is nearest. */
+  .hr__pane {
+    filter: drop-shadow(0 1.2cqw 2.2cqw rgba(40, 52, 72, 0.24));
+    animation: hr-depth var(--dur) linear infinite;
+    animation-delay: calc(var(--dur) * (var(--i) / var(--n) - 1));
+  }
+  @keyframes hr-depth {
+    0%   { opacity: 0.96; }
+    50%  { opacity: 0.32; }
+    100% { opacity: 0.96; }
+  }
+  :global(html[data-motion='off']) .hr__pane { animation: none; opacity: 0.7; }
+
+  /* ---------- and it withdraws with the pieces ----------
+     The room is fixed for the whole document, so without this the ring goes on
+     turning behind the lectures, the cards and the reading for the length of
+     the page. It belongs to the hall's first screen, as the way on used to,
+     and it leaves when the six do. */
+  :global(.bh__plinths[data-state='back']) ~ * .hr,
+  .hr { transition: opacity 0.7s var(--ease), visibility 0.7s var(--ease); }
+  .hr[data-gone] { opacity: 0; visibility: hidden; }
+  .hr__still {
+    position: absolute;
+    inset: 14.11% 11.61% 13.39% 11.43%;
+    inline-size: 76.96%; block-size: 72.5%;
+    object-fit: cover;
+    border-radius: 0.35cqw;
+    opacity: 0.9;
+    filter: saturate(0.86) contrast(0.94) brightness(1.06);
+  }
+  .hr__frame {
+    position: absolute; inset: 0;
+    inline-size: 100%; block-size: 100%;
+    /* Composited normally. `screen` was the obvious reading of a neon PNG and
+       the wrong one here: it lightens, and there is nothing on white marble
+       left to lighten. */
+    opacity: 0.92;
+  }
+
+  /* Someone who has asked for less motion gets the ring standing still. */
+  :global(html[data-motion='off']) .hr__ring { animation: none; }
+
+  /* Not on a phone. The plate is a 220px band there and the pieces already
+     fill it; six more objects in the same band is a busy picture, not a
+     deeper one. */
+  @media (max-width: 48rem) {
+    .hr { display: none; }
+  }
+</style>

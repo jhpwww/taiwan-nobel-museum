@@ -6,6 +6,7 @@ import Sculpture, { type CategoryKey } from './Sculpture.astro';
 import ExtLink from './ExtLink.astro';
 import StudyPanel from './StudyPanel.astro';
 import CompareBlock from './CompareBlock.astro';
+import Explore from './Explore.astro';
 import { useT, type Lang } from '../i18n/ui';
 import { gallery, home, asset } from '../i18n/routing';
 import { createHash } from 'node:crypto';
@@ -39,6 +40,26 @@ const stampAsset = (rel: string) => {
     .digest('hex').slice(0, 8);
   return `${asset(rel)}?v=${hash}`;
 };
+/* ---- 延伸探索 ----
+ * These seven were a list of bare links in a 17rem rail down the right of the
+ * page: a column narrow enough that one long label pushed the whole page 47px
+ * sideways once, and narrow enough that each link's line of description had to
+ * be set at 12px under it.
+ *
+ * They are the same seven, in the same order, as the cards every other room in
+ * the museum ends on — see Explore.astro. A laureate's page is the innermost
+ * room of the three and it now leaves the same way the other two do.
+ */
+const deeper = [
+  { url: rec.links.nobel_lecture, title: t('lec.nobelLecture'), desc: t('lec.nobelLectureNote') },
+  { url: rec.links.nobel_facts,   title: t('lec.nobelFacts'),   desc: t('lec.nobelFactsNote') },
+  rec.links.ntu_spotlight && { url: rec.links.ntu_spotlight, title: t('lec.ntuSpotlight') },
+  rec.links.ntu_epaper    && { url: rec.links.ntu_epaper,    title: t('lec.ntuNews') },
+  rec.links.instagram     && { url: rec.links.instagram,     title: t('lec.instagram') },
+  { url: NTU_CGE,          title: t('lec.ntuCge'),  desc: t('lec.ntuCgeNote') },
+  { url: rec.links.cw_hub, title: t('lec.cwHub'),   desc: t('lec.cwHubNote') },
+].filter(Boolean) as { url: string; title: string; desc?: string }[];
+
 const piece = bright ? {
   model: stampAsset(`assets/models/gold/${cat}.glb`),
   poster: stampAsset(`assets/models/gold/${cat}.webp`),
@@ -191,37 +212,6 @@ const piece = bright ? {
         <StudyPanel lang={lang} rec={rec} />
       </div>
 
-      {/* 5. go deeper */}
-      <aside class="lec__aside" aria-labelledby="h-deep">
-        <h3 id="h-deep" class="lec__h">{t('lec.deeper')}</h3>
-        <ul class="links" role="list">
-          <li class="links__key">
-            <ExtLink lang={lang} href={rec.links.nobel_lecture}>{t('lec.nobelLecture')}</ExtLink>
-            <span>{t('lec.nobelLectureNote')}</span>
-          </li>
-          <li>
-            <ExtLink lang={lang} href={rec.links.nobel_facts}>{t('lec.nobelFacts')}</ExtLink>
-            <span>{t('lec.nobelFactsNote')}</span>
-          </li>
-          {rec.links.ntu_spotlight && (
-            <li><ExtLink lang={lang} href={rec.links.ntu_spotlight}>{t('lec.ntuSpotlight')}</ExtLink></li>
-          )}
-          {rec.links.ntu_epaper && (
-            <li><ExtLink lang={lang} href={rec.links.ntu_epaper}>{t('lec.ntuNews')}</ExtLink></li>
-          )}
-          {rec.links.instagram && (
-            <li><ExtLink lang={lang} href={rec.links.instagram}>{t('lec.instagram')}</ExtLink></li>
-          )}
-          <li>
-            <ExtLink lang={lang} href={NTU_CGE}>{t('lec.ntuCge')}</ExtLink>
-            <span>{t('lec.ntuCgeNote')}</span>
-          </li>
-          <li>
-            <ExtLink lang={lang} href={rec.links.cw_hub}>{t('lec.cwHub')}</ExtLink>
-            <span>{t('lec.cwHubNote')}</span>
-          </li>
-        </ul>
-      </aside>
     </div>
 
     <section class="wrap lec__next" aria-labelledby="h-next">
@@ -230,6 +220,8 @@ const piece = bright ? {
         {next.map((r) => <li><LectureCard lang={lang} rec={r} /></li>)}
       </ul>
     </section>
+
+    <Explore lang={lang} items={deeper} />
     </div>
   </article>
 </Base>
@@ -318,8 +310,10 @@ const piece = bright ? {
     border: 1px solid var(--line); border-radius: var(--radius-control); padding: 0.14rem 0.7rem;
   }
 
+  /* One column. The 17rem rail down the right held the 延伸探索 links and
+     nothing else; they are a section at the foot now, with the other rooms',
+     so the reading column has the page to itself. */
   .lec__body { display: grid; gap: clamp(2rem, 5vw, 3.5rem); padding-block-start: clamp(2rem, 6vw, 3.5rem); }
-  @media (min-width: 62rem) { .lec__body { grid-template-columns: minmax(0, 1fr) 17rem; align-items: start; } }
 
   .lec__h { font-size: var(--step-1); color: var(--cream); margin-block-end: 0.9rem; }
   .lec__h::before {

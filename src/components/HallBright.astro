@@ -35,6 +35,7 @@ import { useT, type Lang } from '../i18n/ui';
 import { gallery, asset } from '../i18n/routing';
 import { lectures, catName, catNameAlt, categoryList } from '../data/catalog';
 import credits from '../../data/model-credits.json';
+import HallRing from './HallRing.astro';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
@@ -130,6 +131,10 @@ const PLATE = { w: 836, h: 470 };
         <img class="bh__photo" src={asset('media/bright-hall.jpg')} alt=""
              width={PLATE.w * 2} height={PLATE.h * 2} fetchpriority="high" decoding="async" />
       </picture>
+      {/* six lectures turning in the air of the room, behind the pieces —
+          inside the plate so they are placed in per cent of the photograph,
+          and before .bh__stage so they paint behind what stands on the floor */}
+      <HallRing />
     </div>
   </div>
 
@@ -778,6 +783,7 @@ const PLATE = { w: 836, h: 470 };
   const plinths = document.querySelector<HTMLElement>('.bh__plinths');
   const foot = document.querySelector<HTMLElement>('.bh__foot');
   const lockup = document.querySelector<HTMLElement>('.bh__lockup');
+  const ring = document.querySelector<HTMLElement>('[data-hall-ring]');
   const pieces = [...document.querySelectorAll<HTMLElement>('.bh__piece')];
 
   let back: boolean | null = null;
@@ -812,6 +818,10 @@ const PLATE = { w: 836, h: 470 };
     back = v;
     plinths.dataset.state = v ? 'back' : 'in';
     lockup?.toggleAttribute('data-small', v);
+    /* the ring of stills belongs to the hall's first screen and goes with the
+       pieces — the room is fixed for the whole document, so left alone it
+       would turn behind the reading all the way down */
+    ring?.toggleAttribute('data-gone', v);
     /* the bar's keys are folded behind one while the pieces are at full size
        and open with them — the attribute is the only thing the two share, and
        the button in the bar sets the same one when it is pressed */
