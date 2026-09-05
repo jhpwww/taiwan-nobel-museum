@@ -514,15 +514,20 @@ const PLATE = { w: 836, h: 470 };
   }
   :global(html[data-motion='off']) .bh__plinths { animation: none; }
 
-  /* A step forward: a tenth larger, and set down a little on the floor.
+  /* A step forward: a tenth larger, and set down the floor.
      On `scale` and `translate` rather than on `transform`, which the arrival
      animation and the retreat both own — the three are separate properties
      and compose, so the row can be a tenth bigger and still walk in from the
      far end and still withdraw. Everything on a piece is sized in container
      units of its own frame, so the type and the device on the drum come with
-     it and nothing has to be scaled twice. */
+     it and nothing has to be scaled twice.
+
+     The step down is a length off the plate now, not a per cent of the row.
+     Per cent of the row means per cent of whatever the labels under it happen
+     to measure, and the figures below have to know where the drums' feet land
+     — see --drum-foot in bright.css, which this and they now share. */
   @media (min-width: 48.0625rem) {
-    .bh__plinths { scale: 1.1; translate: 0 3.4%; }
+    .bh__plinths { scale: 1.1; translate: 0 var(--piece-drop); }
   }
 
   /* Gone back. On a desktop that is one scale about the vanishing point, which
@@ -537,17 +542,35 @@ const PLATE = { w: 836, h: 470 };
   /* the drum carries the name at this size; below, it cannot */
   .bh__cap { display: none; }
 
-  /* ---------- the foot: the introduction, and the way on ---------- */
+  /* ---------- the foot: the way on ----------
+   *
+   * Pinned to the bottom of the window, and over everything.
+   *
+   * It used to hang off the bottom of the stage, and the stage is capped at
+   * 62rem — so on any screen taller than that the invitation to scroll sat a
+   * couple of hundred pixels up the page with white underneath it. And the
+   * strip of figures, which is page content and therefore above the stage,
+   * painted straight over the chevron.
+   *
+   * Fixed to the window fixes both: it is always on the last line of the
+   * screen, and z-index 45 puts it over the page and under the bar. The prize
+   * pages pin their own the same way — see .gr__cue in GalleryPage. */
   .bh__foot {
-    position: absolute;
+    position: fixed;
     inset-inline: 0;
     inset-block-end: clamp(0.7rem, 2vh, 1.5rem);
+    z-index: 45;
     display: grid;
     justify-items: center;
     gap: clamp(0.5rem, 1.4vh, 0.95rem);
-    /* both of these belong to the hall's first screen and go when it does */
+    pointer-events: none;
     transition: opacity 0.55s var(--ease), visibility 0.55s var(--ease);
   }
+  .bh__foot > * { pointer-events: auto; }
+  /* A mark that says 'down' at the bottom of the document says nothing. It is
+     the only thing that takes it away now — it used to go when the pieces
+     withdrew, which on a phone is a fifth of a screen and made 'pinned'
+     meaningless. */
   .bh__foot[data-gone] { opacity: 0; visibility: hidden; }
 
 
@@ -791,7 +814,6 @@ const PLATE = { w: 836, h: 470 };
     const before = animate && !wide ? pieces.map((p) => p.getBoundingClientRect()) : null;
     back = v;
     plinths.dataset.state = v ? 'back' : 'in';
-    foot?.toggleAttribute('data-gone', v);
     lockup?.toggleAttribute('data-small', v);
     /* the bar's keys are folded behind one while the pieces are at full size
        and open with them — the attribute is the only thing the two share, and
@@ -801,8 +823,18 @@ const PLATE = { w: 836, h: 470 };
     if (before) flip(before);
   }
 
+  /* The way on is pinned to the bottom of the window now, so it no longer goes
+     when the pieces do — it stays for as long as there is page left to go to.
+     The 40px is the slack a phone's rubber-banding and a fractional device
+     pixel ratio need before 'at the end' is true. */
+  function endOfPage() {
+    const doc = document.documentElement;
+    return scrollY + innerHeight >= doc.scrollHeight - 40;
+  }
+
   function step(animate = true) {
     setBack(scrollY >= (ROOM.matches ? WHEEL : innerHeight * SHARE), animate);
+    foot?.toggleAttribute('data-gone', endOfPage());
   }
 
   if (plinths) {
@@ -816,6 +848,9 @@ const PLATE = { w: 836, h: 470 };
     }, { passive: true });
     /* crossing the width changes both the cue and the shape of the far state,
        so the row is put back and re-decided from scratch */
+    /* the document's height changes with the window, and so does whether the
+       way on has anywhere left to point */
+    addEventListener('resize', () => step(false), { passive: true });
     ROOM.addEventListener('change', () => {
       for (const p of pieces) { p.style.transition = 'none'; p.style.transform = ''; }
       back = null;

@@ -77,24 +77,34 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
 <Base lang={lang} title={title} segments={['gallery', cat]} bare={bright}>
   {bright ? (
     <>
+    {/* The hall's own room, and no band of empty page above it.
+        Outside the header, and fixed: the room does not belong to the top of
+        this page any more than the museum's name does — it is the room the
+        page is read in, and it holds still while the page rises over it, which
+        is exactly what the hall's own does. Inside the header it could only be
+        absolute, and an absolute room scrolls away with its box. */}
+    <div class="gr__room" aria-hidden="true">
+      <picture>
+        <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
+        <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
+             fetchpriority="high" decoding="async" />
+      </picture>
+    </div>
+
+    {/* the museum's name, in the mark it folds into on the hall — and it is
+        the way back, which is why the 'return to the hall' line under the
+        title has gone: two doors out of one room, side by side, is one too
+        many.
+        Outside the header for the same reason it is outside the laureate
+        page's: .gr used to isolate, and an isolated ancestor caps every
+        z-index under it — the mark's 60 was counted inside the header rather
+        than against the page, and the piece beside it painted over the name.
+        See the note at the head of LecturePage. */}
+    <a class="gr__lock" href={home(lang)} aria-label={t('nav.backHall')}>
+      <span class="gr__lock-name">{t('site.tagline')}</span>
+    </a>
+
     <header class="gr" data-cat={cat}>
-      {/* the hall's own room, and no band of empty page above it */}
-      <div class="gr__room" aria-hidden="true">
-        <picture>
-          <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
-          <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
-               fetchpriority="high" decoding="async" />
-        </picture>
-      </div>
-
-      {/* the museum's name, in the mark it folds into on the hall — and it is
-          the way back, which is why the 'return to the hall' line under the
-          title has gone: two doors out of one room, side by side, is one too
-          many */}
-      <a class="gr__lock" href={home(lang)} aria-label={t('nav.backHall')}>
-        <span class="gr__lock-name">{t('site.tagline')}</span>
-      </a>
-
       <div class="wrap gr__in">
         <div class="gr__id">
           <h1 class="gr__title">
@@ -107,14 +117,18 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
         </div>
       </div>
 
-      <a class="bh__cue gr__cue" href="#gr-body" aria-label={t('hall.scroll')}>
-        <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
-        <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
-          <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
-        </svg>
-        <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
-      </a>
     </header>
+
+    {/* Pinned to the last line of the screen and over everything, the way the
+        hall's is — see .bh__foot in HallBright. Out of the header, because it
+        no longer belongs to the header's box. */}
+    <a class="bh__cue gr__cue" href="#gr-body" aria-label={t('hall.scroll')} data-gr-cue>
+      <span class="bh__cue-rule" aria-hidden="true"><i></i></span>
+      <svg class="bh__cue-chev" viewBox="0 0 26 9" aria-hidden="true" focusable="false">
+        <path d="M1.6 1.6 L13 7.4 L24.4 1.6" />
+      </svg>
+      <span class="bh__cue-txt" aria-hidden="true">{t('hall.scroll')}</span>
+    </a>
 
     {/* The piece rides up with the page and then stops.
         It is a sticky rail rather than a scripted position: sticky is the
@@ -175,6 +189,13 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
       </div>
     </header>
   )}
+  {/* Everything below the room, on its own sheet.
+      The room is fixed now, so anything transparent over it shows a rotunda
+      sliding under the words. The page's own white was already carrying that
+      job — it was on .about, which is only most of the page — so it is one
+      ground here instead, and the room is wiped by the page rising over it
+      rather than scrolled away with the header. */}
+  <div class="gr__sheet">
   <span id="gr-body" class="gr__anchor"></span>
 
   {meta && (
@@ -255,6 +276,7 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
       </section>
     )}
   </div>
+  </div>
 </Base>
 
 <style>
@@ -262,23 +284,39 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
    *
    * A prize page opens the way the hall does: the same photograph, the same
    * piece on the same drum, the museum's name in the corner and the way on at
-   * the foot. What it does not do is hold still — this room scrolls away, and
-   * the lectures are the page.
+   * the foot. And it holds still, as the hall's does — the page is read in
+   * front of the room rather than under a picture of one.
    *
-   * The photograph is cropped here where the hall shows it whole. The hall is
-   * the room; this is a view into it, and a view can be framed. It is cropped
-   * from the top, keeping the floor and the colonnade, because the floor is
-   * what the piece has to stand on.
+   * On a desktop the photograph is cropped, as it was: the hall is the room,
+   * this is a view into it, and a view can be framed. Cropped from the top,
+   * keeping the floor and the colonnade, because the floor is what the piece
+   * has to stand on. On a phone it is the hall's own band — the whole picture
+   * across the width of the screen, uncropped, at the size the hall shows it,
+   * with the piece standing in front of the bottom of it.
+   *
+   * The header is shorter than it was by the height of the marble drum, which
+   * carries the title, the piece and the whole page that much higher up the
+   * screen. The room takes the same height, so the veil at its foot finishes
+   * exactly where the page's own white starts.
    */
   .gr {
     position: relative;
-    isolation: isolate;
-    block-size: clamp(21rem, 60svh, 32rem);
+    block-size: var(--gr-head-h);
     display: grid;
     align-items: end;
-    overflow: hidden;
   }
-  .gr__room { position: absolute; inset: 0; z-index: -1; }
+  /* Fixed, and behind everything. It is not this header's backdrop, it is the
+     page's — see .gr__sheet below for the ground that wipes it. */
+  .gr__room {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-start: 0;
+    z-index: -1;
+    block-size: var(--gr-room-h);
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .gr__room picture { display: block; block-size: 100%; }
   .gr__room img {
     inline-size: 100%; block-size: 100%;
     object-fit: cover;
@@ -291,6 +329,12 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     position: absolute; inset: 0;
     background: linear-gradient(to bottom, transparent 78%, var(--bg-0) 100%);
   }
+
+  /* The page's own ground, and the reason the fixed room does not show
+     through it. .about carried this before and .about is only most of the
+     page; the lectures below it had nothing but the body's white, which a
+     fixed room paints over. */
+  .gr__sheet { position: relative; background: var(--bg-0); }
 
   /* the mark the hall's name folds into, in the same gold glass — see
      'the name, condensed' in bright.css, which this borrows outright */
@@ -358,11 +402,22 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     transition: scale 0.45s var(--ease), translate 0.45s var(--ease);
   }
   /* Caught. Full size it would stand over the lectures for the rest of the
-     page, so at the moment the name catches it the piece becomes a mark of
-     itself and takes its place in the row of keys. */
+     page, so once the visitor has gone half the piece's own height the piece
+     becomes a mark of itself and takes its place beside the museum's name.
+     *
+     * Beside it, and measured — this was a clamp against the viewport width,
+     * and the museum's name is not a share of the viewport. Below about
+     * 1400px the two collided and the mark sat in the middle of the name,
+     * which is what was reported off the deployed site. --lock-w is the name's
+     * own rendered width, set by the script at the foot of this file, so the
+     * mark clears it in both languages at every width. The fallback is the
+     * Han name's measurement, for the frame before the script runs. */
   .gr__rail[data-pinned] .gr__piece {
     scale: 0.2;
-    translate: clamp(5.4rem, 7vw, 6.6rem) -0.4rem;
+    translate:
+      calc(clamp(0.7rem, 2.2vw, 1.6rem) + var(--lock-w, 10.9rem) + 0.55rem
+           - max(1rem, (100vw - 76rem) / 2))
+      -0.4rem;
   }
   :global(html[data-motion='off']) .gr__piece { transition: none; }
   .gr__piece .bh__art {
@@ -373,16 +428,12 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     aspect-ratio: auto;
     max-inline-size: none;
   }
-  /* On both, because the rail is the header's *sibling* — it has to be, to
-     stick for the whole document rather than for the height of the room. A
-     var set on .gr alone does not reach it, and every fallback in the rail's
-     own arithmetic quietly took over: the piece parked 50px too low and its
-     rest position was measured against a height it does not have. */
-  .gr, .gr__rail {
-    --gr-art: clamp(13rem, 38svh, 21rem);
-    --gr-floor: clamp(1.2rem, 3.4vh, 2.2rem);
-    --gr-stick: 0.45rem;
-  }
+  /* --gr-art, --gr-floor, --gr-stick and --gr-room-h are declared once, on the
+     theme root in bright.css. They were on `.gr, .gr__rail` here — on both,
+     because the rail is the header's sibling and a var set on .gr alone does
+     not reach it. The room is a third sibling now and would have needed the
+     same line again, which is one repetition too many for a number three
+     things have to agree on. */
   .gr__id { padding-block-end: 0.2rem; }
   .gr__title {
     font-family: var(--font-han-serif);
@@ -403,25 +454,30 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
     margin-block-start: 0.3rem;
     text-shadow: 0 0 8px rgba(255, 255, 255, 0.9);
   }
+  /* The way on, pinned to the last line of the screen and over everything —
+     the same treatment as the hall's, and for the same two reasons: it belongs
+     to the window rather than to the header's box, and the page that rises
+     over it was painting on top of it. */
   .gr__cue {
-    position: absolute;
-    inset-block-end: 0.5rem;
+    position: fixed;
+    inset-block-end: clamp(0.7rem, 2vh, 1.5rem);
     inset-inline-start: 50%;
     translate: -50% 0;
-    z-index: 2;
+    z-index: 45;
+    transition: opacity 0.55s var(--ease), visibility 0.55s var(--ease);
   }
+  /* nothing left below to point at */
+  .gr__cue[data-gone] { opacity: 0; visibility: hidden; }
   .gr__anchor { display: block; scroll-margin-block-start: 4rem; }
 
   @media (max-width: 40rem) {
-    /* On the rail as well as the room. The rail is a sibling and every one of
-       its numbers is built from --gr-art: its rest position is a negative
-       margin of exactly the piece's height, so a stale value there does not
-       merely draw the piece at the wrong size — it pulls the whole page up
-       under the room and swallows the first paragraph. */
-    /* the hall's own figure, so the piece is the same object at the same
-       size in both rooms — see 'one piece, one size' in plinth.css */
-    .gr, .gr__rail { --gr-art: var(--piece-h); }
-    .gr { block-size: clamp(17rem, 50svh, 24rem); }
+    /* --gr-art and --gr-head-h take their phone values on the theme root in
+       bright.css. They were declared here, on the header and on the rail
+       both — the rail is a sibling and every one of its numbers is built from
+       --gr-art: its rest position is a negative margin of exactly the piece's
+       height, so a stale value there does not merely draw the piece at the
+       wrong size, it pulls the whole page up under the room and swallows the
+       first paragraph. One declaration cannot go stale in one place. */
     /* the keys stack down the right here, so the mark rides just under the
        museum's name rather than beside it */
     /* and when it is caught it becomes the size the hall's own pieces are
@@ -612,23 +668,63 @@ const CAMERA_LIMIT = 'auto auto 1.55m';
      same name bent onto the same cylinder */
   dressPlinths();
 
-  /* The rail does the pinning; this only says when the piece has been caught,
-     so it can become a mark. A boolean toggled on a rAF, not a position
-     recomputed on one — the sticky element itself never waits for script. */
-  const rail = document.querySelector<HTMLElement>('.gr__rail');
-  if (rail) {
-    const stick = () => parseFloat(getComputedStyle(rail).insetBlockStart) || 0;
-    let ticking = false;
-    const test = () => {
-      rail.toggleAttribute('data-pinned', rail.getBoundingClientRect().top <= stick() + 1);
-      ticking = false;
-    };
-    test();
-    addEventListener('scroll', () => {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(test);
-    }, { passive: true });
-    addEventListener('resize', test);
+  /* ---- where the museum's name ends ----
+     The mark the piece shrinks into stands beside the name, and the name is a
+     line of type, not a share of the viewport: 諾貝爾講座博物館 and 'Nobel
+     Lecture Museum' are different widths, and neither of them tracks 7vw. Its
+     rendered width is measured here and handed to the stylesheet. */
+  const lock = document.querySelector<HTMLElement>('.gr__lock');
+  const root = document.documentElement;
+  function measureLock() {
+    if (lock) root.style.setProperty('--lock-w', `${Math.round(lock.offsetWidth)}px`);
   }
+  measureLock();
+  /* the museum's faces are self-hosted and arrive after first paint; the name
+     is a different width in the fallback face */
+  document.fonts?.ready.then(measureLock);
+  addEventListener('resize', measureLock);
+
+  /* ---- when the piece is caught ----
+     The rail does the pinning — sticky is the compositor's own job, so the
+     piece never lags a frame behind the page. What is decided here is only
+     when it becomes a mark.
+
+     On a desktop that is half the piece's own height of scrolling, which is
+     what was asked for and is no longer the same moment as the pin: the page
+     now arrives a drum's height higher, so the rail reaches the top of the
+     window after about 60px. Between the two the piece stands still at full
+     size, and the museum's name is drawn over it rather than under — see the
+     mark's z-index of 60 in bright.css.
+
+     On a phone the rail's own arrival is still the cue: the piece is smaller,
+     the screen is shorter, and half of it is not a distance worth waiting
+     through. */
+  const rail = document.querySelector<HTMLElement>('.gr__rail');
+  const art = document.querySelector<HTMLElement>('.gr__piece .bh__art');
+  const cue = document.querySelector<HTMLElement>('[data-gr-cue]');
+  const WIDE = matchMedia('(min-width: 48.0625rem)');
+
+  let ticking = false;
+  const test = () => {
+    ticking = false;
+    if (rail) {
+      const caught = WIDE.matches && art
+        ? scrollY >= art.offsetHeight / 2
+        : rail.getBoundingClientRect().top
+            <= (parseFloat(getComputedStyle(rail).insetBlockStart) || 0) + 1;
+      rail.toggleAttribute('data-pinned', caught);
+    }
+    /* the way on is pinned to the foot of the window now, so it stays for as
+       long as there is page left to go to */
+    cue?.toggleAttribute('data-gone',
+      scrollY + innerHeight >= root.scrollHeight - 40);
+  };
+  test();
+  addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(test);
+  }, { passive: true });
+  addEventListener('resize', test);
+  WIDE.addEventListener('change', test);
 </script>

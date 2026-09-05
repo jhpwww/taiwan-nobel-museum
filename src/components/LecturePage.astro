@@ -55,31 +55,37 @@ const piece = bright ? {
   bare={bright}
 >
   <article class="lec" data-cat={cat}>
-    {/* Outside the header, not inside it. .lec__head carries isolation:isolate
-      — it has to, or the room behind it at z-index:-1 would sink through the
-      page — and an isolated ancestor caps everything under it: this mark's
-      z-index of 60 was being counted inside the header rather than against
-      the page, so the first <figure class="vf"> further down the document,
-      positioned and later in source order, painted straight over it. Out
-      here its 60 means what it says, exactly as on the prize pages. */}
+    {/* Outside the header, not inside it. .lec__head used to carry
+      isolation:isolate — it had to, or the room behind it at z-index:-1 would
+      have sunk through the page — and an isolated ancestor caps everything
+      under it: this mark's z-index of 60 was being counted inside the header
+      rather than against the page, so the first <figure class="vf"> further
+      down the document, positioned and later in source order, painted straight
+      over it. The room is outside the header now too, so the isolation has
+      gone with it; the mark stays out here, where its 60 means what it says,
+      exactly as on the prize pages. */}
   {bright && (
     <a class="gr__lock lec__lock" href={home(lang)} aria-label={t('nav.backHall')}>
       <span class="gr__lock-name">{t('site.tagline')}</span>
     </a>
   )}
+  {/* The same room as the hall and the prize pages. A laureate's page is the
+      innermost room of the three, not a document that fell out of them.
+
+      Outside the header and fixed, exactly as on the prize pages: the room is
+      what the page is read in front of, not a picture at the top of it. Inside
+      the header it could only be absolute, and an absolute room scrolls away
+      with its box. */}
+  {bright && (
+    <div class="lec__room" aria-hidden="true">
+      <picture>
+        <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
+        <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
+             fetchpriority="high" decoding="async" />
+      </picture>
+    </div>
+  )}
   <header class="lec__head">
-      {/* The same room as the hall and the prize pages. A laureate's page is
-          the innermost room of the three, not a document that fell out of
-          them. */}
-      {bright && (
-        <div class="lec__room" aria-hidden="true">
-          <picture>
-            <source srcset={asset('media/bright-hall.webp')} type="image/webp" />
-            <img src={asset('media/bright-hall.jpg')} alt="" width="1672" height="941"
-                 fetchpriority="high" decoding="async" />
-          </picture>
-        </div>
-      )}
       <div class="wrap lec__head-in">
         <div class="lec__crest" aria-hidden="true">
           {piece ? (
@@ -121,6 +127,9 @@ const piece = bright ? {
       </div>
     </header>
 
+    {/* the page's own ground, so the fixed room is wiped by the page rising
+        over it rather than showing through the words — see .gr__sheet */}
+    <div class="lec__sheet">
     <div class="wrap lec__body">
       <div class="lec__main stack" style="--gap:2.5rem">
         {/* 1. the on-ramp: guide video if it exists */}
@@ -221,26 +230,40 @@ const piece = bright ? {
         {next.map((r) => <li><LectureCard lang={lang} rec={r} /></li>)}
       </ul>
     </section>
+    </div>
   </article>
 </Base>
 
 <style>
   .lec__head {
     position: relative;
-    isolation: isolate;
     border-block-end: 1px solid var(--line);
     background:
       radial-gradient(70% 100% at 12% 0%, color-mix(in srgb, var(--accent) 12%, transparent), transparent 70%),
       var(--bg-1);
     padding-block: clamp(2rem, 6vw, 3.5rem);
   }
-  /* The room behind it, cropped to the floor and the colonnade.
+  /* The room behind the page, cropped to the floor and the colonnade, and
+     pinned: it is the same band the prize pages stand in and it takes their
+     measurement — see --gr-room-h in bright.css. The header is taller than
+     that band and always was; what is under it is the veil's own white, which
+     the gradient below already reaches by its foot, so the join is invisible.
      `picture` has to be told it is a block of full height, or the image's
      100% resolves against an auto-height inline box, falls back to its own
-     aspect ratio, and paints 941px of rotunda into a header meant to be a
+     aspect ratio, and paints 941px of rotunda into a band meant to be a
      third of that. */
-  .lec__room { position: absolute; inset: 0; z-index: -1; overflow: hidden; }
+  .lec__room {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-start: 0;
+    z-index: -1;
+    block-size: var(--gr-room-h);
+    overflow: hidden;
+    pointer-events: none;
+  }
   .lec__room picture { display: block; block-size: 100%; }
+  /* the ground the page is read on, over the pinned room */
+  .lec__sheet { position: relative; background: var(--bg-0); }
   .lec__room img {
     inline-size: 100%; block-size: 100%;
     object-fit: cover; object-position: 50% 80%;

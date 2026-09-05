@@ -107,6 +107,95 @@ html[data-theme='bright'] {
   --shadow-lift: 0 16px 40px -20px rgba(20, 18, 16, 0.45);
 }
 
+
+/* ============================================================
+   THE ROOM'S MEASUREMENTS
+   ============================================================
+   Where the photograph ends, where the drums stand on it, and how much of the
+   foot of the screen the way on takes. The hall works these out for itself
+   inside HallBright, off the plate; they are repeated here because three
+   things outside that component now have to agree with it — the figures under
+   the pieces, the prize page's room, and the laureate page's.
+
+   Every one is derived from the viewport, so nothing has to be measured and
+   nothing drifts when the window changes.
+   ============================================================ */
+html[data-theme='bright'] {
+  /* the photograph's own frame: contained, so whichever of the two limits
+     binds is its height — the same expression .bh uses for --plate-h */
+  --room-plate: min(calc(100vw * 941 / 1672), min(100svh, 62rem));
+  /* the height the hall section occupies, which is what the page below it is
+     pulled up against */
+  --room-hall: min(100svh, 62rem);
+  /* the six figures, measured: a pane of one number and one label, plus the
+     half-rem the strip keeps under it */
+  --strip-h: 4.2rem;
+  /* What the way on takes at the foot of the screen, now that it is pinned
+     there: its own height — a rule that grows with the viewport, a chevron and
+     a word — plus the gap it keeps from the bottom edge. Both are read off
+     .bh__cue in plinth.css and .bh__foot in HallBright; if either changes,
+     this is the line that has to follow. */
+  --cue-clear: calc(3.1rem + clamp(1.5rem, 3.4vh, 2.3rem) + clamp(0.7rem, 2vh, 1.5rem));
+
+  /* How far the row of pieces steps down the floor from where it is composed.
+     A tenth of the plate's height would be the whole answer if every screen
+     had room for it; a short wide one does not — at 1366x768 the drums stand
+     at 83% of the screen and the strip and the way on together want more than
+     the 17% left. So the step is whatever the floor can afford, which on a
+     tall screen is the full nudge and on a short one is nothing. */
+  --piece-drop: min(
+    calc(var(--room-plate) * 0.055),
+    calc(100svh - var(--cue-clear) - 0.6rem - var(--strip-h) - 0.5rem
+         - 0.77175 * var(--room-plate))
+  );
+  /* Where the drums' feet land, in the viewport.
+     0.77175 is not a guess: the row is anchored so its feet sit on the near
+     floor at 76.45% of the plate and then scaled a tenth about the room's
+     vanishing point at 69.2%, which lands the feet at 0.692 + 1.1(0.7645 -
+     0.692) of the plate. See 'the hall's own measurements' in HallBright. */
+  --drum-foot: calc(0.77175 * var(--room-plate) + var(--piece-drop));
+
+  /* ---- and the prize page's own room, which shows one of the six ----
+     These lived on .gr and .gr__rail inside GalleryPage. They are here now
+     because a third thing has to agree with them: the room itself, which is
+     no longer inside the header and so cannot inherit anything from it. */
+  --gr-art: clamp(13rem, 38svh, 21rem);
+  --gr-floor: clamp(1.2rem, 3.4vh, 2.2rem);
+  --gr-stick: 0.45rem;
+  /* The marble drum, as a share of the frame the piece is drawn in: the
+     silhouette runs from 72% to 95.7% of it — the same two readings the label
+     on its face is placed against, see .bh__face in plinth.css. */
+  --gr-drum: calc(var(--gr-art) * 0.237);
+  /* The header the title stands in, shorter than it was by the drum's height:
+     the title, the piece and the whole page below arrive that much higher. */
+  --gr-head-h: calc(clamp(21rem, 60svh, 32rem) - var(--gr-drum));
+  /* On a desktop the room is exactly the header, so the veil at the foot of
+     the photograph finishes where the page's own white begins and there is no
+     seam. */
+  --gr-room-h: var(--gr-head-h);
+}
+@media (max-width: 40rem) {
+  html[data-theme='bright'] {
+    /* the hall's own figure, so the piece is the same object at the same size
+       in both rooms — see 'one piece, one size' in plinth.css */
+    --gr-art: var(--piece-h);
+    /* No pull-up on a phone: the header is already only as tall as it has to
+       be, and the piece stands in front of the photograph rather than on it. */
+    --gr-drum: 0px;
+    --gr-head-h: clamp(17rem, 50svh, 24rem);
+  }
+}
+@media (max-width: 48rem) {
+  html[data-theme='bright'] {
+    /* The room, at the hall's own size: the whole photograph across the width
+       of the phone, uncropped — the same band the hall shows, and no longer a
+       crop of it. The header is taller than the band, exactly as the hall's
+       first screen is: the drums stand in front of the bottom of the picture
+       with the page behind their feet. */
+    --gr-room-h: calc(100vw * 941 / 1672);
+  }
+}
+
 /* ---------- ground ---------- */
 html[data-theme='bright'] body {
   background: var(--bg-0);
@@ -274,19 +363,42 @@ html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang:focus-visib
   html[data-theme='bright'] .topbar--ghost .topbar__nav a.topbar__lang { padding: 0.15rem 0.1rem 0.3rem !important; }
 
   /* ---------- the bar, folded ----------
-     On the hall, and only there, the five keys start behind one. Five keys
-     down the side of the room are five keys over the thing they are doors
-     into; while the pieces are at full size the room is what should be in the
-     window. They open when the pieces withdraw, and on a press.
+     On a phone the five keys start behind one, on every page. Five keys down
+     the side of a room are five keys over the thing they are doors into, and
+     the first screenful of any room in this museum is the room: the hall's
+     pieces, a prize's own sculpture, a laureate's name. They open on a press,
+     and on their own once the visitor has moved past that first screen — the
+     hall counts that as its pieces withdrawing, everywhere else it is half a
+     screen of scrolling. See the scripts in HallBright and in Base.
 
-     Only on the hall: everywhere else the page is already a room and the bar
-     is how you leave it, so it stands open. */
-  html[data-theme='bright'][data-home] .topbar__menu { display: inline-flex; }
-  html[data-theme='bright'][data-home] .topbar--ghost .topbar__nav .topbar__key {
+     It was the hall alone until now. But a prize page opens with a piece
+     standing beside its title in exactly the way the hall does, and the column
+     of keys was landing on it. */
+  /* Written through .topbar--ghost .topbar__nav rather than as a bare class:
+     the rule that hides this key everywhere else is further down this file and
+     weighs exactly the same, so at equal specificity source order was deciding
+     it — and deciding against. It used to carry [data-home], which is what had
+     been winning that argument all along. */
+  html[data-theme='bright'] .topbar--ghost .topbar__nav .topbar__menu {
+    display: inline-flex;
+  }
+  html[data-theme='bright'] .topbar--ghost .topbar__nav .topbar__key {
     display: none;
   }
-  html[data-theme='bright'][data-home][data-nav-open] .topbar--ghost .topbar__nav .topbar__key {
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav .topbar__key {
     display: inline-flex;
+  }
+
+  /* Open, the keys are shorter by 15%.
+     Five keys at the phone's 44px minimum plus their gaps is a column 240px
+     tall — a third of a short phone's screen, standing over the room. 37.4px
+     is what the kit's touch minimum becomes when that is taken off; it is
+     still well past the 24px WCAG 2.5.8 asks for, and the keys are 80 to 120
+     wide, so nothing here is hard to hit. The one that folds them takes it
+     too, or the column has a taller key at the top of it. */
+  html[data-theme='bright'][data-nav-open] .topbar--ghost .topbar__nav
+    :is(.topbar__key, .topbar__menu) {
+    min-height: 37.4px;
   }
 }
 
@@ -877,21 +989,30 @@ html[data-theme='bright'] .after .strip { background: none; border: 0; }
    at the foot of the spacer they were a screen away from the thing they
    count. The hall is fixed, so pulling the page up slides them over the
    marble below the plinths without moving the room at all. */
-html[data-theme='bright'] .after { margin-block-start: -11rem; }
-/* The pull is a fixed length; the pieces are placed off the plate, which is
-   sized from the viewport and capped at 62rem — so the band between the drums
-   and the scroll cue is not the same band on every screen, and on four of the
-   seven desktop sizes swept it was too narrow to hold the strip at all. Where
-   it is, the strip goes under the pieces and the cue keeps its place; where it
-   is not, the strip drops until it clears the drums and the cue goes behind
-   it. Over the cue rather than over the statues: the cue is an invitation to
-   scroll, and a row of figures peeking under the pieces is the same
-   invitation. Values from the sweep, not from arithmetic. */
-@media (max-height: 50rem) {
-  html[data-theme='bright'] .after { margin-block-start: -4.6rem; }
-}
-@media (min-width: 112rem) {
-  html[data-theme='bright'] .after { margin-block-start: -7.4rem; }
+/* Two strip-heights under the drums' feet, or as low as the way on allows —
+   whichever is higher.
+ *
+ * This was three hand-tuned lengths measured on a sweep, and a tuned length
+ * cannot hold: the pull is fixed while the pieces are placed off the plate,
+ * which is sized from the viewport and capped at 62rem, so the two drift apart
+ * as the screen changes. On four of the seven desktop sizes swept the strip
+ * landed on the way on, and it was the strip that painted over it.
+ *
+ * So it is arithmetic now, in the room's own measurements. The first term is
+ * where the figures belong — two of their own heights below the feet of the
+ * drums they count. The second is the floor: the way on is pinned to the
+ * bottom of the screen and stands over everything, so the strip has to finish
+ * above it. min() takes the more negative, which is the higher of the two.
+ *
+ * On a screen tall enough the first term wins and the gap is exactly the two
+ * asked for; on a short wide one the second binds and the strip sits closer
+ * under the drums than that. There is no third answer — at 1366x768 the drums,
+ * the figures and the way on together want more room than the screen has. */
+html[data-theme='bright'] .after {
+  margin-block-start: min(
+    calc(var(--drum-foot) + 2 * var(--strip-h) - var(--room-hall)),
+    calc(100svh - var(--cue-clear) - 0.6rem - var(--strip-h) - var(--room-hall))
+  );
 }
 html[data-theme='bright'] .after .strip { padding-block-start: 0; }
 /* Narrow. At the page's full width the six panes were 153px each and the row
@@ -1054,15 +1175,20 @@ html[data-theme='bright'] .bh__title { line-height: 1.12; }
     hyphens: auto;
     overflow-wrap: anywhere;
   }
-  /* Four rem, and it was six and a half.
-     The pull is a fixed length and the pieces are placed off the plate, which
-     is sized from the viewport — so the two drift apart as the screen changes
-     and at 360x740 the strip had climbed into the bottom row of drums. Swept
-     across seven phone sizes in both languages: at 4rem the smallest clearance
-     is on a 360x740 English page and the strip is still above the fold on all
-     of them. Both languages take the same figure now that their labels are
-     the same one line. */
-  html[data-theme='bright'] .after { margin-block-start: -4rem; }
+  /* Up, off the way on.
+   *
+   * At four rem the strip finished four pixels from the bottom of the screen
+   * and the way on is drawn in the last thirty of them — so the figures were
+   * painting straight over the chevron, which is what was reported.
+   *
+   * Six and a half now, and it is the one measurement on this page that can be
+   * a constant: the way on is pinned to the bottom of the screen and the strip
+   * is pulled up from the bottom of the hall, which is the same edge. So the
+   * two keep their distance whatever the phone's height — 6.5rem is the way
+   * on's 31px, the strip's own 52 to 60, and ten pixels of daylight between
+   * them. Everything above is unchanged: the drums are further off on a tall
+   * phone than on a short one, and the strip sits under them either way. */
+  html[data-theme='bright'] .after { margin-block-start: -6.5rem; }
 }
 
 /* At 320px the English labels hyphenate hard — "institutions" over three
