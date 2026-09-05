@@ -10,6 +10,8 @@
  *
  * Nothing is downloaded, re-hosted or proxied; playback is always YouTube's.
  */
+import videoPosters from '../data/video-posters.json';
+
 interface Props {
   id: string;                 // YouTube video id
   title: string;              // accessible label — what will play
@@ -20,8 +22,26 @@ interface Props {
   eager?: boolean;
 }
 const { id, title, kind = 'plain', label, note, playHint, eager = false } = Astro.props;
-const poster = `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
-const posterHi = `https://i.ytimg.com/vi/${id}/maxresdefault.jpg`;
+/*
+ * The frame this recording is represented by.
+ *
+ * `hqdefault` is the uploader's pick, and for this series that is very often
+ * the person who opened the session rather than the laureate — a host at a
+ * lectern, an introducer mid-sentence, a title card, and in one case a string
+ * quartet. Every facade on the site wore one, while the cards in the grids had
+ * been carrying a verified frame for a year.
+ *
+ * src/data/video-posters.json is that verification, extended to every
+ * recording: each laureate's official portrait is embedded and every face in
+ * every frame YouTube samples is compared against it, and a frame is recorded
+ * only if the person in it IS the laureate. See scripts/pick-posters.py.
+ * Where no frame could be verified — seven recordings, where none of the four
+ * frames YouTube offers contains the laureate at all — the entry is absent and
+ * the uploader's pick stands, which is the honest fallback.
+ */
+const frame = (videoPosters as Record<string, string>)[id];
+const poster = `https://i.ytimg.com/vi/${id}/${frame ?? 'hqdefault'}.jpg`;
+const posterHi = `https://i.ytimg.com/vi/${id}/${frame === 'maxresdefault' || !frame ? 'maxresdefault' : frame}.jpg`;
 ---
 
 <figure class="vf" data-kind={kind}>

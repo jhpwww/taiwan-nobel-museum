@@ -25,8 +25,20 @@ chose, which for this series is usually a title card. The full recording
 cannot be reached from this network to cut a frame at an arbitrary time — see
 the backdrop clip pipeline for why — so three frames is the pool.
 
-Writes src/data/posters.json: lecture id → frame suffix. Anything unmatched
-is omitted, and LectureCard falls back to the recording's default thumbnail.
+Writes two files.
+
+  · src/data/posters.json — lecture id → frame suffix, for the card in a grid.
+  · src/data/video-posters.json — YOUTUBE id → frame suffix, for every facade
+    on a laureate's page: the Taiwan lecture, NTU's own recording of it, the
+    導讀, the extra sittings and each interview.
+
+The second is why this was extended. The cards had been verified for a year
+while every facade on every lecture page still showed `hqdefault` — the
+uploader's pick — so the same recording carried a laureate's face in the grid
+and an opening speaker's on its own page.
+
+Anything unmatched is omitted, and the reader falls back to the recording's
+default thumbnail.
 
     .venv-cv/bin/python scripts/pick-posters.py [--report]
 """
@@ -44,6 +56,7 @@ HERE = pathlib.Path(__file__).resolve().parent.parent
 DETECT = HERE / '.tools/yunet.onnx'
 RECOGNISE = HERE / '.tools/sface.onnx'
 OUT = HERE / 'src/data/posters.json'
+OUT_VID = HERE / 'src/data/video-posters.json'
 SHOTS = HERE / 'assets-src/posters'
 CACHE = HERE / 'assets-src/portraits'
 
@@ -112,24 +125,13 @@ def main() -> None:
     rec = cv2.FaceRecognizerSF.create(str(RECOGNISE), '')
 
     chosen: dict[str, str] = {}
+    by_video: dict[str, str] = {}
     misses: list[str] = []
 
-    for lec in lectures:
-        lid = lec['id']
-        vid = lec['video'].get('lecture')
-        if not vid:
-            misses.append(f'{lid}: no Taiwan recording')
-            continue
-
-        ref_img = portrait(lid, lec['links'].get('nobel_facts', ''))
-        ref_faces = faces(det, ref_img) if ref_img is not None else []
-        if not ref_faces:
-            misses.append(f'{lid}: no usable official portrait')
-            print(f'{lid:<12} —  no reference portrait')
-            continue
-        ref_vec = rec.feature(rec.alignCrop(ref_img, ref_faces[0]))
-
-        results = []
+    def rank(vid: str, ref_vec) -> list:
+        """Every candidate frame of one recording that has the laureate in it,
+        best first. Returns (score, similarity, frame name, image, face box)."""
+        out = []
         for name in CANDIDATES:
             img = decode(get(f'https://i.ytimg.com/vi/{vid}/{name}.jpg'))
             if img is None:
@@ -147,27 +149,64 @@ def main() -> None:
                 size = min(1.0, (fh / h) / 0.30)
                 cx, cy = (x + fw / 2) / w, (y + fh / 2) / h
                 central = 1.0 - min(1.0, abs(cx - 0.5) * 1.2 + abs(cy - 0.45) * 0.7)
-                s = 0.50 * float(sim) + 0.32 * size + 0.18 * central
-                if s > best[0]:
-                    best = (s, float(sim), (int(x), int(y), int(fw), int(fh)))
+                sc = 0.50 * float(sim) + 0.32 * size + 0.18 * central
+                if sc > best[0]:
+                    best = (sc, float(sim), (int(x), int(y), int(fw), int(fh)))
             if best[2] is not None:
-                results.append((best[0], best[1], name, img, best[2]))
+                out.append((best[0], best[1], name, img, best[2]))
+        return out
 
-        if not results:
-            misses.append(f'{lid}: laureate not recognised in any frame')
-            print(f'{lid:<12} —  not recognised')
-            continue
-
+    def pick(results: list):
         # A hard preference, not a scoring nudge. A title card carries a large,
         # well-lit, dead-centre portrait and will out-score any real stage shot
         # every time — and a title card is not a 講座截圖. Take the best frame
         # from inside the recording whenever one recognises the laureate at
         # all, and only fall back to the uploader's pick when none does.
         inside = [r for r in results if r[2] != 'maxresdefault']
-        pool = inside or results
-        pool.sort(key=lambda r: -r[0])
+        pool = sorted(inside or results, key=lambda r: -r[0])
+        return pool
+
+    for lec in lectures:
+        lid = lec['id']
+        vid = lec['video'].get('lecture')
+        if not vid:
+            misses.append(f'{lid}: no Taiwan recording')
+            continue
+
+        ref_img = portrait(lid, lec['links'].get('nobel_facts', ''))
+        ref_faces = faces(det, ref_img) if ref_img is not None else []
+        if not ref_faces:
+            misses.append(f'{lid}: no usable official portrait')
+            print(f'{lid:<12} —  no reference portrait')
+            continue
+        ref_vec = rec.feature(rec.alignCrop(ref_img, ref_faces[0]))
+
+        # Every other recording this laureate appears in, verified the same
+        # way. Their own page shows all of them, and until now every one of
+        # them wore whatever the uploader had chosen.
+        others = [v for v in (
+            lec['video'].get('lecture_ntu'),
+            lec['video'].get('guide'),
+            *[s.get('id') for s in lec['video'].get('extra_sessions', [])],
+            *[i.get('id') for i in lec.get('interviews', [])],
+        ) if v]
+        for ov in others:
+            op = pick(rank(ov, ref_vec))
+            if op:
+                by_video[ov] = op[0][2]
+
+        results = rank(vid, ref_vec)
+
+        if not results:
+            misses.append(f'{lid}: laureate not recognised in any frame')
+            print(f'{lid:<12} —  not recognised')
+            continue
+
+        inside = [r for r in results if r[2] != 'maxresdefault']
+        pool = pick(results)
         s, sim, name, img, box = pool[0]
         chosen[lid] = name
+        by_video[vid] = name
         rest = ' '.join(f'{n}:{v:.2f}' for v, _, n, _, _ in pool[1:])
         flag = '' if inside else '   ← title card, no in-video frame matched'
         print(f'{lid:<12} {name:<14} score {s:.2f}  match {sim:.2f}   ({rest}){flag}')
@@ -178,6 +217,7 @@ def main() -> None:
             cv2.imwrite(str(SHOTS / f'{lid}-{name}.jpg'), img)
 
     OUT.write_text(json.dumps(chosen, indent=2, sort_keys=True) + '\n', encoding='utf-8')
+    OUT_VID.write_text(json.dumps(by_video, indent=2, sort_keys=True) + '\n', encoding='utf-8')
     print(f'\n{len(chosen)}/{len(lectures)} recognised  →  {OUT}')
     if misses:
         print('\nfalling back to the default thumbnail:')
