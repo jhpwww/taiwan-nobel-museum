@@ -158,7 +158,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
         });
 
         if (!root.hasAttribute('data-home')) {
-          let open = null;
+          {/* `false`, not `null`: the attribute starts off the element, so
+              false already is the state, and the pair are compared rather
+              than the attribute re-set on every frame of a scroll. A null
+              seed here is an implicit `any`, which `astro check` fails on —
+              this block is type-checked like any other module. */}
+          let open = false;
           let queued = false;
           const sync = () => {
             queued = false;
