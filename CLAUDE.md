@@ -1,6 +1,8 @@
 # CLAUDE.md
 
-Conventions for this repository. Read `README.md` first for what the project is.
+Conventions for this repository — the dark museum, preserved. The bright museum moved to
+`jhpwww/nobel` (checkout `~/nobel`, live at https://jhpwww.github.io/nobel/) on 2026-09-07;
+bright work happens there. Read `README.md` first for what the project is.
 
 Everything here is a standing rule or a trap that has already cost a rebuild.
 Keep it that way: add a rule, not an account of the work that produced it.
@@ -15,8 +17,9 @@ function, no database, no login. If a task seems to need one, stop and say so.
 These are decided. Do not reopen them, and do not let a tidy-up quietly reverse one.
 
 - **The museum's name and its main axis do not change.**
-- **The dark museum is preserved as it is.** Bright work must never alter what the dark
-  build renders. Its ~56 text styles below AA are deliberate and stay.
+- **The dark museum is preserved as it is.** This repository is that museum; nothing here
+  changes what it renders. Its ~56 text styles below AA are deliberate and stay. The bright
+  museum has its own repository now — do not work on it here.
 - **The 導讀 narration scripts are reference material only.** Their text must never
   appear on the site.
 - **Representative images are chosen for 講座 and 專訪 only.** A 導讀 keeps the frame
@@ -24,8 +27,8 @@ These are decided. Do not reopen them, and do not let a tidy-up quietly reverse 
 - **A number inside a design kit the owner supplied is already decided.** When feedback
   touches one, build the comparison and send it first — the choice is theirs to make
   while looking at it. The button kit's frame widths are not to be changed again.
-- **Do not darken the block red.** See "The bright palette's one known exception".
-- **Every change ships to both running dev servers and to GitHub Pages in the same turn**,
+- **Every change ships to the running dev server (`npm run dev`, port 4321) and to GitHub
+  Pages in the same turn**,
   and is reported with three readings, not a claim: a clean `git status`,
   `git rev-list --left-right --count origin/main...HEAD` at 0/0, and the Pages run green
   on that SHA.
@@ -51,7 +54,8 @@ scripts/                ~29 of them; these are the ones you will touch
   facecheck.py          shared portrait/detector/threshold module for both of those
   make-backdrop-clips.py-> public/media/backdrop/ + src/data/backdrop.json
   normalise-models.mjs  the model pipeline's centre; writes both tinted and gold sets
-  subset-fonts.mjs      both museums' faces
+  subset-fonts.mjs      the faces (`--theme bright` cuts the frozen bright set; leave it)
+  bright-moved.mjs      writes the /bright/ redirect stubs after the build (CI)
   check-links.py        four kinds of reference, over dist/
   check-contrast.mjs / audit-contrast.mjs / audit-type.mjs / check-glass.mjs
   shots.mjs             serve dist/ and screenshot it with Playwright
@@ -108,8 +112,8 @@ src/
 **The halls**
 - Four variants share one `HomePage.astro` via a `style` prop: `flat` (SVG, `Hall.astro`),
   `room` (CSS 3D, `Hall3D.astro`), `gl` (WebGL, `HallGL.astro`), `models` (glTF via
-  `<model-viewer>`, `HallModels.astro`). A fifth, `HallBright.astro`, is not a `style` value —
-  it is selected by `process.env.THEME === 'bright'` and overrides the prop. Only the hall
+  `<model-viewer>`, `HallModels.astro`). A fifth, `HallBright.astro`, is the bright museum's,
+  selected only when `THEME=bright` — which no build here sets any more. Only the hall
   differs; never fork the pages below it.
 - `Sculpture3D.astro` EXTRUDES `Sculpture.astro` — it stacks the same SVG along Z and darkens
   the back slices. Do not rebuild the forms from CSS primitives.
@@ -246,16 +250,11 @@ src/
 - Two accent tokens, and they are not interchangeable. `--accent` paints strokes, text, borders
   and the sculptures — full-strength hue. `--accent-block` paints solid fills: the guide badge in
   its three forms and the study panel's keys and marks. Never use `--accent` for a solid block.
-- In the dark museum `--on-accent` (#150d05) sits on `--accent-block`, so any change to those
-  tokens must be re-checked for WCAG AA (4.5:1); economics is the tightest at 7.03:1. In the
-  bright museum `--on-accent` is #ffffff on `--red` for every category.
-- Warm palette, and prize category is the sole carrier of hue via `[data-cat]` → `--accent` —
-  **in the dark museum only**. The bright museum deliberately drops category hue: all six `--c-*`
-  tokens resolve to `--red-ink` and every `[data-cat]` takes `--accent-block: var(--red)`, so the
-  sculptures, not the colour, say which hall you are in. Do not "restore" per-category hue there.
-- Dark-museum tokens live in `src/styles/global.css`; the bright museum restates them in
-  `src/styles/bright.css`. Add a token rather than a one-off hex value — and add it to both files
-  if the two museums need different values.
+- `--on-accent` (#150d05) sits on `--accent-block`, so any change to those tokens must be
+  re-checked for WCAG AA (4.5:1); economics is the tightest at 7.03:1.
+- Warm palette, and prize category is the sole carrier of hue via `[data-cat]` → `--accent`.
+- Tokens live in `src/styles/global.css`. Add a token rather than a one-off hex value.
+  (`src/styles/bright.css` restates them for the moved museum and is frozen here.)
 
 **SVG**
 - Gradient strokes need `gradientUnits="userSpaceOnUse"`. With the default
@@ -270,8 +269,8 @@ src/
   current `dist/`: the script serves the built site, it does not build it. The viewport default
   is 1440×900, so 390 must be asked for.
 - For a change that is meant to alter nothing visible — a clean-up, a refactor — copy `dist/`
-  aside first and run `node scripts/check-render.mjs <before> <after>` (and the bright build
-  with its base path): it compares every page's DOM and every element's computed style, and
+  aside first and run `node scripts/check-render.mjs <before> <after>`: it compares every
+  page's DOM and every element's computed style, and
   "identical" is the proof. Pixels are not: the halls' own motion makes two shots of one
   build differ.
 - Keyboard-navigable, visible focus, WCAG AA contrast
@@ -375,10 +374,11 @@ name from `SUPPLIED` and from `ON_BASE`.
 
 ## Fonts are self-hosted and subset
 
-`scripts/subset-fonts.mjs` owns both museums' faces — five families. Dark: Noto
-Sans TC, Noto Serif TC, Cormorant Garamond. Bright: Noto Sans TC, Noto Serif TC,
-Source Serif 4, Source Sans 3. Self-hosting keeps a third party out of the
-request path of every visit, which the About page's privacy claim depends on.
+`scripts/subset-fonts.mjs` owns the faces — Noto Sans TC, Noto Serif TC and
+Cormorant Garamond. (The bright set under `public/assets/fonts/bright/` is the
+moved museum's, frozen; its live copy is cut in `~/nobel`.) Self-hosting keeps a
+third party out of the request path of every visit, which the About page's
+privacy claim depends on.
 
 - **Bucket by the font that will actually draw the character, not the head of
   the stack.** The script opens all 92 built pages and reads
@@ -387,13 +387,11 @@ request path of every visit, which the About page's privacy claim depends on.
   `fontFamily.split(',')[0]` gives a Latin face every ideograph and leaves the
   CJK face with none at all. The serif only draws headings, so it carries far
   fewer ideographs than the sans — that split is the whole saving.
-- **Two-pass per museum**, because the corpus comes from the rendered site and
-  the second build is what picks up the new hashes. Dark:
-  `npm run build && node scripts/subset-fonts.mjs && npm run build`. Bright: the
-  bright build, then `node scripts/subset-fonts.mjs --theme bright` (it reads
-  `dist-bright/` and writes `public/assets/fonts/bright/`), then the bright
-  build again. Re-run whenever visible text changes.
-- **Link the stylesheet, do not bundle it.** Both museums name families like
+- **Two passes**, because the corpus comes from the rendered site and the
+  second build is what picks up the new hashes:
+  `npm run build && node scripts/subset-fonts.mjs && npm run build`. Re-run
+  whenever visible text changes.
+- **Link the stylesheet, do not bundle it.** Both font sets name families like
   `Noto Serif TC`. With both stylesheets in one build the browser matches the
   other museum's `@font-face` and fetches a file that is not there. One `<link>`
   per build makes the collision impossible.
@@ -463,57 +461,18 @@ then the verified YouTube frame (`video-posters.json`), then the uploader's `hqd
   detector and the threshold; it names the models to fetch, which live in `.tools/`
   (gitignored).
 
-## The bright museum
+## The bright museum has moved
 
-The same site in daylight, at `/bright/`. Same routes, same data, same
-components — built a second time with `THEME=bright` and a nested `BASE_PATH`,
-then copied into `dist/bright` by the deploy workflow.
+It grew here as the same site in daylight — `THEME=bright`, nested under `/bright/` — and on
+2026-09-07 moved to `jhpwww/nobel` (checkout `~/nobel`, live at https://jhpwww.github.io/nobel/).
+Its rules and traps went with it; that repository's `CLAUDE.md` is where they live now.
 
-- `Base.astro` emits `data-theme` only when `THEME=bright`. The dark build ships
-  the same stylesheet, and with the attribute absent no bright rule matches — so
-  what is guaranteed unchanged is what the dark museum *renders*.
-- Everything in `src/styles/bright.css` is scoped to `html[data-theme='bright']`:
-  the token overrides first, then the component and layout rules the bright ground
-  needs. Add a bright rule there, never a fork of a component.
-- White ground, near-black text. Red carries the marks, the fills and `--accent`;
-  a plain link rests in gold (`--gold-deep`) and turns red on hover. There are no
-  category hues here at all.
-- Gold models: `scripts/normalise-models.mjs` writes a second set to
-  `public/assets/models/gold/`. Metalness near 1 with low roughness is what
-  makes them read as a statuette; the base colour alone reads as yellow paint.
-- `HallBright.astro` and `HallRing.astro` are the two components with no dark
-  counterpart. The room is a **photograph**, and what stands in it is placed in
-  per cent of a plate carrying the picture's own aspect ratio, so a crop moves
-  the picture and its contents together. The eye level is measured at 69.2% of
-  the plate — see `scripts/crop-hall.py`.
-- No embers and no dust: motes are invisible against a hall this bright. The
-  light in this room is the photograph's own.
-
-**The fade band is a fixed copy of the room, not a mask on the page.** `mask-image` has no
-`fixed` attachment, so a mask driven from a scroll handler can never keep up with the
-compositor: the text rises at full opacity and then snaps pale. Instead each page renders its
-room a second time, marked `[data-roomtop]`, laid over the page with a static mask — a cover of
-alpha `1 − a` equals blending the page toward the room at `a`, at no per-frame cost. Do not
-reintroduce a scroll-driven mask.
-
-**Traps in the bright layout that have already cost a rebuild:**
-- A CSS box gap is not the painted gap when the background is a picture with
-  transparent margin baked in. `key-plate.webp` carries 12px of its own margin;
-  halving `row-gap` changes nothing a visitor can see. Measure the artwork rows,
-  not the box.
-- `element.getAnimations()` keeps FINISHED animations. Test
-  `playState === 'running'`, or a stillness check never passes.
-- Individual transform properties resolve `translate → rotate → scale →
-  transform`, so a length written inside `transform` is multiplied by the
-  `scale` property. And `translate` percentages resolve against the element's
-  own size, `inset` percentages against the containing block.
-- Custom properties inherit downward only. A cue computed on a child cannot be
-  read by its parent.
-- Anything that must sit above the fade band needs a z-index above
-  `[data-roomtop]`'s 10.
-- Stop a Playwright check before editing source: an HMR navigation destroys its
-  execution context mid-run.
-- Never write a `pgrep -f` wait loop — it matches itself and never exits.
+- What remains of it here — `HallBright.astro`, `HallRing.astro`, `src/styles/bright.css`,
+  the gold models, the bright font set — is frozen as of the move and ships in no build. Do
+  not edit it here; edit it in `~/nobel`.
+- `/bright/` still answers. The deploy workflow runs `scripts/bright-moved.mjs` after the
+  build, which writes a redirect stub for every route under `dist/bright/`, each pointing at
+  the same page at the new address. Adding a route to the dark museum adds its stub.
 
 ## Colour is measured, not eyeballed
 
@@ -571,20 +530,6 @@ quantised accessors with no `KHR_mesh_quantization` declaration: invalid glTF
 that happens to load in three.js. Check `extensionsRequired` in the output
 before trusting it.
 
-## The bright palette's one known exception
-
-`--accent-block` is TED's #e62b1e because the owner asked for the brand red on
-filled blocks. White on it measures **4.44:1** against AA's 4.5 — a 1.3%
-shortfall, and unfixable while the fill stays that red, since white is already
-the lightest ink available. What still puts white on it: the lecture card's
-badge, the video card's kind badge, the video facade's label, and the study
-desk's picked tags.
-
-Text red is the darkened `--red-ink` (5.72:1) and passes everywhere. **Do not
-"fix" the block red by darkening it — the owner has ruled on that.** If strict
-AA is wanted later, the lever is the label, not the colour: at 18.66px bold the
-bar drops to 3:1.
-
 ## Type on paper
 
 `scripts/audit-type.mjs <origin>` lists what each page actually renders — family, size, weight,
@@ -594,31 +539,5 @@ after any type change; the numbers a typographer reasons in are not the ones
 parent and child page: the same text set in two faces is a defect, but a filter chip set in
 sans while the heading is serif is not — those are different roles.
 
-The bright theme restates the type: on the dark ground glyphs bloom, so that museum opens its
-tracking and sits at a light weight; on white the same weight reads thin and the same tracking
-reads loose.
-
-- Headings and the title-and-name set go to **600** on paper, because Source Sans carries
-  less colour than the serif at the same number. Cormorant is not in the bright museum at all —
-  a display Garamond's hairlines disappear on white under about 40px.
-- Uppercase Latin labels keep their tracking. What is pulled back is Chinese that inherited a
-  Latin small-caps measure: Latin eyebrows 0.22em → 0.13em, `:lang(zh)` eyebrows
-  0.16em → 0.08em, hall hints 0.18em → 0.07em.
-- Leading tightens slightly (1.75 → 1.72).
-
-All of it is scoped to `html[data-theme='bright']`; the audit on the dark origin should still
-report `.lec__who` at 500/0.03em and `.eyebrow` at 0.16em.
-
-**Undimmed backgrounds mean type carries its own light.** The four section backgrounds are
-shown at full strength with only a gradient at the foot, so every title, gold sub-line and note
-over them needs its own layered white edge (`text-shadow`, four stops).
-
-## The bright museum leads with its sans
-
-Every title, and every laureate's name where it heads a block, is set in Source Sans. Only the
-one-line hook keeps a serif — it is a pull-quote, the one place the museum speaks rather than
-labels, and it has its own token (`--font-hook`) so a theme can move every heading without
-dragging the editorial voice along.
-
-Do this **at the token**, never by out-specifying components (see "Colour is measured"):
-`--font-display` and `--font-han-serif` are both the sans in the bright theme.
+The bright museum restates the type for paper; those rules live in `~/nobel`. The audit on
+this origin should report `.lec__who` at 500/0.03em and `.eyebrow` at 0.16em.

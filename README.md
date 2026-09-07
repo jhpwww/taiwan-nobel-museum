@@ -7,7 +7,7 @@ interviews recorded alongside them.
 Audience: high-school students, undergraduates, and the general public. Not specialists.
 
 **Live site:** https://jhpwww.github.io/taiwan-nobel-museum/
-**In daylight:** https://jhpwww.github.io/taiwan-nobel-museum/bright/
+**The bright museum**, now a site of its own: https://jhpwww.github.io/nobel/
 
 ---
 
@@ -38,19 +38,17 @@ plain text. The statistics come from the official Nobel API via
 `scripts/fetch-prize-facts.py` and are stamped with the date they were fetched — re-run it
 once a year after the October announcements.
 
-## Two museums
+## Two museums, two repositories
 
-The site is built twice from one codebase and both are published.
+This repository is the **dark museum** — the original — and it is preserved as it was.
 
-| | |
-|---|---|
-| **dark** | the original museum, at `/` |
-| **bright** | the same routes, same data, same components in daylight, at `/bright/` — white ground, red for anything actionable, gold for what the museum owns, and one hall of its own (`HallBright.astro`) |
-
-The bright build is `THEME=bright` with a nested `BASE_PATH`; `Base.astro` emits
-`data-theme="bright"` only then, and `src/styles/bright.css` is scoped entirely to that
-attribute. **The dark museum renders exactly as it always did** — that is a project
-constraint, not a side effect.
+The **bright museum** — the same routes, same data, same components in daylight, with one
+hall of its own — grew here as a second build published under `/bright/`. On 2026-09-07 it
+moved to [jhpwww/nobel](https://github.com/jhpwww/nobel) and https://jhpwww.github.io/nobel/.
+Every old `/bright/` address still arrives: the deploy workflow writes a redirect stub for each
+route (`scripts/bright-moved.mjs`). The bright code still in this tree — `HallBright.astro`,
+`src/styles/bright.css`, the gold models, the bright font set — is frozen as of the move and
+ships in no build.
 
 ## Four hall styles
 
@@ -110,8 +108,8 @@ payloads are opt-in by route — the rotunda's three.js bundle, behind its WebGL
 and the vendored model-viewer, imported on demand by the objects hall. Videos are embedded from
 `youtube-nocookie.com` and load nothing until clicked.
 
-Fonts are self-hosted and subset per museum, so no third party sits in the request path of a
-visit.
+Fonts are self-hosted and subset to the site's own text, so no third party sits in the request
+path of a visit.
 
 ## Running it
 
@@ -120,12 +118,10 @@ npm install
 npm run dev        # http://localhost:4321/taiwan-nobel-museum/
 npm run build      # -> dist/
 npm run check      # astro check
-
-# the second museum — there is no npm script for it; CI does this inline
-THEME=bright BASE_PATH=/taiwan-nobel-museum/bright npx astro build --outDir dist-bright
+node scripts/bright-moved.mjs   # after a build: the /bright/ redirect stubs CI adds
 ```
 
-A build produces 92 HTML pages per museum, 184 in all.
+A build produces 92 HTML pages; CI adds 92 redirect stubs under `/bright/`.
 
 Node 20+ required. **On WSL, keep this repo in the Linux filesystem** (`~/…`), not under
 `/mnt/c/…` — npm on the Windows mount is roughly 50× slower and will appear to hang.
